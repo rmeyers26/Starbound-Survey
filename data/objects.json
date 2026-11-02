@@ -1,0 +1,69 @@
+[
+  {
+    "id": "sun",
+    "name": "The Sun",
+    "type": "star",
+    "imageType": "simulation",
+    "region": "inner",
+    "quick": "The Sun is the star at the centre of our Solar System. Its gravity holds the planets in orbit and its light and heat make life on Earth possible.",
+    "data": {
+      "diameter": { "label": "Diameter", "value": 1392684, "unit": "km" },
+      "mass": { "label": "Mass", "value": 1.9885e30, "unit": "kg" },
+      "surfaceTemperature": { "label": "Surface temperature", "value": 5772, "unit": "K" },
+      "distanceFromEarth": {
+        "label": "Average distance from Earth",
+        "value": 149597870.7,
+        "unit": "km"
+      },
+      "lightTravelTime": { "label": "Light travel time to Earth", "value": 499, "unit": "s" },
+      "apparentMagnitude": { "label": "Apparent magnitude", "value": -26.74 },
+      "spectralType": { "label": "Spectral type", "value": "G2V" }
+    },
+    "source": "NASA Sun Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/sunfact.html); IAU 2015 Resolution B3 nominal solar values"
+  },
+  {
+    "id": "earth",
+    "name": "Earth",
+    "type": "planet",
+    "imageType": "simulation",
+    "region": "inner",
+    "quick": "Earth is the third planet from the Sun and the only place we know of that has life. About 71% of its surface is covered by liquid water.",
+    "data": {
+      "diameter": { "label": "Mean diameter", "value": 12742, "unit": "km" },
+      "mass": { "label": "Mass", "value": 5.9722e24, "unit": "kg" },
+      "distanceFromSun": {
+        "label": "Average distance from the Sun",
+        "value": 149597870.7,
+        "unit": "km"
+      },
+      "orbitalPeriod": { "label": "Orbital period", "value": 365.256, "unit": "days" },
+      "rotationPeriod": { "label": "Rotation period", "value": 23.93, "unit": "hours" },
+      "surfaceGravity": { "label": "Surface gravity", "value": 9.807, "unit": "m/s²" },
+      "meanTemperature": { "label": "Mean surface temperature", "value": 288, "unit": "K" }
+    },
+    "source": "NASA Earth Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html)"
+  },
+  {
+    "id": "moon",
+    "name": "The Moon",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "inner",
+    "quick": "The Moon is Earth's only natural satellite. Its changing phases come from how much of its sunlit half we can see as it orbits Earth.",
+    "data": {
+      "diameter": { "label": "Mean diameter", "value": 3474.8, "unit": "km" },
+      "mass": { "label": "Mass", "value": 7.346e22, "unit": "kg" },
+      "distanceFromEarth": {
+        "label": "Average distance from Earth",
+        "value": 384400,
+        "unit": "km"
+      },
+      "orbitalPeriod": { "label": "Orbital period", "value": 27.322, "unit": "days" },
+      "surfaceGravity": { "label": "Surface gravity", "value": 1.62, "unit": "m/s²" },
+      "lightTravelTime": { "label": "Light travel time to Earth", "value": 1.28, "unit": "s" },
+      "meanTemperature": { "label": "Mean surface temperature", "value": 220, "unit": "K" },
+      "apparentMagnitude": { "label": "Apparent magnitude (full Moon)", "value": -12.74 }
+    },
+    "source": "NASA Moon Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html)"
+  }
+]

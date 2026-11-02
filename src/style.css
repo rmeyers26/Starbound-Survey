@@ -10,3 +10,17 @@ body {
 #app {
   min-height: 100%;
 }
+
+/* Error screen with Retry button. 44px minimum tap target per the spec. */
+.error-screen {
+  max-width: 28rem;
+  margin: 20vh auto 0;
+  padding: 1rem;
+  text-align: center;
+}
+.error-screen button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 1.5rem;
+  font-size: 1rem;
+}
