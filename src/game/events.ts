@@ -5,6 +5,7 @@
 
 import type { ProfileName } from '../engine/profiles';
 import type { ViewKind } from '../engine/view';
+import type { SaveRecord } from '../save/schema';
 import type { Settings } from './settings';
 
 /** Every event in the game and the data it carries. Add new events here. */
@@ -19,6 +20,8 @@ export interface GameEvents {
   'settings:changed': { settings: Settings };
   /** The player asked to open the Settings screen. */
   'settings:open': undefined;
+  /** Saved progress changed (an object was inspected, or a backup was imported). */
+  'progress:changed': { record: SaveRecord };
   /** The renderer was built or replaced (for example a fallback to the 2D chart). */
   'renderer:changed': { kind: ViewKind; reason: 'initial' | 'forced' | 'fallback' | 'recovered' };
   /** The quality level changed, automatically or because the player chose a profile. */

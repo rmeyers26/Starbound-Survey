@@ -16,7 +16,7 @@ async function start(container: HTMLElement): Promise<void> {
   try {
     const objects = await loadObjects(objectsUrl);
     container.replaceChildren(); // remove the "Loading..." text
-    startApp(container, objects);
+    await startApp(container, objects);
   } catch (error) {
     log('Startup failed', error);
     container.replaceChildren();

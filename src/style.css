@@ -421,3 +421,8 @@ body {
   font-size: 1.4rem;
   cursor: pointer;
 }
+.settings-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
