@@ -53,7 +53,18 @@ export function createHud(
   });
   controls.append(zoomIn, zoomOut, overview);
 
-  hud.append(nav, controls);
+  // Honesty rule (spec): the HUD says when the view is not to scale.
+  const note = document.createElement('p');
+  note.className = 'hud-note';
+  note.textContent = 'Not to scale';
+  note.title =
+    'Sizes and distances are compressed for playability. True values are in the info panel.';
+
+  const top = document.createElement('div');
+  top.className = 'hud-top';
+  top.append(nav, note);
+
+  hud.append(top, controls);
   container.append(hud);
 
   // Keep the "pressed" look of the buttons in sync with the real selection.

@@ -91,3 +91,208 @@ body {
   font-size: 1.4rem;
   padding: 0;
 }
+
+/* ---- top row: object buttons + "Not to scale" note ---- */
+.hud-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  pointer-events: none;
+}
+.hud-top > * {
+  pointer-events: auto;
+}
+.hud-note {
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 14px;
+  background: rgba(10, 16, 36, 0.6);
+  color: #b8c4e8;
+  font-size: 0.8rem;
+}
+/* While the phone bottom sheet is fully open it would overlap the camera buttons: hide them. */
+.sheet-expanded .hud-controls {
+  display: none;
+}
+
+/* ---- info panel ---- */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.info-panel {
+  position: absolute;
+  z-index: 5;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background: rgba(8, 12, 28, 0.92);
+  border: 1px solid #3a4a78;
+  color: #e6ecff;
+  overflow-y: auto;
+  animation: panel-in 0.25s ease-out;
+}
+.info-panel[hidden] {
+  display: none;
+}
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .info-panel {
+    animation: none;
+  }
+}
+.info-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px 4px 16px;
+}
+.info-title {
+  margin: 0;
+  font-size: 1.25rem;
+  flex: 1;
+}
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: #24365e;
+  border: 1px solid #5b73ad;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+.info-close {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 1.6rem;
+  cursor: pointer;
+}
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 12px;
+  border-bottom: 1px solid #24365e;
+}
+.tab {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: #b8c4e8;
+  font: inherit;
+  cursor: pointer;
+}
+.tab[aria-selected='true'] {
+  color: #fff;
+  border-bottom-color: #7fd4ff; /* not colour alone: the selected tab is also bold */
+  font-weight: 700;
+}
+.tab:focus-visible,
+.info-close:focus-visible,
+.sheet-handle:focus-visible {
+  outline: 3px solid #ffd166;
+}
+.pane {
+  padding: 12px 16px;
+}
+.pane[hidden] {
+  display: none;
+}
+.quick-text {
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
+.meta,
+.source,
+.scale-note {
+  margin: 0;
+  overflow-wrap: anywhere; /* long URLs wrap instead of being clipped */
+  font-size: 0.8rem;
+  color: #a9b6dc;
+}
+.scale-note {
+  padding: 0 16px 14px;
+}
+.data-list {
+  margin: 0 0 12px;
+}
+.data-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid #1c2a4d;
+}
+.data-row dt {
+  color: #b8c4e8;
+}
+.data-row dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.sheet-handle {
+  display: none; /* desktop: no handle */
+}
+
+/* Desktop / wide screens: side panel on the left, under the object buttons. */
+@media (min-width: 701px) {
+  .info-panel {
+    top: 72px;
+    left: max(12px, env(safe-area-inset-left));
+    width: 340px;
+    max-height: calc(100% - 96px);
+    border-radius: 12px;
+  }
+}
+
+/* Phones: bottom sheet. */
+@media (max-width: 700px) {
+  .info-panel {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-height: 42vh;
+    border-radius: 16px 16px 0 0;
+    padding-bottom: env(safe-area-inset-bottom); /* keep clear of the home indicator */
+    transition: max-height 0.2s ease-out;
+  }
+  .info-panel.expanded {
+    max-height: 80vh;
+  }
+  .sheet-handle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 44px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    touch-action: none; /* so a swipe on the handle isn't taken by the browser */
+  }
+  .sheet-handle-bar {
+    width: 44px;
+    height: 5px;
+    border-radius: 3px;
+    background: #5b73ad;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .info-panel {
+    transition: none;
+  }
+}
