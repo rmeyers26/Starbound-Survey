@@ -264,6 +264,12 @@ export class WebGLView implements View {
       const material = mesh.material as THREE.MeshStandardMaterial;
       material.map = texture;
       material.color.set(0xffffff); // colour multiplies the picture, so white leaves it unchanged
+      if (spec.nightGlow) {
+        // Reuse the same picture as a very dim self-light so the night side is not pure black.
+        material.emissive.set(0xffffff);
+        material.emissiveMap = texture;
+        material.emissiveIntensity = spec.nightGlow;
+      }
       material.needsUpdate = true; // tell Three.js to rebuild the shader to use the new picture
       log('Texture applied to', id);
     }

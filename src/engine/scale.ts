@@ -14,6 +14,11 @@ export interface VisualSpec {
   texture?: string;
   /** True if the body always shows the same face to its parent (the Moon does). */
   tidallyLocked?: boolean;
+  /**
+   * Faint glow (0 to 1) that lets the picture show on the unlit side. For the Moon this stands in for
+   * "Earthshine": sunlight bounced off Earth that dimly lights the Moon's night side. Artistic strength.
+   */
+  nightGlow?: number;
 }
 
 export const VISUALS: Record<string, VisualSpec> = {
@@ -29,6 +34,7 @@ export const VISUALS: Record<string, VisualSpec> = {
     orbit: { parentId: 'earth', radius: 6 },
     texture: 'moon',
     tidallyLocked: true,
+    nightGlow: 0.08,
   },
   mars: { radius: 1.1, color: 0xc1572f, orbit: { parentId: 'sun', radius: 80 } },
 };
@@ -41,7 +47,7 @@ export const VISUALS: Record<string, VisualSpec> = {
 export const SIM_DAYS_PER_SECOND = 10;
 
 /** Distance the camera flies to when focusing an object: far enough to see it, close enough to feel big. */
-export const focusDistance = (radius: number): number => Math.max(radius * 5, 4);
+export const focusDistance = (radius: number): number => Math.max(radius * 5, 3);
 
 /** Closest the camera may get to an object: just outside its surface. */
 export const closestDistance = (radius: number): number => radius * 1.6 + 0.5;

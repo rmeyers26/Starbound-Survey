@@ -33,3 +33,6 @@ dist
 coverage
 test-results
 playwright-report
+
+# Python tool environment for scripts/moon-cubenet-to-equirect.py
+.venv-tools

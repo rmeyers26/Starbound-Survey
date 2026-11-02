@@ -33,7 +33,7 @@ Date of this report: 2026-11-02.
 ## What was verified, and how
 
 - 213 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
-- 79 browser tests (Playwright) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
+- 83 browser tests (Playwright) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
   bottom-sheet handle only exists on phone-width screens).
 - Lint, type-check and production build pass. Production dependencies: 0 known vulnerabilities.
 - Lighthouse on the production build: accessibility 100, best practices 100, SEO 91.
@@ -89,9 +89,10 @@ Date of this report: 2026-11-02.
    not handled.
 10. **Bundle size.** 587 KB of JavaScript (150 KB compressed), mostly Three.js. Fine for the 5 MB target;
     code-splitting is a later optimisation.
-11. **Visuals are mostly placeholders.** A texture pipeline now exists (JPEG, size chosen by graphics profile;
-    see `TEXTURES.md`) but **no NASA image has been added yet**: the container's network policy blocks NASA.
-    KTX2 is still not used, and texture memory on a real phone is untested.
+11. **Visuals are mostly placeholders.** The Moon now has a real surface picture (JPEG, size chosen by graphics
+    profile; see `TEXTURES.md`). Its **credit and licence are not yet confirmed** (the supplied file has no credit
+    inside and NASA's page could not be opened), so no in-game credit is shown. The other bodies are flat colours.
+    KTX2 is still not used, and texture memory and frame rate on a real phone are untested.
 12. **Cosmetic:** the "Ready to play offline" message can overlap the bottom sheet for a few seconds on phones.
 13. **Tooling pins:** TypeScript is pinned to 6.0 because `typescript-eslint` does not support 7 yet.
     `npm audit` lists moderate advisories in `workbox-build`, a build-time tool that is not shipped to players
