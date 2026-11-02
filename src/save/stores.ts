@@ -57,7 +57,14 @@ export class IndexedDBStore implements KeyValueStore {
       const request = factory.open(name, 1);
       // Runs the first time (or when the version number goes up): create the table.
       request.onupgradeneeded = () => request.result.createObjectStore(STORE_NAME);
-      request.onsuccess = () => resolve(new IndexedDBStore(request.result));
+      request.onsuccess = () => {
+        const db = request.result;
+        // Another tab (or the browser clearing site data, or a future version of the game) wants to
+        // upgrade or delete this database. An open connection would block that forever, so we step
+        // aside. Later writes from this tab will fail and show the "could not save" message.
+        db.onversionchange = () => db.close();
+        resolve(new IndexedDBStore(db));
+      };
       request.onerror = () => reject(request.error ?? new Error('Could not open IndexedDB'));
       request.onblocked = () => reject(new Error('IndexedDB open was blocked'));
     });

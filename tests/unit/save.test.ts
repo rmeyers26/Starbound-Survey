@@ -272,3 +272,21 @@ describe('openBestStore', () => {
     expect(result.durable).toBe(false);
   });
 });
+
+describe('IndexedDBStore and other tabs / storage clearing', () => {
+  /** Tries to delete the database; reports whether it was blocked by an open connection. */
+  function deleteDb(name: string): Promise<'deleted' | 'blocked'> {
+    return new Promise((resolve) => {
+      const request = indexedDB.deleteDatabase(name);
+      request.onsuccess = () => resolve('deleted');
+      request.onblocked = () => resolve('blocked');
+      request.onerror = () => resolve('blocked');
+    });
+  }
+
+  it('closes its connection when another context wants to delete or upgrade the database', async () => {
+    // Without this, an open game tab would block deletion (and future upgrades) forever.
+    await IndexedDBStore.open(indexedDB, 'test-db-versionchange');
+    expect(await deleteDb('test-db-versionchange')).toBe('deleted');
+  });
+});

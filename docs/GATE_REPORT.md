@@ -29,7 +29,7 @@ Date of this report: 2026-11-02.
 
 ## What was verified, and how
 
-- 136 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
+- 137 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
 - 55 browser tests (Playwright) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
   bottom-sheet handle only exists on phone-width screens).
 - Lint, type-check and production build pass. Production dependencies: 0 known vulnerabilities.
@@ -50,6 +50,10 @@ Date of this report: 2026-11-02.
 6. The Sun's diameter was entered from a different source than the one cited; corrected to 1,391,400 km
    (2 x the IAU nominal radius, 695,700 km).
 7. Vitest was also trying to run the Playwright files, which would have failed CI.
+8. (Found by CI in WebKit) The game kept its IndexedDB connection open when another tab or the browser wanted
+   to delete or upgrade the database, which blocks that forever. It now closes the connection on `versionchange`.
+9. (Found by CI in WebKit) The accessibility test scanned while the info panel was still fading in and saw
+   washed-out colours: a test race, not a real contrast problem. The scan now waits for animations to end.
 
 ## Open problems and trade-offs
 
@@ -58,9 +62,10 @@ Date of this report: 2026-11-02.
    the `View` interface, so a WebGPU view can be added later without touching game code.
 2. **No real-device data.** Frame rate, heat, whole-tab memory, load time on a phone network and the 20-minute
    stability test are all unmeasured. Emulated numbers in the log are labelled and must not count.
-3. **WebKit (Safari engine) tests have not been run.** The container has no WebKit. They are enabled in CI
-   (`.github/workflows/ci.yml`). The first CI run is the first real check of Safari behaviour, so expect it
-   could reveal Safari-specific problems.
+3. **WebKit (Safari engine) results come from CI only, and are emulation.** The dev container has no WebKit.
+   CI's first full run (desktop and iPhone 13 emulation) passed 102 tests with 2 needing a retry. Both were
+   root-caused and fixed (bugs 8 and 9 below). Emulated WebKit is not a real iPhone: GPU, memory and storage
+   behaviour still need a real device.
 4. **Minimum iPhone version is unverified.** Vite's default build target is modern browsers, which probably
    excludes iOS 15 (the spec says WebGL2 works on iOS 15+). Test on an older iPhone. If iOS 15 matters,
    set `build.target` lower and re-test, at some cost in size.
