@@ -23,3 +23,30 @@ export function faceTowards(from: Point2D, target: Point2D): number {
   if (dx === 0 && dz === 0) return 0; // same spot: nothing to face
   return Math.atan2(-dz, dx);
 }
+
+/** Direction (radians, in the X/Z plane) pointing from one point to another. */
+export function bearing(from: Point2D, to: Point2D): number {
+  return Math.atan2(to.z - from.z, to.x - from.x);
+}
+
+/** Wraps an angle into the range -π..π, so "just past 359 degrees" becomes "a tiny step forward". */
+export function wrapAngle(angle: number): number {
+  const turn = Math.PI * 2;
+  return angle - turn * Math.round(angle / turn);
+}
+
+/**
+ * How much to change the camera's `yaw` so the camera travels WITH a tidally locked body.
+ *
+ * A locked body (like the Moon) turns exactly once per orbit, so a camera that stays fixed in space sees
+ * it spin. If the camera instead keeps the same angle to the line joining the body and its parent, the
+ * body holds still on screen and the parent hangs in the same part of its sky, which is how tidal locking
+ * looks from the surface.
+ *
+ * `previous` and `current` are the bearings from the body to its parent on two consecutive frames.
+ * The camera sits at x = sin(yaw), z = cos(yaw), so its compass angle is (π/2 - yaw): a turn of the
+ * bearing by +d needs a yaw change of -d.
+ */
+export function coRotationYawDelta(previous: number, current: number): number {
+  return -wrapAngle(current - previous);
+}

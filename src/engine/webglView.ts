@@ -5,7 +5,7 @@ import { CameraRig, OVERVIEW_DISTANCE, OVERVIEW_MIN_DISTANCE } from './cameraRig
 import { attachInput } from './inputController';
 import { log } from './log';
 import { hitRadius, pickObject, type PickCandidate } from './picking';
-import { faceTowards } from './orientation';
+import { bearing, coRotationYawDelta, faceTowards } from './orientation';
 import { mulberry32 } from './random';
 import { SIM_DAYS_PER_SECOND, VISUALS, closestDistance, focusDistance } from './scale';
 import { computePositions } from './solarSystem';
@@ -37,6 +37,8 @@ export class WebGLView implements View {
   private running = false;
   private selectedId: string | null = null;
   private focusId: string | null = null;
+  /** Last frame's bearing from the focused locked body to its parent (null = not tracking). */
+  private lockBearing: number | null = null;
 
   constructor(options: ViewOptions) {
     this.options = options;
@@ -341,6 +343,7 @@ export class WebGLView implements View {
   private focusOn(id: string | null): void {
     if (id !== null && !this.meshes.has(id)) return;
     this.focusId = id;
+    this.lockBearing = null; // start tracking afresh, so switching focus never makes the camera jump
     if (id === null) {
       this.rig.flyTo(OVERVIEW_DISTANCE, OVERVIEW_MIN_DISTANCE);
     } else {
@@ -387,6 +390,24 @@ export class WebGLView implements View {
     }
   }
 
+  /**
+   * While focused on a tidally locked body (the Moon), turn the camera along with the body's orbit so the
+   * body stays still on screen instead of appearing to spin. See `coRotationYawDelta`.
+   */
+  private coRotateCameraWithLockedBody(): void {
+    const spec = this.focusId ? VISUALS[this.focusId] : undefined;
+    const body = this.focusId ? this.meshes.get(this.focusId) : undefined;
+    const parent =
+      spec?.tidallyLocked && spec.orbit ? this.meshes.get(spec.orbit.parentId) : undefined;
+    if (!body || !parent) {
+      this.lockBearing = null;
+      return;
+    }
+    const now = bearing(body.position, parent.position);
+    if (this.lockBearing !== null) this.rig.yaw += coRotationYawDelta(this.lockBearing, now);
+    this.lockBearing = now;
+  }
+
   private updateSelectionRing(): void {
     const mesh = this.selectedId ? this.meshes.get(this.selectedId) : undefined;
     this.selectionRing.visible = mesh !== undefined;
@@ -407,6 +428,7 @@ export class WebGLView implements View {
     const dt = Math.min(frameMs / 1000, 0.1);
     this.simDays += dt * SIM_DAYS_PER_SECOND;
     this.updatePositions();
+    this.coRotateCameraWithLockedBody();
     this.rig.update(dt, this.followedPosition());
     this.rig.applyTo(this.camera);
     this.updateSelectionRing();
