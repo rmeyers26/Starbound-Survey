@@ -51,7 +51,9 @@ export function createHud(
     bus.emit('object:selected', { id: null });
     bus.emit('camera:focus', { id: null });
   });
-  controls.append(zoomIn, zoomOut, overview);
+  const settingsButton = makeButton('Settings', 'hud-button', 'Open settings');
+  settingsButton.addEventListener('click', () => bus.emit('settings:open', undefined));
+  controls.append(zoomIn, zoomOut, overview, settingsButton);
 
   // Honesty rule (spec): the HUD says when the view is not to scale.
   const note = document.createElement('p');

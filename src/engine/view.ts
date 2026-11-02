@@ -37,6 +37,8 @@ export interface ViewOptions {
   objects: CelestialObject[];
   quality: ViewQuality;
   bus: EventBus<GameEvents>;
+  /** Called every frame with the real time since the last frame, in milliseconds. */
+  onFrame?: (frameMs: number) => void;
   /** Present when rebuilding after a failure. */
   initialState?: ViewState;
 }

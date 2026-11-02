@@ -3,6 +3,9 @@
 // Example: a tap, a button and the Enter key all emit 'object:selected'; the info panel and the
 // 3D view both listen, and none of them import each other.
 
+import type { ProfileName } from '../engine/profiles';
+import type { Settings } from './settings';
+
 /** Every event in the game and the data it carries. Add new events here. */
 export interface GameEvents {
   /** An object was selected (or `null` = selection cleared). */
@@ -11,6 +14,19 @@ export interface GameEvents {
   'camera:focus': { id: string | null };
   /** Zoom the camera: factor < 1 moves closer, > 1 moves away. */
   'camera:zoom': { factor: number };
+  /** A setting changed (already validated and saved). */
+  'settings:changed': { settings: Settings };
+  /** The player asked to open the Settings screen. */
+  'settings:open': undefined;
+  /** The quality level changed, automatically or because the player chose a profile. */
+  'quality:changed': { profile: ProfileName; resolutionScale: number; reason: 'auto' | 'manual' };
+  /** Once per second: the measured frame rate and the graphics path in use. */
+  'quality:sample': {
+    fps: number;
+    profile: ProfileName;
+    resolutionScale: number;
+    renderer: string;
+  };
 }
 
 type Listener<T> = (payload: T) => void;

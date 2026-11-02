@@ -10,21 +10,10 @@ import {
   regionName,
   typeLabel,
 } from './format';
+import { el } from './dom';
 import { sheetAction } from './sheetGesture';
 
 type TabName = 'quick' | 'advanced';
-
-/** Small helper: create an element with optional class and text. */
-function el<K extends keyof HTMLElementTagNameMap>(
-  tag: K,
-  className?: string,
-  text?: string,
-): HTMLElementTagNameMap[K] {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text !== undefined) node.textContent = text; // textContent (not innerHTML) = no HTML injection
-  return node;
-}
 
 export function createInfoPanel(
   container: HTMLElement,

@@ -360,9 +360,11 @@ export class WebGLView implements View {
 
   private readonly frame = (): void => {
     const now = performance.now();
-    // Clamp the time step so a stalled tab does not make the planets jump.
-    const dt = Math.min((now - this.lastTime) / 1000, 0.1);
+    const frameMs = now - this.lastTime;
     this.lastTime = now;
+    this.options.onFrame?.(frameMs); // the quality manager measures real frame times
+    // Clamp the time step so a stalled tab does not make the planets jump.
+    const dt = Math.min(frameMs / 1000, 0.1);
     this.simDays += dt * SIM_DAYS_PER_SECOND;
     this.updatePositions();
     this.rig.update(dt, this.followedPosition());
