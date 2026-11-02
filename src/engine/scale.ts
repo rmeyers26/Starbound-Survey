@@ -18,6 +18,10 @@ export interface VisualSpec {
 
 export const VISUALS: Record<string, VisualSpec> = {
   sun: { radius: 8, color: 0xffc860 },
+  // Planets: sizes and orbit distances are squeezed so all fit (see the note at the top of the file).
+  // Order of size and distance is kept true: Venus is nearly Earth's size, Mercury and Mars are smaller.
+  mercury: { radius: 0.8, color: 0x8c8680, orbit: { parentId: 'sun', radius: 28 } },
+  venus: { radius: 1.9, color: 0xe3c07a, orbit: { parentId: 'sun', radius: 43 } },
   earth: { radius: 2, color: 0x2f6fd6, orbit: { parentId: 'sun', radius: 60 } },
   moon: {
     radius: 0.55,
@@ -26,6 +30,7 @@ export const VISUALS: Record<string, VisualSpec> = {
     texture: 'moon',
     tidallyLocked: true,
   },
+  mars: { radius: 1.1, color: 0xc1572f, orbit: { parentId: 'sun', radius: 80 } },
 };
 
 /**

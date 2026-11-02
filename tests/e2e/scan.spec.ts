@@ -104,7 +104,7 @@ test.describe('scanning', () => {
     await openGame(page);
     await expect(xpText(page)).toHaveText('40 / 200 XP');
     await page.getByRole('button', { name: /Open the Logbook/ }).click();
-    await expect(page.locator('.logbook-summary')).toHaveText('Discovered 2 of 3 objects.');
+    await expect(page.locator('.logbook-summary')).toHaveText('Discovered 2 of 6 objects.');
   });
 });
 
@@ -117,8 +117,8 @@ test.describe('Logbook', () => {
     await page.getByRole('button', { name: /Open the Logbook/ }).click();
     const dialog = page.locator('dialog.logbook-dialog');
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByText('Discovered 1 of 3 objects.')).toBeVisible();
-    await expect(dialog.getByText('Not scanned yet')).toHaveCount(2);
+    await expect(dialog.getByText('Discovered 1 of 6 objects.')).toBeVisible();
+    await expect(dialog.getByText('Not scanned yet')).toHaveCount(5);
     await expect(dialog.getByText('Basic scan')).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden();

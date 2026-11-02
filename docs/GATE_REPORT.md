@@ -32,7 +32,7 @@ Date of this report: 2026-11-02.
 
 ## What was verified, and how
 
-- 207 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
+- 213 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
 - 79 browser tests (Playwright) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
   bottom-sheet handle only exists on phone-width screens).
 - Lint, type-check and production build pass. Production dependencies: 0 known vulnerabilities.
@@ -72,7 +72,7 @@ Date of this report: 2026-11-02.
 4. **Minimum iPhone version is unverified.** Vite's default build target is modern browsers, which probably
    excludes iOS 15 (the spec says WebGL2 works on iOS 15+). Test on an older iPhone. If iOS 15 matters,
    set `build.target` lower and re-test, at some cost in size.
-5. **Data needs your spot-check.** The container could not reach NASA's pages (blocked by network policy),
+5. **Data needs your spot-check** (Mercury, Venus and Mars are listed in `DATA_CHECK.md`). The container could not reach NASA's pages (blocked by network policy),
    so values were entered from knowledge, then cross-checked only against my own recollection. One error was
    already found (problem 6 above). Please compare every number with the cited fact sheet before it ships.
 6. **Settings live in `localStorage`, not in the save record.** The spec's example save contains settings,

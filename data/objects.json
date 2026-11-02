@@ -51,6 +51,112 @@
     "source": "NASA Sun Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/sunfact.html); IAU 2015 Resolution B3 nominal solar values (radius 695,700 km, so diameter 1,391,400 km; effective temperature 5,772 K)"
   },
   {
+    "id": "mercury",
+    "name": "Mercury",
+    "type": "planet",
+    "imageType": "simulation",
+    "region": "inner",
+    "quick": "Mercury is the smallest planet and the closest to the Sun. It has almost no atmosphere to hold in heat, so its sunlit side is scorching and its night side is freezing.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 4879.4,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 3.3e23,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromSun": {
+        "label": "Average distance from the Sun",
+        "value": 57900000,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 87.969,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "rotationPeriod": {
+        "label": "Rotation period",
+        "value": 1407.6,
+        "unit": "hours",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 3.7,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "meanTemperature": {
+        "label": "Mean surface temperature",
+        "value": 440,
+        "unit": "K",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Mercury Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/mercuryfact.html)"
+  },
+  {
+    "id": "venus",
+    "name": "Venus",
+    "type": "planet",
+    "imageType": "simulation",
+    "region": "inner",
+    "quick": "Venus is the hottest planet. A thick carbon dioxide atmosphere traps heat, and it spins backwards compared with most planets, so the Sun would rise in the west.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 12103.6,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 4.8675e24,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromSun": {
+        "label": "Average distance from the Sun",
+        "value": 108200000,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 224.701,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "rotationPeriod": {
+        "label": "Rotation period (retrograde)",
+        "value": 5832.5,
+        "unit": "hours",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 8.87,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "meanTemperature": {
+        "label": "Mean surface temperature",
+        "value": 737,
+        "unit": "K",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Venus Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/venusfact.html)"
+  },
+  {
     "id": "earth",
     "name": "Earth",
     "type": "planet",
@@ -160,5 +266,58 @@
       }
     },
     "source": "NASA Moon Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html)"
+  },
+  {
+    "id": "mars",
+    "name": "Mars",
+    "type": "planet",
+    "imageType": "simulation",
+    "region": "inner",
+    "quick": "Mars is a cold, dry desert world with the tallest volcano in the Solar System, Olympus Mons. Robot explorers have been studying its surface for decades.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 6779,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 6.4171e23,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromSun": {
+        "label": "Average distance from the Sun",
+        "value": 227900000,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 686.98,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "rotationPeriod": {
+        "label": "Rotation period",
+        "value": 24.6229,
+        "unit": "hours",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 3.73,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "meanTemperature": {
+        "label": "Mean surface temperature",
+        "value": 208,
+        "unit": "K",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Mars Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html)"
   }
 ]

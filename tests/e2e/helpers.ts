@@ -14,7 +14,7 @@ export function trackErrors(page: Page): string[] {
 export async function openGame(page: Page, query = ''): Promise<void> {
   await page.goto(`/${query}`);
   await expect(page.locator('canvas.game-canvas')).toBeVisible();
-  await expect(page.locator('.hud-objects button')).toHaveCount(3);
+  await expect(page.locator('.hud-objects button')).toHaveCount(6);
 }
 
 export const chip = (page: Page, id: 'sun' | 'earth' | 'moon') =>

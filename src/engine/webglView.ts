@@ -1,4 +1,4 @@
-// The 3D renderer: draws the Sun, Earth, Moon and a star field with Three.js (WebGL2).
+// The 3D renderer: draws the Sun, planets, Moon and a star field with Three.js (WebGL2).
 import * as THREE from 'three';
 import type { GameEvents } from '../game/events';
 import { CameraRig, OVERVIEW_DISTANCE, OVERVIEW_MIN_DISTANCE } from './cameraRig';
@@ -53,7 +53,7 @@ export class WebGLView implements View {
     canvas.setAttribute('role', 'application');
     canvas.setAttribute(
       'aria-label',
-      '3D view of the Sun, Earth and Moon. Arrow keys rotate, plus and minus zoom, Enter focuses the selected object, Escape returns to the overview.',
+      '3D view of the inner Solar System: the Sun, Mercury, Venus, Earth, the Moon and Mars. Arrow keys rotate, plus and minus zoom, Enter focuses the selected object, Escape returns to the overview.',
     );
     options.host.append(canvas);
     // If the GPU resets (common on phones when the app is backgrounded), tell the ViewHost so it
@@ -175,7 +175,11 @@ export class WebGLView implements View {
       this.scene.add(mesh);
     }
     this.scene.add(this.buildGlow(VISUALS.sun.radius * 1.5));
-    this.scene.add(this.buildOrbitLine(VISUALS.earth.orbit!.radius));
+    // One ring for every body that circles the Sun. (Moons are skipped: a ring around a moving
+    // planet would have to move with it.)
+    for (const spec of Object.values(VISUALS)) {
+      if (spec.orbit?.parentId === 'sun') this.scene.add(this.buildOrbitLine(spec.orbit.radius));
+    }
     this.updatePositions();
   }
 

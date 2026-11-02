@@ -15,10 +15,19 @@ const MIN_ZOOM = 0.6;
 const MAX_ZOOM = 40;
 const MIN_HIT_PX = 22; // finger-sized tap target (about 44 px across)
 
-/** Pixels per scene unit at zoom 1, chosen so Earth's whole orbit fits on screen. */
+/** Farthest any body can be from the Sun: its orbit radius plus those of the bodies it carries. */
+function outerReach(): number {
+  const distanceFromSun = (id: string): number => {
+    const orbit = VISUALS[id].orbit;
+    return orbit ? orbit.radius + distanceFromSun(orbit.parentId) : 0;
+  };
+  return Math.max(...Object.keys(VISUALS).map(distanceFromSun));
+}
+
+/** Pixels per scene unit at zoom 1, chosen so the outermost orbit fits on screen. */
 function baseScale(width: number, height: number): number {
-  const reach = VISUALS.earth.orbit!.radius + VISUALS.moon.orbit!.radius + 2;
-  return (Math.min(width, height) / 2 - 24) / reach;
+  // 60 px of margin keeps the outermost ring clear of the button row.
+  return (Math.min(width, height) / 2 - 60) / (outerReach() + 2);
 }
 
 export class Canvas2DView implements View {
@@ -62,7 +71,7 @@ export class Canvas2DView implements View {
     this.canvas.setAttribute('role', 'application');
     this.canvas.setAttribute(
       'aria-label',
-      'Simplified 2D star chart of the Sun, Earth and Moon. Arrow keys move the chart, plus and minus zoom, Enter focuses the selected object, Escape returns to the overview.',
+      'Simplified 2D star chart of the inner Solar System: the Sun, Mercury, Venus, Earth, the Moon and Mars. Arrow keys move the chart, plus and minus zoom, Enter focuses the selected object, Escape returns to the overview.',
     );
     options.host.append(this.canvas);
 
@@ -295,21 +304,15 @@ export class Canvas2DView implements View {
       ctx.fillRect(this.stars[i * 2] * width, this.stars[i * 2 + 1] * height, 1.5, 1.5);
     }
 
-    // Orbit rings: Earth around the Sun, the Moon around Earth.
+    // Orbit rings: one circle per body, centred on the body it circles (planets: the Sun; the Moon: Earth).
     ctx.strokeStyle = '#3a4a78';
     ctx.lineWidth = 1;
-    const sun = this.positions.get('sun');
-    const earth = this.positions.get('earth');
-    if (sun) {
-      const [sx, sy] = toScreen(sun);
+    for (const spec of Object.values(VISUALS)) {
+      const parent = spec.orbit ? this.positions.get(spec.orbit.parentId) : undefined;
+      if (!spec.orbit || !parent) continue;
+      const [cx, cy] = toScreen(parent);
       ctx.beginPath();
-      ctx.arc(sx, sy, VISUALS.earth.orbit!.radius * s, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-    if (earth) {
-      const [ex, ey] = toScreen(earth);
-      ctx.beginPath();
-      ctx.arc(ex, ey, VISUALS.moon.orbit!.radius * s, 0, Math.PI * 2);
+      ctx.arc(cx, cy, spec.orbit.radius * s, 0, Math.PI * 2);
       ctx.stroke();
     }
 
