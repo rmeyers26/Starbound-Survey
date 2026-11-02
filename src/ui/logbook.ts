@@ -1,0 +1,89 @@
+// The Logbook: every object you have discovered by scanning (spec: "Discovered objects, the encyclopedia").
+// It is a native <dialog> and a game STATE: opening it moves the state machine to LOGBOOK, which is
+// what stops scanning while it is open.
+import type { EventBus, GameEvents } from '../game/events';
+import type { GameStateMachine } from '../game/stateMachine';
+import { TIER_LABEL } from '../game/tiers';
+import type { CelestialObject } from '../game/types';
+import type { SaveRecord } from '../save/schema';
+import { el } from './dom';
+import { regionName, typeLabel } from './format';
+
+export function createLogbook(
+  container: HTMLElement,
+  objects: CelestialObject[],
+  bus: EventBus<GameEvents>,
+  machine: GameStateMachine,
+  getRecord: () => SaveRecord,
+): () => void {
+  const dialog = el('dialog', 'app-dialog logbook-dialog');
+  dialog.setAttribute('aria-labelledby', 'logbook-title');
+  const body = el('div', 'settings-body');
+  const title = el('h2', 'settings-title', 'Logbook');
+  title.id = 'logbook-title';
+  const summary = el('p', 'logbook-summary');
+  const list = el('ul', 'logbook-list');
+  const close = el('button', 'hud-button settings-close', 'Close');
+  close.type = 'button';
+  body.append(title, summary, list, close);
+  dialog.append(body);
+  container.append(dialog);
+
+  function render(): void {
+    const record = getRecord();
+    const found = objects.filter((o) => (record.scannedObjects[o.id] ?? 0) > 0);
+    summary.textContent = `Discovered ${found.length} of ${objects.length} objects.`;
+
+    list.replaceChildren();
+    for (const object of objects) {
+      const tier = record.scannedObjects[object.id] ?? 0;
+      const item = el('li', 'logbook-entry');
+      item.append(el('h3', undefined, object.name));
+      if (tier === 0) {
+        item.append(
+          el('p', 'logbook-meta', 'Not scanned yet. Select it, fly close, and hold SCAN.'),
+        );
+      } else {
+        item.append(
+          el(
+            'p',
+            'logbook-meta',
+            `${typeLabel(object.type)} · ${regionName(object.region)} · ${TIER_LABEL[tier]} scan`,
+          ),
+          el('p', undefined, object.quick),
+        );
+        const view = el('button', 'hud-button', `View ${object.name} in space`);
+        view.type = 'button';
+        view.addEventListener('click', () => {
+          dialog.close(); // 'close' handler below returns the game to EXPLORE
+          bus.emit('object:selected', { id: object.id });
+          bus.emit('camera:focus', { id: object.id });
+        });
+        item.append(view);
+      }
+      list.append(item);
+    }
+  }
+
+  close.addEventListener('click', () => dialog.close());
+  // Closing (button, Escape key, or "View in space") always returns the game to EXPLORE.
+  dialog.addEventListener('close', () => {
+    if (machine.state === 'LOGBOOK') machine.transition('EXPLORE');
+  });
+
+  const offState = bus.on('state:changed', ({ to }) => {
+    if (to === 'LOGBOOK') {
+      render();
+      if (!dialog.open) dialog.showModal();
+    } else if (dialog.open) {
+      dialog.close();
+    }
+  });
+  const offProgress = bus.on('progress:changed', () => dialog.open && render());
+
+  return () => {
+    offState();
+    offProgress();
+    dialog.remove();
+  };
+}

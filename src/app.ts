@@ -3,6 +3,10 @@ import { createQualityController } from './engine/qualityController';
 import { ViewHost, readRendererOverride } from './engine/viewHost';
 import { EventBus, type GameEvents } from './game/events';
 import { recordInspection } from './game/progress';
+import { regionName } from './ui/format';
+import { createScanController } from './game/scanController';
+import { readScanSeconds } from './game/scanner';
+import { GameStateMachine } from './game/stateMachine';
 import { SaveService } from './save/saveService';
 import { openBestStore } from './save/stores';
 import { SettingsStore, defaultSettings, normalizeSettings, type Settings } from './game/settings';
@@ -11,7 +15,9 @@ import { loadPrefs, savePrefs } from './save/prefs';
 import { createFpsReadout } from './ui/fpsReadout';
 import { createHud } from './ui/hud';
 import { createInfoPanel } from './ui/infoPanel';
+import { createLogbook } from './ui/logbook';
 import { createSaveSection } from './ui/saveSection';
+import { createScanHud, createXpBar } from './ui/scanHud';
 import { createSettingsPanel } from './ui/settingsPanel';
 import { createToaster } from './ui/toast';
 import { maybeShowInstallHint } from './ui/installHint';
@@ -50,7 +56,9 @@ export async function startApp(
   // to protect our data from being cleared (it may refuse, and nothing depends on the answer).
   let warnedAboutSaving = false;
   let askedForPersistence = false;
+  let selectedId: string | null = null;
   const offSelected = bus.on('object:selected', ({ id }) => {
+    selectedId = id;
     if (!id) return;
     save
       .update((record) => recordInspection(record, id))
@@ -100,9 +108,47 @@ export async function startApp(
   applyControls(settings.get());
   const offSettings = bus.on('settings:changed', ({ settings: s }) => applyControls(s));
 
+  // The game's single "what is happening now" state (spec: game state machine).
+  const machine = new GameStateMachine(bus);
+  machine.transition('TITLE'); // no title screen yet: go straight through to exploring
+  machine.transition('EXPLORE');
+
+  const scan = createScanController({
+    bus,
+    machine,
+    objects,
+    getRecord: () => save.current,
+    commit: (change) =>
+      save.update(change).catch(() => {
+        if (warnedAboutSaving) return;
+        warnedAboutSaving = true;
+        toaster.show(
+          'Could not save your progress on this device. Try exporting a backup from Settings.',
+        );
+      }),
+    getSelectedId: () => selectedId,
+    getDistance: (id) => view?.distanceTo(id) ?? null,
+    getSettings: () => settings.get(),
+    scanSeconds: readScanSeconds(window.location.search),
+  });
+  const offRankUp = bus.on('rank:up', ({ rank, newRegions }) => {
+    const regions = newRegions.map(regionName).join(', ');
+    toaster.show(
+      `Rank up! You are now a ${rank}.${regions ? ` New region unlocked: ${regions}.` : ''}`,
+      {
+        durationMs: 12_000,
+      },
+    );
+  });
+
   const cleanups = [
-    createHud(container, objects, bus),
-    createInfoPanel(container, objects, bus),
+    createHud(container, objects, bus, machine),
+    createXpBar(container, bus, () => save.current),
+    createScanHud(container, bus, objects, () => settings.get()),
+    createLogbook(container, objects, bus, machine, () => save.current),
+    createInfoPanel(container, objects, bus, () => save.current),
+    scan.dispose,
+    offRankUp,
     createFpsReadout(container, bus, settings.get().showFps),
     createSettingsPanel(container, settings, bus, [saveSection.element]),
     saveSection.dispose,

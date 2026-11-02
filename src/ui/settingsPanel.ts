@@ -4,6 +4,8 @@ import { PROFILES } from '../engine/profiles';
 import type { EventBus, GameEvents } from '../game/events';
 import {
   PROFILE_CHOICES,
+  SCAN_MODES,
+  type ScanMode,
   SENSITIVITY_MAX,
   SENSITIVITY_MIN,
   type ProfileChoice,
@@ -33,7 +35,7 @@ export function createSettingsPanel(
   /** Extra sections (e.g. save/export) appended below the basic settings. */
   extraSections: HTMLElement[] = [],
 ): () => void {
-  const dialog = el('dialog', 'settings-dialog');
+  const dialog = el('dialog', 'app-dialog settings-dialog');
   dialog.setAttribute('aria-labelledby', 'settings-title');
   const form = el('div', 'settings-body');
   form.append(el('h2', 'settings-title', 'Settings'));
@@ -51,6 +53,19 @@ export function createSettingsPanel(
   profile.addEventListener('change', () =>
     store.update({ profile: profile.value as ProfileChoice }),
   );
+
+  const scanMode = el('select');
+  const SCAN_MODE_LABEL: Record<ScanMode, string> = {
+    hold: 'Hold the button (default)',
+    tap: 'Tap once (no holding)',
+  };
+  for (const mode of SCAN_MODES) {
+    const option = el('option', undefined, SCAN_MODE_LABEL[mode]);
+    option.value = mode;
+    scanMode.append(option);
+  }
+  scanMode.value = s.scanMode;
+  scanMode.addEventListener('change', () => store.update({ scanMode: scanMode.value as ScanMode }));
 
   const showFps = el('input');
   showFps.type = 'checkbox';
@@ -81,6 +96,7 @@ export function createSettingsPanel(
       profile,
       'Auto picks a level for your device and lowers it if the game runs slowly.',
     ),
+    row('Scan control', scanMode, 'Tap once is easier if holding a button is hard.'),
     row('Show frame rate', showFps),
     row('Rotation speed', rotate),
     row('Zoom speed', zoom),
@@ -105,6 +121,7 @@ export function createSettingsPanel(
     const now = store.get();
     profile.value = now.profile;
     showFps.checked = now.showFps;
+    scanMode.value = now.scanMode;
     rotate.value = String(now.rotateSensitivity);
     zoom.value = String(now.zoomSensitivity);
     reduced.checked = now.reducedMotion;

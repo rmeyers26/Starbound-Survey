@@ -2,7 +2,10 @@
 // Desktop: a panel at the side. Phones: a bottom sheet (CSS media query decides which).
 // It listens to the event bus; it never talks to the 3D view directly.
 import type { EventBus, GameEvents } from '../game/events';
+import { firstRankForTier } from '../game/ranks';
+import { TIER_LABEL, splitByTier } from '../game/tiers';
 import type { CelestialObject } from '../game/types';
+import type { SaveRecord } from '../save/schema';
 import {
   IMAGE_TYPE_DESCRIPTION,
   IMAGE_TYPE_LABEL,
@@ -19,6 +22,7 @@ export function createInfoPanel(
   container: HTMLElement,
   objects: CelestialObject[],
   bus: EventBus<GameEvents>,
+  getRecord: () => SaveRecord,
 ): () => void {
   const byId = new Map(objects.map((o) => [o.id, o]));
 
@@ -103,8 +107,27 @@ export function createInfoPanel(
       el('p', 'meta', `${typeLabel(object.type)} · ${regionName(object.region)}`),
     );
 
+    renderAdvanced(object);
+  }
+
+  /** Advanced tab: only the measurements this object's scans have revealed (spec: layered results). */
+  function renderAdvanced(object: CelestialObject): void {
+    const tier = getRecord().scannedObjects[object.id] ?? 0;
+    const { unlocked, locked } = splitByTier(object, tier);
+
+    if (tier === 0) {
+      panes.advanced.replaceChildren(
+        el(
+          'p',
+          'locked-note',
+          'Scan this object to reveal its measurements. Fly close, then hold SCAN.',
+        ),
+      );
+      return;
+    }
+
     const list = el('dl', 'data-list');
-    for (const measurement of Object.values(object.data)) {
+    for (const measurement of unlocked) {
       const row = el('div', 'data-row');
       row.append(
         el('dt', undefined, measurement.label),
@@ -112,18 +135,35 @@ export function createInfoPanel(
       );
       list.append(row);
     }
-    panes.advanced.replaceChildren(list, el('p', 'source', `Source: ${object.source}`));
+    panes.advanced.replaceChildren(list);
+    if (locked.length > 0) {
+      const next = tier + 1;
+      panes.advanced.append(
+        el(
+          'p',
+          'locked-note',
+          `${locked.length} more measurement${locked.length === 1 ? '' : 's'} locked. A ${TIER_LABEL[next]} scan unlocks at the ${firstRankForTier(next).name} rank.`,
+        ),
+      );
+    }
+    panes.advanced.append(el('p', 'source', `Source: ${object.source}`));
   }
 
+  let currentId: string | null = null;
+
   function open(object: CelestialObject): void {
+    currentId = object.id;
     render(object);
     showTab('quick');
     setExpanded(false);
     panel.hidden = false;
+    container.classList.add('panel-open'); // lets CSS keep the SCAN button above the phone sheet
     live.textContent = `Selected ${object.name}`;
   }
 
   function hide(): void {
+    currentId = null;
+    container.classList.remove('panel-open');
     panel.hidden = true;
     setExpanded(false);
     live.textContent = 'Selection cleared';
@@ -135,6 +175,12 @@ export function createInfoPanel(
     const object = id ? byId.get(id) : undefined;
     if (object) open(object);
     else hide();
+  });
+
+  // A finished scan unlocks data: refresh the open panel so it appears immediately.
+  const offProgress = bus.on('progress:changed', () => {
+    const object = currentId ? byId.get(currentId) : undefined;
+    if (object) renderAdvanced(object);
   });
 
   close.addEventListener('click', () => bus.emit('object:selected', { id: null }));
@@ -174,6 +220,7 @@ export function createInfoPanel(
 
   return () => {
     unsubscribe();
+    offProgress();
     panel.remove();
     live.remove();
   };

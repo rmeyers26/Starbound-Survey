@@ -21,6 +21,7 @@ function fakeView(kind: ViewKind, options: ViewOptions) {
     setQuality: vi.fn(),
     setControlSettings: vi.fn(),
     getState: vi.fn(() => sampleState),
+    distanceTo: vi.fn(() => 5),
   };
 }
 type Fake = ReturnType<typeof fakeView>;

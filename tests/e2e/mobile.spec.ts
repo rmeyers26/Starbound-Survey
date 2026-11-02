@@ -47,6 +47,7 @@ test('every button is at least 44 x 44 CSS pixels', async ({ page }) => {
     );
 
   expect(await tooSmall('.hud button')).toEqual([]);
+  expect(await tooSmall('.scan-hud button')).toEqual([]);
   expect(await tooSmall('.info-panel button')).toEqual([]);
 
   await openSettings(page);
@@ -97,7 +98,7 @@ test('no on-screen button is ever covered by the info panel', async ({ page }) =
   await chip(page, 'moon').click();
   await expect(page.locator('.info-panel')).toBeVisible();
   // For every visible HUD button, the element actually at its centre point must be that button.
-  const covered = await page.locator('.hud button').evaluateAll((buttons) =>
+  const covered = await page.locator('.hud button, .scan-hud button').evaluateAll((buttons) =>
     buttons
       .filter((b) => {
         const r = b.getBoundingClientRect();

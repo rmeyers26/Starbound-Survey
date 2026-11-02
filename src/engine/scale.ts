@@ -24,3 +24,12 @@ export const VISUALS: Record<string, VisualSpec> = {
  * to follow. This is a simulation speed, not a measurement.
  */
 export const SIM_DAYS_PER_SECOND = 10;
+
+/** Distance the camera flies to when focusing an object: far enough to see it, close enough to feel big. */
+export const focusDistance = (radius: number): number => Math.max(radius * 5, 4);
+
+/** Closest the camera may get to an object: just outside its surface. */
+export const closestDistance = (radius: number): number => radius * 1.6 + 0.5;
+
+/** How far away the scanner can still reach an object (twice the focus distance). */
+export const scanRange = (radius: number): number => focusDistance(radius) * 2;

@@ -316,7 +316,7 @@ body {
 .fps-readout[hidden] {
   display: none;
 }
-.settings-dialog {
+.app-dialog {
   box-sizing: border-box;
   width: min(30rem, calc(100% - 24px));
   max-height: calc(100% - 24px);
@@ -326,7 +326,7 @@ body {
   background: #080c1c;
   color: #e6ecff;
 }
-.settings-dialog::backdrop {
+.app-dialog::backdrop {
   background: rgba(0, 0, 0, 0.6);
 }
 .settings-body {
@@ -388,14 +388,22 @@ body {
 .toast-region {
   position: absolute;
   z-index: 20;
-  left: 50%;
-  transform: translateX(-50%);
+  /* Stay clear of the SCAN button (a 96px ring plus margin) in the bottom-right corner. */
+  left: max(12px, env(safe-area-inset-left));
+  right: calc(max(16px, env(safe-area-inset-right)) + 112px);
+  max-width: 32rem;
   bottom: max(16px, env(safe-area-inset-bottom));
-  width: min(32rem, calc(100% - 24px));
   display: flex;
   flex-direction: column;
   gap: 8px;
   pointer-events: none;
+}
+/* On phones the SCAN button is lifted above the info sheet; lift notifications with it. */
+@media (max-width: 700px) {
+  .panel-open .toast-region {
+    bottom: calc(42vh + 12px);
+    bottom: calc(42dvh + 12px);
+  }
 }
 .toast {
   pointer-events: auto;
@@ -444,4 +452,147 @@ body {
     flex-direction: row;
     flex-wrap: wrap;
   }
+}
+
+/* ---- scanning: SCAN button, status line, XP bar, Logbook ---- */
+.hud-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.xp-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 14px;
+  background: rgba(10, 16, 36, 0.7);
+  font-size: 0.8rem;
+  color: #d6def5;
+}
+.xp-rank {
+  font-weight: 700;
+}
+.xp-track {
+  width: 72px;
+  height: 8px;
+  border-radius: 4px;
+  background: #24365e;
+  overflow: hidden;
+}
+.xp-fill {
+  height: 100%;
+  background: #7fd4ff;
+  transition: width 0.4s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .xp-fill {
+    transition: none;
+  }
+}
+.scan-hud {
+  position: absolute;
+  z-index: 3;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+}
+.scan-hud > * {
+  pointer-events: auto;
+}
+.scan-status {
+  margin: 0;
+  max-width: min(18rem, calc(100vw - 32px));
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: rgba(10, 16, 36, 0.85);
+  font-size: 0.85rem;
+  text-align: right;
+}
+.scan-status:empty {
+  display: none;
+}
+/* The ring around the button fills as the scan progresses (--scan-progress goes 0 to 1). */
+.scan-ring {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: conic-gradient(#7fd4ff calc(var(--scan-progress, 0) * 1turn), #24365e 0);
+}
+.scan-button {
+  width: 80px;
+  height: 80px;
+  border: 0;
+  border-radius: 50%;
+  background: #0d1a3a;
+  color: #fff;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  /* A press-and-hold control: stop the browser from scrolling, selecting text or showing menus. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.scan-button[data-scanning] {
+  background: #17306a;
+}
+.scan-button:focus-visible {
+  outline: 3px solid #ffd166;
+  outline-offset: 3px;
+}
+/* On phones the info sheet rises from the bottom: lift the SCAN button above it, and hide the
+   button entirely while the sheet is fully expanded (you are reading, not scanning). */
+@media (max-width: 700px) {
+  .panel-open .scan-hud {
+    bottom: calc(42vh + 12px);
+    bottom: calc(42dvh + 12px);
+  }
+  .sheet-expanded .scan-hud {
+    display: none;
+  }
+}
+.locked-note {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  color: #c3cdee;
+  line-height: 1.4;
+}
+.logbook-summary {
+  margin: 0;
+  color: #a9b6dc;
+}
+.logbook-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.logbook-entry {
+  padding: 12px;
+  border: 1px solid #24365e;
+  border-radius: 10px;
+}
+.logbook-entry h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+.logbook-entry p {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+.logbook-meta {
+  color: #a9b6dc;
 }

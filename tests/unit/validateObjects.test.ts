@@ -61,3 +61,20 @@ describe('data/objects.json (the real game data)', () => {
     expect(ids).toEqual(['sun', 'earth', 'moon']);
   });
 });
+
+describe('measurement tiers', () => {
+  it('accepts valid tiers and a missing tier', () => {
+    const entry = {
+      ...good(),
+      data: {
+        a: { label: 'A', value: 1, unit: 'km', tier: 'spectral' },
+        b: { label: 'B', value: 2 },
+      },
+    };
+    expect(problemsFor([entry])).toEqual([]);
+  });
+  it('rejects an unknown tier', () => {
+    const entry = { ...good(), data: { a: { label: 'A', value: 1, tier: 'ultra' } } };
+    expect(problemsFor([entry])[0]).toContain('data.a.tier');
+  });
+});

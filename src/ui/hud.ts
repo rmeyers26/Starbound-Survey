@@ -2,6 +2,7 @@
 // They are plain <button>s, which gives us keyboard and screen-reader support for free, and they
 // are the button alternatives to the touch gestures (spec rule). They only talk to the event bus.
 import type { EventBus, GameEvents } from '../game/events';
+import type { GameStateMachine } from '../game/stateMachine';
 import type { CelestialObject } from '../game/types';
 
 function makeButton(label: string, className: string, ariaLabel?: string): HTMLButtonElement {
@@ -17,6 +18,7 @@ export function createHud(
   container: HTMLElement,
   objects: CelestialObject[],
   bus: EventBus<GameEvents>,
+  machine: GameStateMachine,
 ): () => void {
   const hud = document.createElement('div');
   hud.className = 'hud';
@@ -53,7 +55,13 @@ export function createHud(
   });
   const settingsButton = makeButton('Settings', 'hud-button', 'Open settings');
   settingsButton.addEventListener('click', () => bus.emit('settings:open', undefined));
-  controls.append(zoomIn, zoomOut, overview, settingsButton);
+  const logbookButton = makeButton(
+    'Logbook',
+    'hud-button',
+    'Open the Logbook of discovered objects',
+  );
+  logbookButton.addEventListener('click', () => machine.transition('LOGBOOK'));
+  controls.append(zoomIn, zoomOut, overview, logbookButton, settingsButton);
 
   // Honesty rule (spec): the HUD says when the view is not to scale.
   const note = document.createElement('p');
@@ -64,7 +72,11 @@ export function createHud(
 
   const top = document.createElement('div');
   top.className = 'hud-top';
-  top.append(nav, note);
+  // Status column: the scale note now, and the rank / XP bar added below it by createXpBar.
+  const statusColumn = document.createElement('div');
+  statusColumn.className = 'hud-status';
+  statusColumn.append(note);
+  top.append(nav, statusColumn);
 
   hud.append(top, controls);
   container.append(hud);

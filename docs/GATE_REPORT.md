@@ -5,6 +5,9 @@ results on a real iPhone and a real Android phone, and none exist. The go or no-
 
 Date of this report: 2026-11-02.
 
+> **Update:** Phase 1 slice A was started before this gate passed, at the owner's request. See `PHASE1.md`.
+> The gate criteria below are unchanged and still open.
+
 ## Gate criteria
 
 | #   | Criterion (from the spec)                                                     | Status                                                                          | Evidence                                                                                                                                    |

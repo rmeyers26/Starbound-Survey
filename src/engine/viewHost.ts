@@ -91,6 +91,10 @@ export class ViewHost implements View {
     return this.current.getState();
   }
 
+  distanceTo(id: string): number | null {
+    return this.current.distanceTo(id);
+  }
+
   /** Builds a view; if WebGL was wanted but throws, falls back to Canvas 2D. */
   private build(state: ViewState | undefined, tryWebGL: boolean, reason: RendererReason): View {
     const viewOptions: ViewOptions = {

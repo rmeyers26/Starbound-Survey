@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { chip, openGame, openSettings } from './helpers';
+import { chip, openForScanning, openGame, openSettings, scanObject } from './helpers';
 
 // Spec: "text and controls meet WCAG AA contrast", labelled controls, keyboard reachable.
 // axe-core is an automated checker. It finds many (not all) problems, so it complements manual checks.
@@ -22,7 +22,19 @@ test('info panel has no accessibility violations', async ({ page }) => {
   await chip(page, 'earth').click();
   await expect(page.locator('.info-panel')).toBeVisible();
   expect((await scan(page)).violations).toEqual([]);
+  await page.getByRole('tab', { name: 'Advanced data' }).click(); // locked view
+  expect((await scan(page)).violations).toEqual([]);
+});
+
+test('scanning HUD, unlocked data and the Logbook have no accessibility violations', async ({
+  page,
+}) => {
+  await openForScanning(page);
+  await scanObject(page, 'moon');
   await page.getByRole('tab', { name: 'Advanced data' }).click();
+  expect((await scan(page)).violations).toEqual([]);
+  await page.getByRole('button', { name: /Open the Logbook/ }).click();
+  await expect(page.locator('dialog.logbook-dialog')).toBeVisible();
   expect((await scan(page)).violations).toEqual([]);
 });
 

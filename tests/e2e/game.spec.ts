@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { chip, openGame, openSettings, trackErrors } from './helpers';
+import { chip, openForScanning, openGame, openSettings, scanObject, trackErrors } from './helpers';
 
 test('loads the 3D scene with no errors', async ({ page }) => {
   const errors = trackErrors(page);
@@ -8,8 +8,10 @@ test('loads the 3D scene with no errors', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-test('selecting an object shows real data from the JSON file', async ({ page }) => {
-  await openGame(page);
+test('selecting an object shows its facts; measurements are earned by scanning', async ({
+  page,
+}) => {
+  await openForScanning(page);
   await chip(page, 'moon').click();
 
   const panel = page.locator('.info-panel');
@@ -18,6 +20,13 @@ test('selecting an object shows real data from the JSON file', async ({ page }) 
   await expect(panel.locator('.badge')).toHaveText('Simulation'); // every visual is labelled
   await expect(panel.getByText('natural satellite')).toBeVisible(); // Quick facts tab
 
+  // Before scanning: the Advanced tab is locked.
+  await panel.getByRole('tab', { name: 'Advanced data' }).click();
+  await expect(panel.getByText('Scan this object to reveal its measurements')).toBeVisible();
+  await expect(panel.getByText('384,400 km')).toHaveCount(0);
+
+  // After a scan: real values from the JSON file appear, with their source.
+  await scanObject(page, 'moon'); // selecting again resets the panel to its Quick facts tab
   await panel.getByRole('tab', { name: 'Advanced data' }).click();
   await expect(panel.getByText('384,400 km')).toBeVisible();
   await expect(panel.getByText('Source: NASA Moon Fact Sheet')).toBeVisible();
