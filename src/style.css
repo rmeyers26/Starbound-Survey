@@ -1,0 +1,447 @@
+/* Global styles. Dark, full-screen base for the 3D view. */
+html,
+body {
+  overscroll-behavior: none; /* stops pull-down-to-refresh while playing */
+  margin: 0;
+  height: 100%;
+  background: #05070f;
+  color: #e6ecff;
+  font-family: system-ui, sans-serif;
+}
+#app {
+  position: fixed; /* the game fills the whole screen */
+  inset: 0;
+  overflow: hidden;
+}
+
+/* The 3D canvas fills its container; its drawing size is set by JavaScript. */
+.game-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Spec: touch-action: none on the game canvas ONLY, so the browser doesn't scroll/zoom the page
+     while the player drags or pinches. Menus elsewhere still scroll normally. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  outline-offset: -3px;
+}
+
+/* Error screen with Retry button. 44px minimum tap target per the spec. */
+.error-screen {
+  max-width: 28rem;
+  margin: 20vh auto 0;
+  padding: 1rem;
+  text-align: center;
+}
+.error-screen button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 1.5rem;
+  font-size: 1rem;
+}
+
+/* ---- HUD (on-screen controls) ---- */
+.hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none; /* clicks pass through to the canvas except on the buttons */
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  box-sizing: border-box;
+}
+.hud > * {
+  pointer-events: auto;
+}
+.hud-objects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.hud-controls {
+  position: absolute;
+  right: max(12px, env(safe-area-inset-right));
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.hud-button {
+  min-width: 44px; /* spec: every tappable control is at least 44 CSS pixels */
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid #3a4a78;
+  border-radius: 22px;
+  background: rgba(10, 16, 36, 0.75);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.hud-button[aria-pressed='true'] {
+  border-color: #7fd4ff;
+  background: rgba(40, 90, 130, 0.8);
+}
+.hud-button:focus-visible,
+.game-canvas:focus-visible {
+  outline: 3px solid #ffd166;
+}
+.hud-round {
+  font-size: 1.4rem;
+  padding: 0;
+}
+
+/* ---- top row: object buttons + "Not to scale" note ---- */
+.hud-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  pointer-events: none;
+}
+.hud-top > * {
+  pointer-events: auto;
+}
+.hud-note {
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 14px;
+  background: rgba(10, 16, 36, 0.6);
+  color: #b8c4e8;
+  font-size: 0.8rem;
+}
+/* While the phone bottom sheet is fully open it would overlap the camera buttons: hide them. */
+.sheet-expanded .hud-controls {
+  display: none;
+}
+
+/* ---- info panel ---- */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.info-panel {
+  position: absolute;
+  z-index: 5;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background: rgba(8, 12, 28, 0.92);
+  border: 1px solid #3a4a78;
+  color: #e6ecff;
+  overflow-y: auto;
+  animation: panel-in 0.25s ease-out;
+}
+.info-panel[hidden] {
+  display: none;
+}
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .info-panel {
+    animation: none;
+  }
+}
+.info-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px 4px 16px;
+}
+.info-title {
+  margin: 0;
+  font-size: 1.25rem;
+  flex: 1;
+}
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: #24365e;
+  border: 1px solid #5b73ad;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+.info-close {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 1.6rem;
+  cursor: pointer;
+}
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 12px;
+  border-bottom: 1px solid #24365e;
+}
+.tab {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: #b8c4e8;
+  font: inherit;
+  cursor: pointer;
+}
+.tab[aria-selected='true'] {
+  color: #fff;
+  border-bottom-color: #7fd4ff; /* not colour alone: the selected tab is also bold */
+  font-weight: 700;
+}
+.tab:focus-visible,
+.info-close:focus-visible,
+.sheet-handle:focus-visible {
+  outline: 3px solid #ffd166;
+}
+.pane {
+  padding: 12px 16px;
+}
+.pane[hidden] {
+  display: none;
+}
+.quick-text {
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
+.meta,
+.source,
+.scale-note {
+  margin: 0;
+  overflow-wrap: anywhere; /* long URLs wrap instead of being clipped */
+  font-size: 0.8rem;
+  color: #a9b6dc;
+}
+.scale-note {
+  padding: 0 16px 14px;
+}
+.data-list {
+  margin: 0 0 12px;
+}
+.data-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid #1c2a4d;
+}
+.data-row dt {
+  color: #b8c4e8;
+}
+.data-row dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.sheet-handle {
+  display: none; /* desktop: no handle */
+}
+
+/* Desktop / wide screens: side panel on the left, under the object buttons. */
+@media (min-width: 701px) {
+  .info-panel {
+    top: 72px;
+    left: max(12px, env(safe-area-inset-left));
+    width: 340px;
+    max-height: calc(100% - 96px);
+    border-radius: 12px;
+  }
+}
+
+/* Phones: bottom sheet. */
+@media (max-width: 700px) {
+  .info-panel {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-height: 42vh;
+    max-height: 42dvh; /* dvh follows the phone's collapsing browser toolbar; vh is the fallback */
+    border-radius: 16px 16px 0 0;
+    padding-bottom: env(safe-area-inset-bottom); /* keep clear of the home indicator */
+    transition: max-height 0.2s ease-out;
+  }
+  .info-panel.expanded {
+    max-height: 80vh;
+    max-height: 80dvh;
+  }
+  .sheet-handle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 44px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    touch-action: none; /* so a swipe on the handle isn't taken by the browser */
+  }
+  .sheet-handle-bar {
+    width: 44px;
+    height: 5px;
+    border-radius: 3px;
+    background: #5b73ad;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .info-panel {
+    transition: none;
+  }
+}
+
+/* ---- FPS readout and Settings dialog ---- */
+.fps-readout {
+  position: absolute;
+  left: max(12px, env(safe-area-inset-left));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 4;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  font:
+    0.75rem ui-monospace,
+    monospace;
+  pointer-events: none;
+}
+.fps-readout[hidden] {
+  display: none;
+}
+.settings-dialog {
+  box-sizing: border-box;
+  width: min(30rem, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  padding: 0;
+  border: 1px solid #3a4a78;
+  border-radius: 14px;
+  background: #080c1c;
+  color: #e6ecff;
+}
+.settings-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+.settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+}
+.settings-title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+.setting-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  min-height: 44px;
+}
+.setting-label {
+  font-weight: 600;
+}
+.setting-hint {
+  flex-basis: 100%;
+  font-size: 0.8rem;
+  color: #a9b6dc;
+}
+.setting-row select,
+.setting-row input[type='range'] {
+  min-height: 44px;
+  font: inherit;
+}
+.setting-row input[type='checkbox'] {
+  width: 24px;
+  height: 24px;
+}
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid #24365e;
+}
+.settings-section h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.settings-section p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #a9b6dc;
+}
+.settings-close {
+  align-self: flex-end;
+}
+
+/* ---- toasts (quiet notifications) ---- */
+.toast-region {
+  position: absolute;
+  z-index: 20;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: max(16px, env(safe-area-inset-bottom));
+  width: min(32rem, calc(100% - 24px));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px 8px 16px;
+  border: 1px solid #5b73ad;
+  border-radius: 14px;
+  background: rgba(12, 20, 44, 0.96);
+  font-size: 0.9rem;
+}
+.toast-text {
+  flex: 1;
+}
+.toast-button {
+  min-height: 44px;
+}
+.toast-dismiss {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+.settings-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Phones: the bottom sheet rises from the bottom, so the camera buttons move to a row at the top
+   (under the object buttons) instead of a column in the middle, where the sheet would cover them. */
+@media (max-width: 700px) {
+  .hud {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .hud-controls {
+    position: static;
+    transform: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
