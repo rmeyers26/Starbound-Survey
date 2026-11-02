@@ -19,6 +19,11 @@ export interface VisualSpec {
    * "Earthshine": sunlight bounced off Earth that dimly lights the Moon's night side. Artistic strength.
    */
   nightGlow?: number;
+  /**
+   * For a textured body that does not spin: which longitude (degrees east) of its map faces the default
+   * camera. Without this the side you first see would be whatever the picture's edge happens to be.
+   */
+  startLongitudeDeg?: number;
 }
 
 export const VISUALS: Record<string, VisualSpec> = {
@@ -36,7 +41,13 @@ export const VISUALS: Record<string, VisualSpec> = {
     tidallyLocked: true,
     nightGlow: 0.08,
   },
-  mars: { radius: 1.1, color: 0xc1572f, orbit: { parentId: 'sun', radius: 80 } },
+  mars: {
+    radius: 1.1,
+    color: 0xc1572f,
+    orbit: { parentId: 'sun', radius: 80 },
+    texture: 'mars',
+    startLongitudeDeg: 70, // Syrtis Major and the Hellas basin
+  },
 };
 
 /**

@@ -37,7 +37,7 @@ export class WebGLView implements View {
   private running = false;
   private selectedId: string | null = null;
   private focusId: string | null = null;
-  /** Last frame's bearing from the focused locked body to its parent (null = not tracking). */
+  /** Last frame's bearing from the focused body to the body it orbits (null = not tracking). */
   private lockBearing: number | null = null;
 
   constructor(options: ViewOptions) {
@@ -173,6 +173,11 @@ export class WebGLView implements View {
         : new THREE.MeshStandardMaterial({ color: spec.color, roughness: 1, metalness: 0 }); // matte, like real rock and dust
       const mesh = new THREE.Mesh(geometry, material);
       mesh.userData.objectId = id;
+      if (spec.startLongitudeDeg !== undefined) {
+        // The centre of a sphere's picture faces +X and longitude grows toward -Z, so turning by
+        // (-90 degrees - longitude) brings that longitude round to face +Z, where the camera starts.
+        mesh.rotation.y = -Math.PI / 2 - (spec.startLongitudeDeg * Math.PI) / 180;
+      }
       this.meshes.set(id, mesh);
       this.scene.add(mesh);
     }
@@ -391,14 +396,16 @@ export class WebGLView implements View {
   }
 
   /**
-   * While focused on a tidally locked body (the Moon), turn the camera along with the body's orbit so the
-   * body stays still on screen instead of appearing to spin. See `coRotationYawDelta`.
+   * While focused on a body that orbits something (a planet around the Sun, the Moon around Earth), turn the
+   * camera along with its orbit. Without this, a camera that follows a planet but never turns sees the
+   * Sun swing all the way round it, and sees the Moon spin once per orbit. With it, the thing being
+   * orbited stays put on screen, the lit side of the body stays the same, and only the stars drift.
+   * See `coRotationYawDelta`. Focusing the Sun (which orbits nothing) leaves the camera alone.
    */
-  private coRotateCameraWithLockedBody(): void {
+  private coRotateCameraWithOrbit(): void {
     const spec = this.focusId ? VISUALS[this.focusId] : undefined;
     const body = this.focusId ? this.meshes.get(this.focusId) : undefined;
-    const parent =
-      spec?.tidallyLocked && spec.orbit ? this.meshes.get(spec.orbit.parentId) : undefined;
+    const parent = spec?.orbit ? this.meshes.get(spec.orbit.parentId) : undefined;
     if (!body || !parent) {
       this.lockBearing = null;
       return;
@@ -428,7 +435,7 @@ export class WebGLView implements View {
     const dt = Math.min(frameMs / 1000, 0.1);
     this.simDays += dt * SIM_DAYS_PER_SECOND;
     this.updatePositions();
-    this.coRotateCameraWithLockedBody();
+    this.coRotateCameraWithOrbit();
     this.rig.update(dt, this.followedPosition());
     this.rig.applyTo(this.camera);
     this.updateSelectionRing();

@@ -41,12 +41,12 @@ describe('wrapAngle', () => {
   });
 });
 
-describe('camera co-rotation with a tidally locked body', () => {
+describe('camera co-rotation with an orbiting body', () => {
   // The camera's compass angle around its target, from the way CameraRig places it: x = sin(yaw), z = cos(yaw).
   const cameraCompass = (yaw: number): number => Math.PI / 2 - yaw;
   const sameDirection = (a: number, b: number): number => Math.abs(wrapAngle(a - b));
 
-  it('keeps the camera at the same angle to the line from the Moon to Earth, all the way round', () => {
+  it('keeps the camera at the same angle to the line from the body to what it orbits, all the way round', () => {
     const earth = { x: 0, z: 0 };
     const moonAt = (angle: number) => ({ x: 6 * Math.cos(angle), z: -6 * Math.sin(angle) });
     let previous = bearing(moonAt(0), earth);

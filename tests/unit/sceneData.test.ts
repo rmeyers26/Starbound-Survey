@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { SIM_DAYS_PER_SECOND, VISUALS } from '../../src/engine/scale';
 import { computePositions } from '../../src/engine/solarSystem';
+import { textureUrlFor } from '../../src/engine/textures';
 import { validateObjects } from '../../src/game/validateObjects';
 
 const objects = validateObjects(JSON.parse(readFileSync('data/objects.json', 'utf8')));
@@ -59,5 +60,13 @@ describe('objects.json and the 3D scene agree', () => {
   it('...but not so slow that Mars feels frozen (its year is under 5 minutes)', () => {
     const marsDays = objects.find((o) => o.id === 'mars')!.data.orbitalPeriod.value as number;
     expect(marsDays / SIM_DAYS_PER_SECOND).toBeLessThan(300);
+  });
+
+  it('every body that names a texture has a picture file for it (a typo would silently leave it flat)', () => {
+    for (const [id, spec] of Object.entries(VISUALS)) {
+      if (!spec.texture) continue;
+      expect(textureUrlFor(spec.texture, 1024), `${id} 1k`).not.toBeNull();
+      expect(textureUrlFor(spec.texture, 2048), `${id} 2k`).not.toBeNull();
+    }
   });
 });

@@ -51,6 +51,8 @@ Tick each one and note anything odd.
 - [ ] Seen from above, every planet circles the Sun **counter-clockwise**, and the Moon circles Earth the same way.
 - [ ] The Moon takes about 9 seconds to go once round Earth and always shows the same face to Earth.
 - [ ] Nothing looks frantic or frozen.
+- [ ] Tap a planet: the Sun stays on the same side of it (it does not swing round), and only the stars drift.
+- [ ] Tap the Moon: its surface stays still on screen while its lit part changes through the phases.
 
 **Scanning (press and hold)**
 
@@ -65,6 +67,7 @@ Tick each one and note anything odd.
 **Surface images** (only once `assets/textures/` has files; see `docs/TEXTURES.md`)
 
 - [ ] The Moon shows a real surface (grey with darker patches), not a plain grey ball.
+- [ ] Mars shows a real surface (rusty, with dark patches and a bright basin), not a plain orange ball.
 - [ ] The same face of the Moon always points at Earth as it orbits.
 - [ ] The frame rate with the image is still near 60 (note it before and after if you can).
 - [ ] Settings > Graphics quality > Performance still looks acceptable.

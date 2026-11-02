@@ -32,7 +32,7 @@ Date of this report: 2026-11-02.
 
 ## What was verified, and how
 
-- 217 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
+- 222 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
 - 83 browser tests (Playwright) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
   bottom-sheet handle only exists on phone-width screens).
 - Lint, type-check and production build pass. Production dependencies: 0 known vulnerabilities.
@@ -63,6 +63,10 @@ Date of this report: 2026-11-02.
     and locked in by unit tests plus an on-screen check of both the 3D view and the 2D chart.
 11. **The Moon went round Earth in 2.7 s**, which looked frantic because it also turns once per orbit to keep
     its near side toward Earth. The clock now runs at 3 days per second (Moon about 9 s, Earth's year about 2 min).
+12. **The Sun circled any planet you focused on**, and the Moon looked like it spun. The camera followed the body
+    but never turned with its orbit. It now turns along with the orbit while you are focused on anything that
+    orbits something, so the Sun stays on one side of a planet and the Moon keeps its face still (its phases
+    still change). Measured: Mercury's lit side moved 160 degrees in 10 s before and under 1 degree after.
 
 ## Open problems and trade-offs
 
@@ -95,7 +99,7 @@ Date of this report: 2026-11-02.
    not handled.
 10. **Bundle size.** 587 KB of JavaScript (150 KB compressed), mostly Three.js. Fine for the 5 MB target;
     code-splitting is a later optimisation.
-11. **Visuals are mostly placeholders.** The Moon now has a real surface picture (JPEG, size chosen by graphics
+11. **Visuals are mostly placeholders.** The Moon and Mars now have real surface pictures (JPEG, size chosen by graphics
     profile; see `TEXTURES.md`). Its **credit and licence are not yet confirmed** (the supplied file has no credit
     inside and NASA's page could not be opened), so no in-game credit is shown. The other bodies are flat colours.
     KTX2 is still not used, and texture memory and frame rate on a real phone are untested.

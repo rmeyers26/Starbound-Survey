@@ -36,14 +36,15 @@ export function wrapAngle(angle: number): number {
 }
 
 /**
- * How much to change the camera's `yaw` so the camera travels WITH a tidally locked body.
+ * How much to change the camera's `yaw` so the camera travels WITH an orbiting body.
  *
- * A locked body (like the Moon) turns exactly once per orbit, so a camera that stays fixed in space sees
- * it spin. If the camera instead keeps the same angle to the line joining the body and its parent, the
- * body holds still on screen and the parent hangs in the same part of its sky, which is how tidal locking
- * looks from the surface.
+ * A camera that follows a planet but never turns sees the Sun swing right round it once per year, and sees
+ * a tidally locked moon (which turns once per orbit) spin. If the camera instead keeps the same angle to
+ * the line joining the body and the thing it orbits, that thing holds still on screen: the Sun stays on
+ * one side of a planet, and Earth hangs in the same part of the Moon's sky, which is how it looks from
+ * there.
  *
- * `previous` and `current` are the bearings from the body to its parent on two consecutive frames.
+ * `previous` and `current` are the bearings from the body to the thing it orbits on two consecutive frames.
  * The camera sits at x = sin(yaw), z = cos(yaw), so its compass angle is (π/2 - yaw): a turn of the
  * bearing by +d needs a yaw change of -d.
  */
