@@ -52,4 +52,9 @@ export interface View {
   setQuality(quality: ViewQuality): void;
   setControlSettings(settings: ControlSettings): void;
   getState(): ViewState;
+  /**
+   * Distance from the ship (camera) to an object in scene units, or null when it cannot be known.
+   * The scanner uses this for its range check.
+   */
+  distanceTo(id: string): number | null;
 }

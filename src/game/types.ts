@@ -9,12 +9,17 @@ export type ImageType = (typeof IMAGE_TYPES)[number];
 export const OBJECT_TYPES = ['star', 'planet', 'moon', 'nebula', 'galaxy', 'blackHole'] as const;
 export type ObjectType = (typeof OBJECT_TYPES)[number];
 
+// Scanning reveals data in layers (spec: "Layered results"). Higher tiers need a higher scanner level.
+export const SCAN_TIERS = ['basic', 'detailed', 'spectral'] as const;
+export type ScanTier = (typeof SCAN_TIERS)[number];
+
 // One measurement, e.g. { label: "Diameter", value: 12742, unit: "km" }.
 // Keeping the unit next to the number means the UI never has to guess it.
 export interface Measurement {
   label: string;
   value: number | string;
   unit?: string; // optional: some values (e.g. "G2V") have no unit
+  tier?: ScanTier; // which scan reveals it; omitted means 'basic'
 }
 
 export interface CelestialObject {

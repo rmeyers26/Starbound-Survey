@@ -4,9 +4,8 @@ A browser-based 3D astronomy exploration game: pilot a survey ship through a sca
 cosmos and scan real objects to learn real science. It runs in Safari (iPhone) and Chrome
 (Android) with nothing to install, and can be added to the Home Screen to play offline.
 
-**Status: Phase 0, the prototype.** Earth, Moon and Sun with orbit camera, info panels, saves,
-graphics fallbacks and PWA support. It is waiting on real-phone testing before the gate can pass.
-Read `docs/GATE_REPORT.md` first.
+**Status:** Phase 0 prototype is merged and waiting on real-phone testing (`docs/GATE_REPORT.md`).
+Phase 1 has started early: **slice A (scanning, XP, ranks, Logbook) is done**. See `docs/PHASE1.md`.
 
 ## Documents
 
@@ -16,6 +15,20 @@ Read `docs/GATE_REPORT.md` first.
 | `docs/GATE_REPORT.md`    | What is done, what is proven, open problems, go/no-go |
 | `docs/DEVICE_TESTING.md` | Step-by-step checklist for testing on a real phone    |
 | `docs/TESTING_LOG.md`    | Results table (real-device rows are still empty)      |
+
+## How to play
+
+1. **Pick an object:** tap the Sun, Earth or Moon (or use the buttons at the top).
+2. **Fly to it:** double-tap it, or use its button. You must be close to scan (otherwise: "Move closer to scan").
+3. **Scan:** press and hold **SCAN** (bottom right), or hold the **Space** key, until the ring fills (3 seconds).
+   Let go early and the scan is cancelled. Prefer not to hold? Settings > Scan control > "Tap once".
+4. **Learn:** a scan reveals measurements in the **Advanced data** tab, with their source.
+5. **Earn XP:** first scan of an object = **20 XP**, a deeper scan = 10 XP, re-scanning the same level = 0.
+   The bar at the top right shows your rank (Cadet, Navigator, Surveyor, Astronomer, Director) and progress.
+6. **Logbook:** open it to see what you have discovered.
+
+Deeper scans (Detailed at Navigator, Spectral at Surveyor) need a higher rank. More ways to earn XP
+(Flight School, quizzes, missions) arrive in the next Phase 1 slices.
 
 ## What you need installed
 
@@ -54,6 +67,7 @@ engine, then run with `PW_WEBKIT=1 npm run test:e2e`). Regenerate app icons with
 ## Handy URL options (for testing)
 
 - `?renderer=canvas2d` forces the simplified 2D chart, as if WebGL were unavailable.
+- `?scanSeconds=0.5` changes how long a scan takes (0.2 to 10 seconds; default 3). Used by the automated tests.
 
 In **Settings** you can choose the graphics quality, turn on a frame-rate readout, change control
 speeds and Reduce motion, and export or import a backup of your progress.

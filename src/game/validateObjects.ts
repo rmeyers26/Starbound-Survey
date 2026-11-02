@@ -3,6 +3,8 @@
 import {
   IMAGE_TYPES,
   OBJECT_TYPES,
+  SCAN_TIERS,
+  type ScanTier,
   type CelestialObject,
   type ImageType,
   type ObjectType,
@@ -37,6 +39,9 @@ function checkMeasurement(where: string, raw: unknown, problems: string[]): void
   }
   if (raw.unit !== undefined && !isNonEmptyString(raw.unit)) {
     problems.push(`${where}.unit: if present, must be a non-empty string`);
+  }
+  if (raw.tier !== undefined && !SCAN_TIERS.includes(raw.tier as ScanTier)) {
+    problems.push(`${where}.tier: if present, must be one of ${SCAN_TIERS.join(', ')}`);
   }
 }
 

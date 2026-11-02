@@ -10,12 +10,17 @@ export const PROFILE_CHOICES: readonly ProfileChoice[] = [
   'performance',
 ];
 
+export type ScanMode = 'hold' | 'tap';
+export const SCAN_MODES: readonly ScanMode[] = ['hold', 'tap'];
+
 export interface Settings {
   profile: ProfileChoice;
   showFps: boolean;
   rotateSensitivity: number; // 1 = default
   zoomSensitivity: number; // 1 = default
   reducedMotion: boolean;
+  /** 'hold' = keep the SCAN control pressed (spec). 'tap' = one tap starts a scan (no holding needed). */
+  scanMode: ScanMode;
 }
 
 export const SENSITIVITY_MIN = 0.25;
@@ -29,6 +34,7 @@ export function defaultSettings(prefersReducedMotion: boolean): Settings {
     rotateSensitivity: 1,
     zoomSensitivity: 1,
     reducedMotion: prefersReducedMotion,
+    scanMode: 'hold',
   };
 }
 
@@ -51,6 +57,9 @@ export function normalizeSettings(raw: unknown, defaults: Settings): Settings {
       ? clampSensitivity(r.zoomSensitivity)
       : defaults.zoomSensitivity,
     reducedMotion: typeof r.reducedMotion === 'boolean' ? r.reducedMotion : defaults.reducedMotion,
+    scanMode: SCAN_MODES.includes(r.scanMode as ScanMode)
+      ? (r.scanMode as ScanMode)
+      : defaults.scanMode,
   };
 }
 

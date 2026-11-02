@@ -6,7 +6,9 @@
 import type { ProfileName } from '../engine/profiles';
 import type { ViewKind } from '../engine/view';
 import type { SaveRecord } from '../save/schema';
+import type { ScanBlock } from './scanner';
 import type { Settings } from './settings';
+import type { GameState } from './stateMachine';
 
 /** Every event in the game and the data it carries. Add new events here. */
 export interface GameEvents {
@@ -20,6 +22,22 @@ export interface GameEvents {
   'settings:changed': { settings: Settings };
   /** The player asked to open the Settings screen. */
   'settings:open': undefined;
+  /** The game moved from one state to another (for example EXPLORE -> LOGBOOK). */
+  'state:changed': { from: GameState; to: GameState };
+  /** The player pressed or released the SCAN control. */
+  'scan:request': { action: 'start' | 'stop' };
+  /** Fired every frame while scanning: progress from 0 to 1. */
+  'scan:progress': { id: string; progress: number };
+  /** A scan finished and was applied to the save. */
+  'scan:completed': { id: string; tier: number; xpAwarded: number };
+  /** A scan was stopped early (released, moved away, selection changed...). */
+  'scan:cancelled': { id: string };
+  /** A scan could not start. */
+  'scan:blocked': { reason: ScanBlock };
+  /** XP was awarded. */
+  'xp:changed': { xp: number; delta: number; rank: string };
+  /** A rank threshold was crossed. */
+  'rank:up': { rank: string; newRegions: string[] };
   /** Saved progress changed (an object was inspected, or a backup was imported). */
   'progress:changed': { record: SaveRecord };
   /** The renderer was built or replaced (for example a fallback to the 2D chart). */

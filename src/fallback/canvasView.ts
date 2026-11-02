@@ -6,7 +6,7 @@ import { clamp } from '../engine/easing';
 import { attachInput } from '../engine/inputController';
 import { log } from '../engine/log';
 import { mulberry32 } from '../engine/random';
-import { SIM_DAYS_PER_SECOND, VISUALS } from '../engine/scale';
+import { SIM_DAYS_PER_SECOND, VISUALS, focusDistance } from '../engine/scale';
 import { computePositions, type BodyPosition } from '../engine/solarSystem';
 import type { ControlSettings, View, ViewOptions, ViewQuality, ViewState } from '../engine/view';
 
@@ -116,6 +116,21 @@ export class Canvas2DView implements View {
       simDays: this.simDays,
       camera: { yaw: 0, pitch: 0.4, distance: 150 },
     };
+  }
+
+  /**
+   * The 2D chart has no camera, so "distance" is an approximation that matches the 3D view: an object
+   * you have flown to (and not zoomed out from) is at its focus distance; zooming out scales it up;
+   * anything not focused is out of reach (null).
+   */
+  distanceTo(id: string): number | null {
+    const spec = VISUALS[id];
+    if (!spec || this.focusId !== id) return null;
+    const settled = Math.abs(Math.log(this.zoom) - Math.log(this.zoomTarget)) < 0.1;
+    if (!settled) return null;
+    const { width, height } = this.cssSize();
+    const focusZoom = clamp(20 / (spec.radius * baseScale(width, height)), 1, MAX_ZOOM);
+    return focusDistance(spec.radius) * (focusZoom / this.zoomTarget);
   }
 
   // ---- input and events ---------------------------------------------------------------

@@ -35,3 +35,15 @@ test('after one visit the game loads and works with no network', async ({ page, 
   await chip(page, 'moon').click();
   await expect(page.locator('.info-title')).toHaveText('The Moon');
 });
+
+test('a notification never covers the SCAN button', async ({ page }) => {
+  await openGame(page);
+  // "Ready to play offline" is the notification every first-time visitor sees.
+  await expect(page.locator('.toast')).toBeVisible({ timeout: 30_000 });
+  const covered = await page.locator('.scan-button').evaluate((button) => {
+    const r = button.getBoundingClientRect();
+    const top = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+    return !(top === button || button.contains(top));
+  });
+  expect(covered).toBe(false);
+});

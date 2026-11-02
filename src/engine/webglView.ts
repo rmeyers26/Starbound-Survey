@@ -6,18 +6,13 @@ import { attachInput } from './inputController';
 import { log } from './log';
 import { hitRadius, pickObject, type PickCandidate } from './picking';
 import { mulberry32 } from './random';
-import { SIM_DAYS_PER_SECOND, VISUALS } from './scale';
+import { SIM_DAYS_PER_SECOND, VISUALS, closestDistance, focusDistance } from './scale';
 import { computePositions } from './solarSystem';
 import type { ControlSettings, View, ViewOptions, ViewQuality, ViewState } from './view';
 
 /** Radius of the sphere the stars sit on (far beyond the planets). */
 const STAR_SPHERE_RADIUS = 1500;
 const MAX_STARS = 4000;
-
-/** Distance to fly to when focusing an object: far enough to see it, close enough to feel big. */
-const focusDistance = (radius: number): number => Math.max(radius * 5, 4);
-/** Closest the camera may get to an object: just outside its surface. */
-const closestDistance = (radius: number): number => radius * 1.6 + 0.5;
 
 export class WebGLView implements View {
   readonly kind = 'webgl2' as const;
@@ -144,6 +139,11 @@ export class WebGLView implements View {
       simDays: this.simDays,
       camera: this.rig.getState(),
     };
+  }
+
+  distanceTo(id: string): number | null {
+    const mesh = this.meshes.get(id);
+    return mesh ? this.camera.position.distanceTo(mesh.position) : null;
   }
 
   // ---- scene construction -------------------------------------------------------------
