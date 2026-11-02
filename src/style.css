@@ -1,0 +1,12 @@
+/* Global styles. Dark, full-screen base for the 3D view. */
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: #05070f;
+  color: #e6ecff;
+  font-family: system-ui, sans-serif;
+}
+#app {
+  min-height: 100%;
+}
