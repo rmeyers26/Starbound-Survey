@@ -3,7 +3,12 @@ import { ViewHost, readRendererOverride, type ViewFactories } from '../../src/en
 import type { View, ViewKind, ViewOptions, ViewState } from '../../src/engine/view';
 import { EventBus, type GameEvents } from '../../src/game/events';
 
-const quality = { pixelRatioCap: 2, resolutionScale: 1, starCount: 100 };
+const quality = {
+  pixelRatioCap: 2,
+  resolutionScale: 1,
+  starCount: 100,
+  textureSize: 1024 as const,
+};
 const sampleState: ViewState = {
   selectedId: 'moon',
   focusId: 'earth',

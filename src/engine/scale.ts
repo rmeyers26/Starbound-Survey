@@ -10,12 +10,22 @@ export interface VisualSpec {
   color: number;
   /** Orbit around another object. Omitted for the Sun, which sits at the centre. */
   orbit?: { parentId: string; radius: number };
+  /** Name used to find image files in assets/textures (e.g. "moon" finds moon-1k.jpg). Optional. */
+  texture?: string;
+  /** True if the body always shows the same face to its parent (the Moon does). */
+  tidallyLocked?: boolean;
 }
 
 export const VISUALS: Record<string, VisualSpec> = {
   sun: { radius: 8, color: 0xffc860 },
   earth: { radius: 2, color: 0x2f6fd6, orbit: { parentId: 'sun', radius: 60 } },
-  moon: { radius: 0.55, color: 0xb9b9b9, orbit: { parentId: 'earth', radius: 6 } },
+  moon: {
+    radius: 0.55,
+    color: 0xb9b9b9,
+    orbit: { parentId: 'earth', radius: 6 },
+    texture: 'moon',
+    tidallyLocked: true,
+  },
 };
 
 /**

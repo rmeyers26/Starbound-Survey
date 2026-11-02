@@ -32,8 +32,8 @@ Date of this report: 2026-11-02.
 
 ## What was verified, and how
 
-- 137 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
-- 55 browser tests (Playwright) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
+- 207 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
+- 79 browser tests (Playwright) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
   bottom-sheet handle only exists on phone-width screens).
 - Lint, type-check and production build pass. Production dependencies: 0 known vulnerabilities.
 - Lighthouse on the production build: accessibility 100, best practices 100, SEO 91.
@@ -81,15 +81,17 @@ Date of this report: 2026-11-02.
    you prefer settings to travel with the backup.
 7. **Android install prompt is not built.** Only the iPhone "Add to Home Screen" hint exists. Chrome on
    Android offers its own Install option in the menu.
-8. **Hosting is not chosen.** The manifest assumes the game is served from the site root (`/`), which fits
-   Cloudflare Pages. A sub-folder host such as GitHub Pages needs `base` set in `vite.config.ts`.
+8. **Hosting: Netlify (development).** The game is deployed on Netlify, which serves from the site root over
+   HTTPS and fits the manifest. `netlify.toml` pins Node 22 and the cache rules. A sub-folder host such as
+   GitHub Pages would need `base` set in `vite.config.ts`.
 9. **Cache recovery is partial.** A missing cached file falls back to the network, and a failed data load
    shows the Retry screen. A corrupted cached _script_ is not detected and could show a blank page. Rare, but
    not handled.
 10. **Bundle size.** 587 KB of JavaScript (150 KB compressed), mostly Three.js. Fine for the 5 MB target;
     code-splitting is a later optimisation.
-11. **Visuals are placeholders.** Flat-colour spheres: no textures, so the KTX2 texture pipeline and its
-    memory behaviour are untested.
+11. **Visuals are mostly placeholders.** A texture pipeline now exists (JPEG, size chosen by graphics profile;
+    see `TEXTURES.md`) but **no NASA image has been added yet**: the container's network policy blocks NASA.
+    KTX2 is still not used, and texture memory on a real phone is untested.
 12. **Cosmetic:** the "Ready to play offline" message can overlap the bottom sheet for a few seconds on phones.
 13. **Tooling pins:** TypeScript is pinned to 6.0 because `typescript-eslint` does not support 7 yet.
     `npm audit` lists moderate advisories in `workbox-build`, a build-time tool that is not shipped to players

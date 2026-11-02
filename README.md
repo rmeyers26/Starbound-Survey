@@ -15,6 +15,7 @@ Phase 1 has started early: **slice A (scanning, XP, ranks, Logbook) is done**. S
 | `docs/GATE_REPORT.md`    | What is done, what is proven, open problems, go/no-go |
 | `docs/DEVICE_TESTING.md` | Step-by-step checklist for testing on a real phone    |
 | `docs/TESTING_LOG.md`    | Results table (real-device rows are still empty)      |
+| `docs/TEXTURES.md`       | How to add NASA surface images (Moon, and later more) |
 
 ## How to play
 

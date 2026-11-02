@@ -11,13 +11,33 @@ export interface Profile {
   stepDownBelowFps: number;
   pixelRatioCap: number;
   starCount: number;
+  /** Width of surface images in pixels. A 2048 x 1024 image takes about 4x the memory of 1024 x 512. */
+  textureSize: 1024 | 2048;
 }
 
 export const PROFILES: Record<ProfileName, Profile> = {
   // High targets 60 FPS; we step down below 50 so normal vsync jitter doesn't trigger it.
-  high: { label: 'High', stepDownBelowFps: 50, pixelRatioCap: 2, starCount: 4000 },
-  balanced: { label: 'Balanced', stepDownBelowFps: 28, pixelRatioCap: 1.5, starCount: 2000 },
-  performance: { label: 'Performance', stepDownBelowFps: 24, pixelRatioCap: 1, starCount: 800 },
+  high: {
+    label: 'High',
+    stepDownBelowFps: 50,
+    pixelRatioCap: 2,
+    starCount: 4000,
+    textureSize: 2048,
+  },
+  balanced: {
+    label: 'Balanced',
+    stepDownBelowFps: 28,
+    pixelRatioCap: 1.5,
+    starCount: 2000,
+    textureSize: 1024,
+  },
+  performance: {
+    label: 'Performance',
+    stepDownBelowFps: 24,
+    pixelRatioCap: 1,
+    starCount: 800,
+    textureSize: 1024,
+  },
 };
 
 /** Spec: lower the internal resolution first (100% -> 85% -> 70%) before reducing effects. */
@@ -44,6 +64,7 @@ export function toViewQuality(level: Level): ViewQuality {
     pixelRatioCap: profile.pixelRatioCap,
     resolutionScale: level.resolutionScale,
     starCount: profile.starCount,
+    textureSize: profile.textureSize,
   };
 }
 

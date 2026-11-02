@@ -5,9 +5,11 @@ import { CameraRig, OVERVIEW_DISTANCE, OVERVIEW_MIN_DISTANCE } from './cameraRig
 import { attachInput } from './inputController';
 import { log } from './log';
 import { hitRadius, pickObject, type PickCandidate } from './picking';
+import { faceTowards } from './orientation';
 import { mulberry32 } from './random';
 import { SIM_DAYS_PER_SECOND, VISUALS, closestDistance, focusDistance } from './scale';
 import { computePositions } from './solarSystem';
+import { loadTexture, textureUrlFor } from './textures';
 import type { ControlSettings, View, ViewOptions, ViewQuality, ViewState } from './view';
 
 /** Radius of the sphere the stars sit on (far beyond the planets). */
@@ -75,6 +77,7 @@ export class WebGLView implements View {
     this.resizeObserver.observe(options.host);
     document.addEventListener('visibilitychange', this.onVisibilityChange);
     this.setQuality(this.quality);
+    void this.loadSurfaceTextures();
   }
 
   private disposed = false;
@@ -110,7 +113,11 @@ export class WebGLView implements View {
       ) {
         node.geometry.dispose();
         const materials = Array.isArray(node.material) ? node.material : [node.material];
-        materials.forEach((m) => m.dispose());
+        materials.forEach((m) => {
+          // A material's picture (texture) lives on the GPU separately and must be freed too.
+          if ('map' in m && m.map instanceof THREE.Texture) m.map.dispose();
+          m.dispose();
+        });
       }
     });
     this.renderer.dispose();
@@ -161,7 +168,7 @@ export class WebGLView implements View {
       // The Sun glows by itself (Basic material ignores lights); planets are lit by the Sun.
       const material = isSun
         ? new THREE.MeshBasicMaterial({ color: spec.color })
-        : new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.9 });
+        : new THREE.MeshStandardMaterial({ color: spec.color, roughness: 1, metalness: 0 }); // matte, like real rock and dust
       const mesh = new THREE.Mesh(geometry, material);
       mesh.userData.objectId = id;
       this.meshes.set(id, mesh);
@@ -231,6 +238,31 @@ export class WebGLView implements View {
     ring.renderOrder = 10;
     ring.visible = false;
     return ring;
+  }
+
+  /**
+   * Loads surface pictures (e.g. NASA's Moon map) in the background. The game is already running with
+   * flat colours; each body switches to its picture the moment the picture arrives. If there is no
+   * picture, or it fails to load, nothing changes.
+   */
+  private async loadSurfaceTextures(): Promise<void> {
+    const maxAnisotropy = this.renderer.capabilities.getMaxAnisotropy();
+    for (const [id, spec] of Object.entries(VISUALS)) {
+      if (!spec.texture) continue;
+      const url = textureUrlFor(spec.texture, this.quality.textureSize);
+      if (!url) continue;
+      const texture = await loadTexture(url, maxAnisotropy);
+      const mesh = this.meshes.get(id);
+      if (this.disposed || !texture || !mesh) {
+        texture?.dispose(); // the view was closed while the picture downloaded
+        continue;
+      }
+      const material = mesh.material as THREE.MeshStandardMaterial;
+      material.map = texture;
+      material.color.set(0xffffff); // colour multiplies the picture, so white leaves it unchanged
+      material.needsUpdate = true; // tell Three.js to rebuild the shader to use the new picture
+      log('Texture applied to', id);
+    }
   }
 
   // ---- input and events ---------------------------------------------------------------
@@ -333,7 +365,15 @@ export class WebGLView implements View {
 
   private updatePositions(): void {
     for (const [id, p] of computePositions(this.options.objects, this.simDays)) {
-      this.meshes.get(id)?.position.set(p.x, 0, p.z);
+      const mesh = this.meshes.get(id);
+      if (!mesh) continue;
+      mesh.position.set(p.x, 0, p.z);
+      // The Moon keeps its near side toward Earth, just as the real Moon does.
+      const orbit = VISUALS[id].orbit;
+      if (VISUALS[id].tidallyLocked && orbit) {
+        const parent = this.meshes.get(orbit.parentId);
+        if (parent) mesh.rotation.y = faceTowards(mesh.position, parent.position);
+      }
     }
   }
 

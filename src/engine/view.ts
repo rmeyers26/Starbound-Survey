@@ -14,6 +14,8 @@ export interface ViewQuality {
   resolutionScale: number;
   /** How many background stars to draw. */
   starCount: number;
+  /** Width in pixels of the surface images to load (smaller on weaker devices to save memory). */
+  textureSize: 1024 | 2048;
 }
 
 /** Player-adjustable control settings (Settings screen). */
