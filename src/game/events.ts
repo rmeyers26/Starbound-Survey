@@ -4,6 +4,7 @@
 // 3D view both listen, and none of them import each other.
 
 import type { ProfileName } from '../engine/profiles';
+import type { ViewKind } from '../engine/view';
 import type { Settings } from './settings';
 
 /** Every event in the game and the data it carries. Add new events here. */
@@ -18,6 +19,8 @@ export interface GameEvents {
   'settings:changed': { settings: Settings };
   /** The player asked to open the Settings screen. */
   'settings:open': undefined;
+  /** The renderer was built or replaced (for example a fallback to the 2D chart). */
+  'renderer:changed': { kind: ViewKind; reason: 'initial' | 'forced' | 'fallback' | 'recovered' };
   /** The quality level changed, automatically or because the player chose a profile. */
   'quality:changed': { profile: ProfileName; resolutionScale: number; reason: 'auto' | 'manual' };
   /** Once per second: the measured frame rate and the graphics path in use. */

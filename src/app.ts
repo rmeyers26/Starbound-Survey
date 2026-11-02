@@ -1,7 +1,6 @@
 // Puts the game together once the data has loaded: settings, renderer, quality, and UI.
 import { createQualityController } from './engine/qualityController';
-import { WebGLView } from './engine/webglView';
-import type { View } from './engine/view';
+import { ViewHost, readRendererOverride } from './engine/viewHost';
 import { EventBus, type GameEvents } from './game/events';
 import { SettingsStore, defaultSettings, normalizeSettings, type Settings } from './game/settings';
 import type { CelestialObject } from './game/types';
@@ -10,6 +9,7 @@ import { createFpsReadout } from './ui/fpsReadout';
 import { createHud } from './ui/hud';
 import { createInfoPanel } from './ui/infoPanel';
 import { createSettingsPanel } from './ui/settingsPanel';
+import { createToaster } from './ui/toast';
 
 /** Builds and starts the game. Returns a function that tears everything down again. */
 export function startApp(container: HTMLElement, objects: CelestialObject[]): () => void {
@@ -25,15 +25,28 @@ export function startApp(container: HTMLElement, objects: CelestialObject[]): ()
     bus,
   );
 
-  let view: View | null = null;
+  const toaster = createToaster(container);
+  let view: ViewHost | null = null;
   const quality = createQualityController(() => view, bus, settings);
 
-  view = new WebGLView({
+  view = new ViewHost({
     host: container,
     objects,
     bus,
-    quality: quality.currentQuality(),
+    getQuality: quality.currentQuality,
     onFrame: quality.onFrame,
+    forceCanvas: readRendererOverride(window.location.search) === 'canvas2d',
+    onRendererChanged: (kind, reason) => {
+      bus.emit('renderer:changed', { kind, reason });
+      // Tell the player when something went wrong, but stay quiet on a normal start.
+      if (reason === 'fallback') {
+        toaster.show(
+          '3D graphics are not available, so the game switched to a simplified star chart.',
+        );
+      } else if (reason === 'recovered') {
+        toaster.show('The graphics card was reset. The 3D view has been restored.');
+      }
+    },
   });
 
   const applyControls = (s: Settings): void =>
@@ -51,6 +64,7 @@ export function startApp(container: HTMLElement, objects: CelestialObject[]): ()
     createFpsReadout(container, bus, settings.get().showFps),
     createSettingsPanel(container, settings, bus),
     offSettings,
+    toaster.dispose,
     quality.dispose,
   ];
 

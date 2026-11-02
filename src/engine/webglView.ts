@@ -4,33 +4,15 @@ import type { GameEvents } from '../game/events';
 import { CameraRig, OVERVIEW_DISTANCE, OVERVIEW_MIN_DISTANCE } from './cameraRig';
 import { attachInput } from './inputController';
 import { log } from './log';
-import { orbitPosition } from './orbits';
 import { hitRadius, pickObject, type PickCandidate } from './picking';
+import { mulberry32 } from './random';
 import { SIM_DAYS_PER_SECOND, VISUALS } from './scale';
+import { computePositions } from './solarSystem';
 import type { ControlSettings, View, ViewOptions, ViewQuality, ViewState } from './view';
 
 /** Radius of the sphere the stars sit on (far beyond the planets). */
 const STAR_SPHERE_RADIUS = 1500;
 const MAX_STARS = 4000;
-
-/** Small seeded random generator, so the star field looks identical on every load. */
-function mulberry32(seed: number): () => number {
-  let a = seed;
-  return () => {
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-/** Returns the orbital period (days) stored in the JSON data, or throws if it is missing. */
-function periodDaysOf(options: ViewOptions, id: string): number {
-  const object = options.objects.find((o) => o.id === id);
-  const value = object?.data.orbitalPeriod?.value;
-  if (typeof value !== 'number') throw new Error(`"${id}" has no numeric orbitalPeriod in data`);
-  return value;
-}
 
 /** Distance to fly to when focusing an object: far enough to see it, close enough to feel big. */
 const focusDistance = (radius: number): number => Math.max(radius * 5, 4);
@@ -77,6 +59,9 @@ export class WebGLView implements View {
       '3D view of the Sun, Earth and Moon. Arrow keys rotate, plus and minus zoom, Enter focuses the selected object, Escape returns to the overview.',
     );
     options.host.append(canvas);
+    // If the GPU resets (common on phones when the app is backgrounded), tell the ViewHost so it
+    // can rebuild or fall back. preventDefault() says "we will deal with it" to the browser.
+    canvas.addEventListener('webglcontextlost', this.onContextLost);
 
     this.scene.background = new THREE.Color(0x02030a);
     this.buildLights();
@@ -97,6 +82,16 @@ export class WebGLView implements View {
     this.setQuality(this.quality);
   }
 
+  private disposed = false;
+
+  private readonly onContextLost = (event: Event): void => {
+    event.preventDefault();
+    if (this.disposed) return;
+    log('WebGL context lost');
+    this.renderer.setAnimationLoop(null);
+    this.options.onContextLost?.();
+  };
+
   start(): void {
     this.running = true;
     this.resume();
@@ -104,7 +99,9 @@ export class WebGLView implements View {
   }
 
   dispose(): void {
+    this.disposed = true;
     this.running = false;
+    this.renderer.domElement.removeEventListener('webglcontextlost', this.onContextLost);
     this.renderer.setAnimationLoop(null);
     this.resizeObserver.disconnect();
     document.removeEventListener('visibilitychange', this.onVisibilityChange);
@@ -335,16 +332,9 @@ export class WebGLView implements View {
   // ---- per-frame work -------------------------------------------------------------------
 
   private updatePositions(): void {
-    const earthPeriod = periodDaysOf(this.options, 'earth');
-    const moonPeriod = periodDaysOf(this.options, 'moon');
-    const earthOrbit = VISUALS.earth.orbit!;
-    const moonOrbit = VISUALS.moon.orbit!;
-
-    const earth = orbitPosition(earthOrbit.radius, earthPeriod, this.simDays);
-    const moonOffset = orbitPosition(moonOrbit.radius, moonPeriod, this.simDays);
-    this.meshes.get('sun')!.position.set(0, 0, 0);
-    this.meshes.get('earth')!.position.set(earth.x, 0, earth.z);
-    this.meshes.get('moon')!.position.set(earth.x + moonOffset.x, 0, earth.z + moonOffset.z);
+    for (const [id, p] of computePositions(this.options.objects, this.simDays)) {
+      this.meshes.get(id)?.position.set(p.x, 0, p.z);
+    }
   }
 
   private updateSelectionRing(): void {

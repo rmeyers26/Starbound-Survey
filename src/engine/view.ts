@@ -39,6 +39,8 @@ export interface ViewOptions {
   bus: EventBus<GameEvents>;
   /** Called every frame with the real time since the last frame, in milliseconds. */
   onFrame?: (frameMs: number) => void;
+  /** Called when the GPU is lost mid-session, so the ViewHost can rebuild or fall back. */
+  onContextLost?: () => void;
   /** Present when rebuilding after a failure. */
   initialState?: ViewState;
 }
