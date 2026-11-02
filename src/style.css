@@ -8,7 +8,16 @@ body {
   font-family: system-ui, sans-serif;
 }
 #app {
-  min-height: 100%;
+  position: fixed; /* the game fills the whole screen */
+  inset: 0;
+  overflow: hidden;
+}
+
+/* The 3D canvas fills its container; its drawing size is set by JavaScript. */
+.game-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 /* Error screen with Retry button. 44px minimum tap target per the spec. */

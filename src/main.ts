@@ -4,6 +4,7 @@ import './style.css';
 // runtime. That lets us handle a failed load with a Retry button, as the spec requires.
 import objectsUrl from '../data/objects.json?url';
 import { log } from './engine/log';
+import { WebGLView } from './engine/webglView';
 import { loadObjects } from './game/dataLoader';
 import { showErrorScreen } from './ui/errorScreen';
 
@@ -14,8 +15,13 @@ async function start(container: HTMLElement): Promise<void> {
   container.textContent = 'Loading...';
   try {
     const objects = await loadObjects(objectsUrl);
-    // Temporary output; the 3D scene replaces this in step 3.
-    container.textContent = `Loaded: ${objects.map((o) => o.name).join(', ')}`;
+    container.replaceChildren(); // remove the "Loading..." text
+    const view = new WebGLView({
+      host: container,
+      objects,
+      quality: { pixelRatioCap: 2, resolutionScale: 1, starCount: 2500 },
+    });
+    view.start();
   } catch (error) {
     log('Startup failed', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
