@@ -32,7 +32,7 @@ Date of this report: 2026-11-02.
 
 ## What was verified, and how
 
-- 213 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
+- 217 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
 - 83 browser tests (Playwright) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
   bottom-sheet handle only exists on phone-width screens).
 - Lint, type-check and production build pass. Production dependencies: 0 known vulnerabilities.
@@ -57,6 +57,12 @@ Date of this report: 2026-11-02.
    to delete or upgrade the database, which blocks that forever. It now closes the connection on `versionchange`.
 9. (Found by CI in WebKit) The accessibility test scanned while the info panel was still fading in and saw
    washed-out colours: a test race, not a real contrast problem. The scan now waits for animations to end.
+
+10. **Every orbit ran clockwise** (seen from above the north pole), the opposite of the real Solar System.
+    Found by the owner, then confirmed by measuring Earth's motion on screen. Fixed in `orbits.ts` (`z = -sin`)
+    and locked in by unit tests plus an on-screen check of both the 3D view and the 2D chart.
+11. **The Moon went round Earth in 2.7 s**, which looked frantic because it also turns once per orbit to keep
+    its near side toward Earth. The clock now runs at 3 days per second (Moon about 9 s, Earth's year about 2 min).
 
 ## Open problems and trade-offs
 

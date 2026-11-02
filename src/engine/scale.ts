@@ -40,11 +40,14 @@ export const VISUALS: Record<string, VisualSpec> = {
 };
 
 /**
- * How many simulated days pass per real second. Earth's year then takes about 36 s
- * (365.256 / 10), and the Moon circles Earth in about 2.7 s: fast enough to see, slow enough
- * to follow. This is a simulation speed, not a measurement.
+ * How many simulated days pass per real second. At 3 days per second:
+ *   Mercury's year about 29 s, Venus about 75 s, Earth about 2 min, Mars about 3.8 min,
+ *   and the Moon circles Earth in about 9 s (it was 2.7 s at 10 days per second, which felt frantic
+ *   because the Moon also turns once per orbit to keep its near side facing Earth).
+ * One speed for everything keeps the true ratios between orbits. This is a simulation speed, not a
+ * measurement, and it is not shown to the player as a real time scale.
  */
-export const SIM_DAYS_PER_SECOND = 10;
+export const SIM_DAYS_PER_SECOND = 3;
 
 /** Distance the camera flies to when focusing an object: far enough to see it, close enough to feel big. */
 export const focusDistance = (radius: number): number => Math.max(radius * 5, 3);

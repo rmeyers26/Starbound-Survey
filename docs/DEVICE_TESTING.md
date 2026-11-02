@@ -46,6 +46,12 @@ Tick each one and note anything odd.
 - [ ] No buttons hidden behind the notch or the home bar. Try both portrait and landscape.
 - [ ] No button feels too small to tap.
 
+**Motion**
+
+- [ ] Seen from above, every planet circles the Sun **counter-clockwise**, and the Moon circles Earth the same way.
+- [ ] The Moon takes about 9 seconds to go once round Earth and always shows the same face to Earth.
+- [ ] Nothing looks frantic or frozen.
+
 **Scanning (press and hold)**
 
 - [ ] Fly to the Moon (tap its name), then press and hold SCAN for 3 seconds: the ring fills and you earn 20 XP.

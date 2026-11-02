@@ -3,7 +3,7 @@
 // would crash or silently show nothing. These tests catch that immediately.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { VISUALS } from '../../src/engine/scale';
+import { SIM_DAYS_PER_SECOND, VISUALS } from '../../src/engine/scale';
 import { computePositions } from '../../src/engine/solarSystem';
 import { validateObjects } from '../../src/game/validateObjects';
 
@@ -49,5 +49,15 @@ describe('objects.json and the 3D scene agree', () => {
     for (const id of ['mercury', 'venus', 'earth', 'mars']) {
       expect(VISUALS[id].orbit!.radius).toBeGreaterThan(VISUALS.sun.radius + VISUALS[id].radius);
     }
+  });
+
+  it('the simulation is slow enough to follow: the Moon takes at least 8 seconds to circle Earth', () => {
+    const moonDays = objects.find((o) => o.id === 'moon')!.data.orbitalPeriod.value as number;
+    expect(moonDays / SIM_DAYS_PER_SECOND).toBeGreaterThanOrEqual(8);
+  });
+
+  it('...but not so slow that Mars feels frozen (its year is under 5 minutes)', () => {
+    const marsDays = objects.find((o) => o.id === 'mars')!.data.orbitalPeriod.value as number;
+    expect(marsDays / SIM_DAYS_PER_SECOND).toBeLessThan(300);
   });
 });
