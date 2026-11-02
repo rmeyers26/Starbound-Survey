@@ -32,8 +32,8 @@ Date of this report: 2026-11-02.
 
 ## What was verified, and how
 
-- 227 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
-- 87 browser tests (Playwright) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
+- 242 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
+- 91 browser tests (Playwright) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
   bottom-sheet handle only exists on phone-width screens).
 - Lint, type-check and production build pass. Production dependencies: 0 known vulnerabilities.
 - Lighthouse on the production build: accessibility 100, best practices 100, SEO 91.
@@ -72,6 +72,12 @@ Date of this report: 2026-11-02.
     tapping the last button scrolled the "hidden" game container and pushed "The Sun" and the camera buttons
     off the left edge. Fixed by clipping the container and stretching the row to the screen, with a test that
     was checked to fail without the fix.
+
+14. **Regions were saved but never enforced.** Rank-ups recorded the unlocked regions, but nothing read them, so adding the
+    outer planets would have let a brand-new player scan Jupiter and made the Navigator rank-up meaningless. Regions are
+    now enforced: locked bodies are not drawn or tappable, their buttons explain themselves, scanning refuses them,
+    and the Logbook counts only what you can reach. A unit test also checks that the inner region alone is enough XP
+    to reach Navigator, so the game can never dead-end.
 
 ## Open problems and trade-offs
 

@@ -68,6 +68,22 @@ describe('checkScan', () => {
       reason: 'not-exploring',
     });
   });
+  it('refuses to scan an object in a region the player has not unlocked', () => {
+    const jupiter = objects.find((o) => o.id === 'jupiter')!;
+    // A new player has only the inner region, so even a perfect distance cannot scan Jupiter.
+    expect(checkScan({ ...base, object: jupiter, distance: 1 })).toEqual({
+      ok: false,
+      reason: 'locked',
+    });
+    const unlocked = { ...base.record, unlockedRegions: ['inner', 'outer'] };
+    expect(checkScan({ ...base, object: jupiter, record: unlocked, distance: 1 })).toEqual({
+      ok: true,
+      tier: 1,
+    });
+  });
+  it('says why a locked scan is refused, in words a player can act on', () => {
+    expect(SCAN_BLOCK_MESSAGE.locked).toMatch(/rank up/i);
+  });
   it('blocks with nothing selected', () => {
     expect(checkScan({ ...base, object: undefined })).toEqual({
       ok: false,

@@ -107,6 +107,9 @@ test('no on-screen button is ever covered by the info panel', async ({ page }) =
         const cx = r.x + r.width / 2;
         const cy = r.y + r.height / 2;
         if (cx < 0 || cx > window.innerWidth || cy < 0 || cy > window.innerHeight) return false;
+        // Likewise a button scrolled out of the row's visible part (the row is clipped at its edges).
+        const row = b.closest('.hud-objects')?.getBoundingClientRect();
+        if (row && (cx < row.left || cx > row.right)) return false;
         const top = document.elementFromPoint(cx, cy);
         return !(top === b || b.contains(top));
       })

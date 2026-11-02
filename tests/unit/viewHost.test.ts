@@ -25,6 +25,7 @@ function fakeView(kind: ViewKind, options: ViewOptions) {
     dispose: vi.fn(),
     setQuality: vi.fn(),
     setControlSettings: vi.fn(),
+    setUnlockedRegions: vi.fn(),
     getState: vi.fn(() => sampleState),
     distanceTo: vi.fn(() => 5),
   };
@@ -33,6 +34,7 @@ type Fake = ReturnType<typeof fakeView>;
 
 function setup(opts: { webglThrows?: boolean; forceCanvas?: boolean } = {}) {
   const views: Fake[] = [];
+  const unlocked = ['inner'];
   const factories: ViewFactories = {
     createWebGL: (o) => {
       if (opts.webglThrows) throw new Error('no webgl');
@@ -52,6 +54,7 @@ function setup(opts: { webglThrows?: boolean; forceCanvas?: boolean } = {}) {
     objects: [],
     bus: new EventBus<GameEvents>(),
     getQuality: () => quality,
+    getUnlockedRegions: () => unlocked,
     onRendererChanged: (kind, reason) => changes.push([kind, reason]),
     forceCanvas: opts.forceCanvas,
     factories,
@@ -122,5 +125,28 @@ describe('readRendererOverride', () => {
     expect(readRendererOverride('?renderer=webgl2')).toBe('webgl2');
     expect(readRendererOverride('?renderer=bogus')).toBeNull();
     expect(readRendererOverride('')).toBeNull();
+  });
+});
+
+describe('ViewHost and unlocked regions', () => {
+  it('gives a new view the regions unlocked right now', () => {
+    const { views } = setup();
+    expect(views[0].options.unlockedRegions).toEqual(['inner']);
+  });
+
+  it('passes a change of regions on to the current view', () => {
+    const { host, views } = setup();
+    host.setUnlockedRegions(['inner', 'outer']);
+    expect(views[0].setUnlockedRegions).toHaveBeenCalledWith(['inner', 'outer']);
+  });
+
+  it('asks for the latest regions again when a view is rebuilt after the GPU is lost', () => {
+    const { host, views } = setup();
+    // A rebuilt view must not forget a rank-up that happened since the first one was made.
+    (
+      host as unknown as { options: { getUnlockedRegions: () => string[] } }
+    ).options.getUnlockedRegions = () => ['inner', 'outer'];
+    (views[0].options.onContextLost as () => void)();
+    expect(views[1].options.unlockedRegions).toEqual(['inner', 'outer']);
   });
 });

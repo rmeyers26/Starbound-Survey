@@ -77,3 +77,50 @@ Notes and likely differences:
   then Deimos, then the Moon) and a unit test keeps it that way.
 - Sizes and orbit distances are compressed, as for everything else. All objects are drawn as flat-colour spheres
   with no photos yet.
+
+## Jupiter, Saturn, Uranus and Neptune
+
+**Status: UNVERIFIED**, entered from memory. Source pages (NASA NSSDC fact sheets):
+
+| Object  | Source page                                                      |
+| ------- | ---------------------------------------------------------------- |
+| Jupiter | https://nssdc.gsfc.nasa.gov/planetary/factsheet/jupiterfact.html |
+| Saturn  | https://nssdc.gsfc.nasa.gov/planetary/factsheet/saturnfact.html  |
+| Uranus  | https://nssdc.gsfc.nasa.gov/planetary/factsheet/uranusfact.html  |
+| Neptune | https://nssdc.gsfc.nasa.gov/planetary/factsheet/neptunefact.html |
+
+| Value (as entered)                | Jupiter   | Saturn    | Uranus   | Neptune   | Checked? |
+| --------------------------------- | --------- | --------- | -------- | --------- | -------- |
+| Mean diameter (km)                | 139,822   | 116,464   | 50,724   | 49,244    | [ ]      |
+| Mass (kg)                         | 1.8982e27 | 5.6834e26 | 8.681e25 | 1.0241e26 | [ ]      |
+| Average distance from Sun (km)    | 778.5e6   | 1,432e6   | 2,867e6  | 4,515e6   | [ ]      |
+| Orbital period (days)             | 4,332.59  | 10,759.22 | 30,688.5 | 60,182    | [ ]      |
+| Rotation period (hours)           | 9.925     | 10.656    | 17.24\*  | 16.11     | [ ]      |
+| Gravity at the 1-bar level (m/s²) | 24.79     | 10.44     | 8.87     | 11.15     | [ ]      |
+| Temperature at 1 bar (K)          | 165       | 134       | 76       | 72        | [ ]      |
+
+\* Uranus spins backwards ("retrograde"; its axis is tilted about 98 degrees). The fact sheet shows 17.24 hours with a
+minus sign; the game shows the number and says "retrograde" in the label.
+
+Notes:
+
+- **Gas and ice giants have no solid surface.** Their "gravity" and "temperature" are quoted at the level where the
+  air pressure equals 1 bar (about Earth's sea-level pressure), which is why the labels say so.
+- **Mean diameter** is twice the volumetric mean radius (Jupiter 69,911 km, Saturn 58,232 km, Uranus 25,362 km,
+  Neptune 24,622 km). Planets that spin fast are flattened, so the equatorial diameter is larger (Saturn: 120,536 km).
+- **Rotation periods** of gas giants are defined by their magnetic fields or cloud tops and differ by source.
+- Quick-facts text to check: Jupiter "more than twice the mass of all the other planets put together" and the Great
+  Red Spot "wider than Earth ... watched for more than 150 years"; Saturn "less dense than water"; Uranus "tipped on
+  its side" with methane giving the colour; Neptune "the farthest planet" with winds "more than 1,800 kilometres per hour".
+
+## How the outer planets are drawn and unlocked
+
+- **Locked until Navigator.** The spec unlocks the Outer Solar System at 200 XP. Until then the four planets are not
+  drawn, cannot be tapped, and their buttons are dimmed and dashed (they still announce "locked" and explain how to
+  unlock them when tapped). Rank-up makes them appear and widens the overview camera. Scanning also refuses locked
+  objects as a second line of defence.
+- **Saturn's rings** are a decorative flat disc (1.3 to 2.3 planet radii, tilted 26.7 degrees), not a measurement.
+- **Distances are compressed hard**: Jupiter, Saturn, Uranus and Neptune are drawn at 140, 165, 190 and 212 units from
+  the Sun (Earth is 60), where the true ratios would put Neptune 30 times farther out than Earth. The true ORDER and
+  size order are kept and tested.
+- All four are flat-colour spheres with no cloud bands yet.

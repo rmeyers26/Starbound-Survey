@@ -5,6 +5,7 @@ import type { EventBus, GameEvents } from '../game/events';
 import type { GameStateMachine } from '../game/stateMachine';
 import { TIER_LABEL } from '../game/tiers';
 import type { CelestialObject } from '../game/types';
+import { unlockedObjects } from '../game/regions';
 import type { SaveRecord } from '../save/schema';
 import { el } from './dom';
 import { regionName, typeLabel } from './format';
@@ -31,11 +32,16 @@ export function createLogbook(
 
   function render(): void {
     const record = getRecord();
-    const found = objects.filter((o) => (record.scannedObjects[o.id] ?? 0) > 0);
-    summary.textContent = `Discovered ${found.length} of ${objects.length} objects.`;
+    // Only objects in unlocked regions are listed, so the total never counts things you cannot reach yet.
+    const available = unlockedObjects(objects, record);
+    const found = available.filter((o) => (record.scannedObjects[o.id] ?? 0) > 0);
+    const lockedCount = objects.length - available.length;
+    summary.textContent =
+      `Discovered ${found.length} of ${available.length} objects.` +
+      (lockedCount > 0 ? ' More objects unlock as you rank up.' : '');
 
     list.replaceChildren();
-    for (const object of objects) {
+    for (const object of available) {
       const tier = record.scannedObjects[object.id] ?? 0;
       const item = el('li', 'logbook-entry');
       item.append(el('h3', undefined, object.name));

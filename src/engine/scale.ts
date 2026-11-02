@@ -31,6 +31,8 @@ export interface VisualSpec {
    * Moon), which a unit test checks. This is disclosed in the docs.
    */
   visualPeriodDays?: number;
+  /** Rings drawn around the body (Saturn). Sizes are multiples of the body's radius. Decorative. */
+  rings?: { inner: number; outer: number; color: number; opacity: number; tiltDeg: number };
 }
 
 export const VISUALS: Record<string, VisualSpec> = {
@@ -73,6 +75,18 @@ export const VISUALS: Record<string, VisualSpec> = {
   // The asteroid belt sits between Mars and Jupiter. Orbit distances are compressed, order kept true.
   vesta: { radius: 0.3, color: 0x9a948c, orbit: { parentId: 'sun', radius: 100 } },
   ceres: { radius: 0.35, color: 0x7d7a78, orbit: { parentId: 'sun', radius: 112 } },
+  // The outer planets (unlock at Navigator). Real distances are 5 to 30 times Earth's; here they are squeezed
+  // so the whole system still fits, with the true ORDER kept. Sizes keep the true order too.
+  jupiter: { radius: 5.5, color: 0xc8a27a, orbit: { parentId: 'sun', radius: 140 } },
+  saturn: {
+    radius: 4.8,
+    color: 0xe0cf9b,
+    orbit: { parentId: 'sun', radius: 165 },
+    // Saturn's rings really reach from about 1.3 to 2.3 planet radii and are tilted about 27 degrees.
+    rings: { inner: 1.3, outer: 2.3, color: 0xcdb98a, opacity: 0.75, tiltDeg: 26.7 },
+  },
+  uranus: { radius: 3.2, color: 0x9fd6e0, orbit: { parentId: 'sun', radius: 190 } },
+  neptune: { radius: 3.1, color: 0x4a6fe0, orbit: { parentId: 'sun', radius: 212 } },
 };
 
 /**
@@ -93,3 +107,23 @@ export const closestDistance = (radius: number): number => radius * 1.6 + 0.5;
 
 /** How far away the scanner can still reach an object (twice the focus distance). */
 export const scanRange = (radius: number): number => focusDistance(radius) * 2;
+
+/**
+ * How far from the Sun the farthest of these bodies can be: its orbit radius plus the orbits of whatever it
+ * circles (a moon of Mars adds Mars's orbit). Used to frame the camera and the 2D chart.
+ */
+export function reachFromSun(ids: Iterable<string>): number {
+  const distanceFromSun = (id: string): number => {
+    const orbit = VISUALS[id]?.orbit;
+    return orbit ? orbit.radius + distanceFromSun(orbit.parentId) : 0;
+  };
+  return Math.max(0, ...[...ids].map(distanceFromSun));
+}
+
+/** Camera distance for the whole-system overview, so the outermost visible orbit just fits. */
+export function overviewDistanceFor(reach: number): number {
+  return Math.max(OVERVIEW_DISTANCE_MIN, Math.round(reach * OVERVIEW_PER_UNIT_OF_REACH));
+}
+
+const OVERVIEW_PER_UNIT_OF_REACH = 2.15;
+const OVERVIEW_DISTANCE_MIN = 150;

@@ -3,7 +3,13 @@
 // would crash or silently show nothing. These tests catch that immediately.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { SIM_DAYS_PER_SECOND, VISUALS } from '../../src/engine/scale';
+import {
+  SIM_DAYS_PER_SECOND,
+  VISUALS,
+  overviewDistanceFor,
+  reachFromSun,
+} from '../../src/engine/scale';
+import { visibleBodyIds } from '../../src/game/regions';
 import { computePositions } from '../../src/engine/solarSystem';
 import { textureUrlFor } from '../../src/engine/textures';
 import { RANKS } from '../../src/game/ranks';
@@ -97,8 +103,44 @@ describe('objects.json and the 3D scene agree', () => {
     });
   });
 
-  it('the first rank-up is reachable: first scans of every object add up to the XP for Navigator', () => {
+  it('the first rank-up is reachable using ONLY the inner region (otherwise the game would dead-end)', () => {
     const firstScanXp = 20; // spec: first scan of an object = 20 XP
-    expect(objects.length * firstScanXp).toBeGreaterThanOrEqual(RANKS[1].xp);
+    const innerObjects = objects.filter((o) => o.region === 'inner');
+    expect(innerObjects.length * firstScanXp).toBeGreaterThanOrEqual(RANKS[1].xp);
+  });
+
+  it('every object belongs to a region that some rank unlocks', () => {
+    const unlockable = new Set(RANKS.flatMap((r) => r.regions));
+    for (const o of objects) expect(unlockable.has(o.region), `${o.id}: ${o.region}`).toBe(true);
+  });
+
+  describe('framing the overview camera', () => {
+    const reachOf = (regions: string[]): number => reachFromSun(visibleBodyIds(objects, regions));
+    const MAX_CAMERA_DISTANCE = 700; // MAX_DISTANCE in cameraRig.ts
+
+    it('the outer planets reach farther out than the inner system', () => {
+      expect(reachOf(['inner', 'outer'])).toBeGreaterThan(reachOf(['inner']));
+    });
+
+    it("a moon adds its parent planet's orbit to its reach", () => {
+      expect(reachFromSun(['phobos'])).toBe(
+        VISUALS.mars.orbit!.radius + VISUALS.phobos.orbit!.radius,
+      );
+    });
+
+    it('the overview widens when the outer region unlocks, and still fits within the camera limit', () => {
+      const before = overviewDistanceFor(reachOf(['inner']));
+      const after = overviewDistanceFor(reachOf(['inner', 'outer']));
+      expect(after).toBeGreaterThan(before);
+      expect(after).toBeLessThanOrEqual(MAX_CAMERA_DISTANCE);
+    });
+
+    it('with nothing unlocked the overview still has a sensible minimum', () => {
+      expect(overviewDistanceFor(0)).toBeGreaterThanOrEqual(150);
+    });
+  });
+
+  it('Saturn has rings and nothing else does', () => {
+    expect(Object.keys(VISUALS).filter((id) => VISUALS[id].rings)).toEqual(['saturn']);
   });
 });

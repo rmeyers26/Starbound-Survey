@@ -69,6 +69,10 @@ describe('data/objects.json (the real game data)', () => {
       'deimos',
       'vesta',
       'ceres',
+      'jupiter',
+      'saturn',
+      'uranus',
+      'neptune',
     ]);
   });
 });

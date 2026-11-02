@@ -32,6 +32,8 @@ export interface ViewHostOptions {
   bus: EventBus<GameEvents>;
   /** Called whenever a (re)built view needs the latest quality. */
   getQuality: () => ViewQuality;
+  /** The regions unlocked right now; asked again whenever a view is (re)built. */
+  getUnlockedRegions: () => string[];
   onFrame?: (frameMs: number) => void;
   onRendererChanged?: (kind: ViewKind, reason: RendererReason) => void;
   /** True when the URL says `?renderer=canvas2d` (a testing override). */
@@ -82,6 +84,10 @@ export class ViewHost implements View {
     this.current.setQuality(quality);
   }
 
+  setUnlockedRegions(regions: string[]): void {
+    this.current.setUnlockedRegions(regions);
+  }
+
   setControlSettings(settings: ControlSettings): void {
     this.lastControls = settings; // remembered so a rebuilt view gets the same settings
     this.current.setControlSettings(settings);
@@ -105,6 +111,7 @@ export class ViewHost implements View {
       onFrame: this.options.onFrame,
       onContextLost: () => this.handleContextLost(),
       initialState: state,
+      unlockedRegions: this.options.getUnlockedRegions(),
     };
 
     if (tryWebGL) {

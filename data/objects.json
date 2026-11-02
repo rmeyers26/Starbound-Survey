@@ -519,5 +519,217 @@
       }
     },
     "source": "NASA Solar System Exploration: Ceres; JPL Small-Body Database, 1 Ceres (ssd.jpl.nasa.gov/tools/sbdb_lookup.html)"
+  },
+  {
+    "id": "jupiter",
+    "name": "Jupiter",
+    "type": "planet",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Jupiter is the largest planet, a giant ball of gas with more than twice the mass of all the other planets put together. Its Great Red Spot is a storm wider than Earth that has been watched for more than 150 years.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 139822,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.8982e27,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromSun": {
+        "label": "Average distance from the Sun",
+        "value": 778500000,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 4332.59,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "rotationPeriod": {
+        "label": "Rotation period",
+        "value": 9.925,
+        "unit": "hours",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Gravity at the 1-bar level",
+        "value": 24.79,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "meanTemperature": {
+        "label": "Temperature at the 1-bar level",
+        "value": 165,
+        "unit": "K",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Jupiter Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/jupiterfact.html)"
+  },
+  {
+    "id": "saturn",
+    "name": "Saturn",
+    "type": "planet",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Saturn is a gas giant famous for its bright rings, made of billions of pieces of ice and rock. It is so light for its size that, on average, it is less dense than water.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 116464,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 5.6834e26,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromSun": {
+        "label": "Average distance from the Sun",
+        "value": 1432000000,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 10759.22,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "rotationPeriod": {
+        "label": "Rotation period",
+        "value": 10.656,
+        "unit": "hours",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Gravity at the 1-bar level",
+        "value": 10.44,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "meanTemperature": {
+        "label": "Temperature at the 1-bar level",
+        "value": 134,
+        "unit": "K",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Saturn Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/saturnfact.html)"
+  },
+  {
+    "id": "uranus",
+    "name": "Uranus",
+    "type": "planet",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Uranus is an ice giant that rolls around the Sun tipped on its side, so its poles take turns pointing at the Sun. Methane in its air gives it a pale blue-green colour.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 50724,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 8.681e25,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromSun": {
+        "label": "Average distance from the Sun",
+        "value": 2867000000,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 30688.5,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "rotationPeriod": {
+        "label": "Rotation period (retrograde)",
+        "value": 17.24,
+        "unit": "hours",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Gravity at the 1-bar level",
+        "value": 8.87,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "meanTemperature": {
+        "label": "Temperature at the 1-bar level",
+        "value": 76,
+        "unit": "K",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Uranus Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/uranusfact.html)"
+  },
+  {
+    "id": "neptune",
+    "name": "Neptune",
+    "type": "planet",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Neptune is the farthest planet from the Sun: a cold, dark, windy ice giant. Its winds are the fastest in the Solar System, blowing at more than 1,800 kilometres per hour.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 49244,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.0241e26,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromSun": {
+        "label": "Average distance from the Sun",
+        "value": 4515000000,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 60182,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "rotationPeriod": {
+        "label": "Rotation period",
+        "value": 16.11,
+        "unit": "hours",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Gravity at the 1-bar level",
+        "value": 11.15,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "meanTemperature": {
+        "label": "Temperature at the 1-bar level",
+        "value": 72,
+        "unit": "K",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Neptune Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/neptunefact.html)"
   }
 ]

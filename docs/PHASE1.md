@@ -4,13 +4,13 @@ Phase 1 is built in slices, each tested and merged on its own. **Gate exception:
 starts only after the prototype passes real-phone testing. That testing has not happened yet. Phase 1 was
 started early at the owner's request on 2026-11-02; the Phase 0 gate (see `GATE_REPORT.md`) is still open.
 
-| Slice | Contents                                                                                  | Status                                                                                       |
-| ----- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| A     | Game state machine, scan mechanic, scan tiers, XP and ranks, Logbook, tap-to-scan setting | **Done** (this slice)                                                                        |
-| B     | Flight School tutorial (8 beats), quizzes (bonus XP), first 3 missions                    | Not started                                                                                  |
-| C     | All planets, moons, belts and orbits with cited data                                      | **Started:** the whole inner system (10 objects) is in; data unverified, see `DATA_CHECK.md` |
-| D     | Visual effects: bloom, atmosphere, warp (with Reduce motion fallbacks)                    | Not started                                                                                  |
-| E     | Full quality manager review and Canvas fallback parity                                    | Not started                                                                                  |
+| Slice | Contents                                                                                  | Status                                                                                                                                                           |
+| ----- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A     | Game state machine, scan mechanic, scan tiers, XP and ranks, Logbook, tap-to-scan setting | **Done** (this slice)                                                                                                                                            |
+| B     | Flight School tutorial (8 beats), quizzes (bonus XP), first 3 missions                    | Not started                                                                                                                                                      |
+| C     | All planets, moons, belts and orbits with cited data                                      | **Started:** inner system (10 objects) and the four outer planets; their moons, the Kuiper Belt and comets are still to do. Data unverified, see `DATA_CHECK.md` |
+| D     | Visual effects: bloom, atmosphere, warp (with Reduce motion fallbacks)                    | Not started                                                                                                                                                      |
+| E     | Full quality manager review and Canvas fallback parity                                    | Not started                                                                                                                                                      |
 
 ## Slice A: how the pieces fit
 
@@ -45,8 +45,8 @@ Design choices (all tunable numbers are in one place each):
 ## Known limits of slice A
 
 - **The first rank-up is now reachable:** ten objects at 20 XP for a first scan is exactly the 200 XP Navigator needs
-  (an end-to-end test scans all ten). Navigator unlocks the Outer Solar System, which has no objects yet, so
-  there is nothing new to fly to after the rank-up until slice C continues.
+  (an end-to-end test scans all ten). Navigator unlocks the Outer Solar System: Jupiter, Saturn, Uranus and Neptune now appear. Reaching Surveyor (600 XP) needs
+  more than the 14 first scans available (280 XP), so the XP sources of slices B and C (quizzes, missions, moons) are still needed.
 - Detailed and spectral scans cannot be done until a player reaches Navigator, for the same reason.
 - The scan has no 3D holographic sweep yet (slice D). The ring on the button is the only progress effect.
 - Left-handed layout (spec) is not built; the SCAN button is bottom-right.

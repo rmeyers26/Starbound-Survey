@@ -104,7 +104,36 @@ test.describe('scanning', () => {
     await openGame(page);
     await expect(xpText(page)).toHaveText('40 / 200 XP');
     await page.getByRole('button', { name: /Open the Logbook/ }).click();
-    await expect(page.locator('.logbook-summary')).toHaveText('Discovered 2 of 10 objects.');
+    await expect(page.locator('.logbook-summary')).toContainText('Discovered 2 of 10 objects.');
+  });
+});
+
+test.describe('regions', () => {
+  test('the outer planets are locked for a new player, and say how to unlock them', async ({
+    page,
+  }) => {
+    await openGame(page);
+    const jupiter = chip(page, 'jupiter');
+    await expect(jupiter).toHaveAttribute('aria-disabled', 'true');
+    await expect(jupiter).toContainText('(locked)'); // spoken by screen readers
+    // A real finger can still tap it; it just explains itself. (force: true skips Playwright's
+    // "is it enabled?" check, which refuses to click anything marked aria-disabled.)
+    await jupiter.click({ force: true });
+    await expect(
+      page.getByText('Jupiter is in the Outer Solar System. Reach Navigator to unlock it.'),
+    ).toBeVisible();
+    await expect(page.locator('.info-panel')).toBeHidden(); // nothing was selected
+    // Inner objects are not affected.
+    await expect(chip(page, 'mars')).toHaveAttribute('aria-disabled', 'false');
+  });
+
+  test('the Logbook only counts objects you can reach', async ({ page }) => {
+    await openGame(page);
+    await page.getByRole('button', { name: /Open the Logbook/ }).click();
+    const dialog = page.locator('dialog.logbook-dialog');
+    await expect(dialog.getByText('Discovered 0 of 10 objects.')).toBeVisible();
+    await expect(dialog.getByText('More objects unlock as you rank up.')).toBeVisible();
+    await expect(dialog.getByText('Jupiter')).toHaveCount(0);
   });
 });
 
@@ -131,6 +160,15 @@ test.describe('ranks', () => {
     ).toBeVisible();
     await expect(xpText(page)).toContainText('200');
     await expect(xpText(page)).toContainText('600'); // the next goal is Surveyor
+
+    // The rank-up unlocked the outer planets: Jupiter can now be selected and scanned for 20 more XP.
+    await expect(chip(page, 'jupiter')).toHaveAttribute('aria-disabled', 'false');
+    await scanObject(page, 'jupiter');
+    await expect(xpText(page)).toContainText('220');
+    await page.getByRole('button', { name: /Open the Logbook/ }).click();
+    await expect(
+      page.locator('dialog.logbook-dialog').getByText('Discovered 11 of 14 objects.'),
+    ).toBeVisible();
   });
 });
 

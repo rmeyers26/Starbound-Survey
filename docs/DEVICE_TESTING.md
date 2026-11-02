@@ -56,6 +56,12 @@ Tick each one and note anything odd.
 - [ ] Tap a planet: the Sun stays on the same side of it (it does not swing round), and only the stars drift.
 - [ ] Tap the Moon: its surface stays still on screen while its lit part changes through the phases.
 
+**Regions**
+
+- [ ] On a new save the Jupiter, Saturn, Uranus and Neptune buttons are dim with dashed borders and the outer planets are not drawn.
+- [ ] Tapping a locked button shows "... Reach Navigator to unlock it." and selects nothing.
+- [ ] After the rank-up the planets appear, the camera pulls back, Saturn's rings are visible, and you can scan Jupiter.
+
 **Scanning (press and hold)**
 
 - [ ] Fly to the Moon (tap its name), then press and hold SCAN for 3 seconds: the ring fills and you earn 20 XP.

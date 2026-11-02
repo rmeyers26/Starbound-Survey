@@ -94,6 +94,11 @@ body {
   font: inherit;
   cursor: pointer;
 }
+/* An object in a region you have not unlocked yet: dim, dashed, still tappable (it explains itself). */
+.hud-button.locked {
+  opacity: 0.55;
+  border-style: dashed;
+}
 .hud-button[aria-pressed='true'] {
   border-color: #7fd4ff;
   background: rgba(40, 90, 130, 0.8);
