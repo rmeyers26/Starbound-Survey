@@ -1,9 +1,13 @@
 // The 3D renderer: draws the Sun, Earth, Moon and a star field with Three.js (WebGL2).
 import * as THREE from 'three';
+import type { GameEvents } from '../game/events';
+import { CameraRig, OVERVIEW_DISTANCE, OVERVIEW_MIN_DISTANCE } from './cameraRig';
+import { attachInput } from './inputController';
 import { log } from './log';
 import { orbitPosition } from './orbits';
+import { hitRadius, pickObject, type PickCandidate } from './picking';
 import { SIM_DAYS_PER_SECOND, VISUALS } from './scale';
-import type { View, ViewOptions, ViewQuality } from './view';
+import type { ControlSettings, View, ViewOptions, ViewQuality, ViewState } from './view';
 
 /** Radius of the sphere the stars sit on (far beyond the planets). */
 const STAR_SPHERE_RADIUS = 1500;
@@ -28,21 +32,32 @@ function periodDaysOf(options: ViewOptions, id: string): number {
   return value;
 }
 
+/** Distance to fly to when focusing an object: far enough to see it, close enough to feel big. */
+const focusDistance = (radius: number): number => Math.max(radius * 5, 4);
+/** Closest the camera may get to an object: just outside its surface. */
+const closestDistance = (radius: number): number => radius * 1.6 + 0.5;
+
 export class WebGLView implements View {
   readonly kind = 'webgl2' as const;
 
+  private readonly options: ViewOptions;
   private readonly renderer: THREE.WebGLRenderer;
   private readonly scene = new THREE.Scene();
   private readonly camera = new THREE.PerspectiveCamera(50, 1, 0.1, 4000);
+  private readonly rig = new CameraRig();
   private readonly meshes = new Map<string, THREE.Mesh>();
   private readonly stars: THREE.Points;
+  private readonly selectionRing: THREE.Mesh;
+  private readonly raycaster = new THREE.Raycaster();
   private readonly resizeObserver: ResizeObserver;
+  private readonly cleanups: Array<() => void> = [];
+  private readonly followPosition = new THREE.Vector3();
   private quality: ViewQuality;
   private simDays = 0;
   private lastTime = 0;
   private running = false;
-
-  private readonly options: ViewOptions;
+  private selectedId: string | null = null;
+  private focusId: string | null = null;
 
   constructor(options: ViewOptions) {
     this.options = options;
@@ -53,17 +68,27 @@ export class WebGLView implements View {
       antialias: true,
       powerPreference: 'high-performance',
     });
-    this.renderer.domElement.className = 'game-canvas';
-    options.host.append(this.renderer.domElement);
+    const canvas = this.renderer.domElement;
+    canvas.className = 'game-canvas';
+    canvas.tabIndex = 0; // lets the keyboard focus the 3D view
+    canvas.setAttribute('role', 'application');
+    canvas.setAttribute(
+      'aria-label',
+      '3D view of the Sun, Earth and Moon. Arrow keys rotate, plus and minus zoom, Enter focuses the selected object, Escape returns to the overview.',
+    );
+    options.host.append(canvas);
 
     this.scene.background = new THREE.Color(0x02030a);
     this.buildLights();
     this.buildBodies();
     this.stars = this.buildStars();
     this.scene.add(this.stars);
+    this.selectionRing = this.buildSelectionRing();
+    this.scene.add(this.selectionRing);
 
-    this.camera.position.set(0, 55, 130);
-    this.camera.lookAt(0, 0, 0);
+    this.restoreState(options.initialState);
+    this.connectInput(canvas);
+    this.connectBus();
 
     // Keep the canvas sized to its container, including when a phone rotates.
     this.resizeObserver = new ResizeObserver(() => this.resize());
@@ -83,6 +108,7 @@ export class WebGLView implements View {
     this.renderer.setAnimationLoop(null);
     this.resizeObserver.disconnect();
     document.removeEventListener('visibilitychange', this.onVisibilityChange);
+    this.cleanups.forEach((fn) => fn());
     // Free GPU memory held by geometries, materials and the renderer itself.
     this.scene.traverse((node) => {
       if (
@@ -109,6 +135,20 @@ export class WebGLView implements View {
     this.resize();
   }
 
+  setControlSettings(settings: ControlSettings): void {
+    this.rig.sensitivity = { rotate: settings.rotateSensitivity, zoom: settings.zoomSensitivity };
+    this.rig.reducedMotion = settings.reducedMotion;
+  }
+
+  getState(): ViewState {
+    return {
+      selectedId: this.selectedId,
+      focusId: this.focusId,
+      simDays: this.simDays,
+      camera: this.rig.getState(),
+    };
+  }
+
   // ---- scene construction -------------------------------------------------------------
 
   private buildLights(): void {
@@ -126,7 +166,7 @@ export class WebGLView implements View {
         ? new THREE.MeshBasicMaterial({ color: spec.color })
         : new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.9 });
       const mesh = new THREE.Mesh(geometry, material);
-      mesh.userData.objectId = id; // lets picking (step 4) map a mesh back to its data
+      mesh.userData.objectId = id;
       this.meshes.set(id, mesh);
       this.scene.add(mesh);
     }
@@ -181,6 +221,117 @@ export class WebGLView implements View {
     return new THREE.Points(geometry, material);
   }
 
+  /** A flat ring that always faces the camera and marks the selected object. */
+  private buildSelectionRing(): THREE.Mesh {
+    const material = new THREE.MeshBasicMaterial({
+      color: 0x7fd4ff,
+      side: THREE.DoubleSide,
+      depthTest: false, // draw on top, even if the object is behind something
+      transparent: true,
+      opacity: 0.9,
+    });
+    const ring = new THREE.Mesh(new THREE.RingGeometry(0.965, 1, 64), material);
+    ring.renderOrder = 10;
+    ring.visible = false;
+    return ring;
+  }
+
+  // ---- input and events ---------------------------------------------------------------
+
+  private connectInput(canvas: HTMLElement): void {
+    const { bus } = this.options;
+    const objectAt = (x: number, y: number): string | null => {
+      const w = this.options.host.clientWidth;
+      const h = this.options.host.clientHeight;
+      if (w === 0 || h === 0) return null;
+      // Convert pixels to "normalised device coordinates" (-1..1, with Y pointing up).
+      this.raycaster.setFromCamera(
+        new THREE.Vector2((x / w) * 2 - 1, -(y / h) * 2 + 1),
+        this.camera,
+      );
+      return pickObject(this.raycaster.ray, this.camera.position, this.pickCandidates());
+    };
+    const focusSelected = (): void => {
+      if (this.selectedId) bus.emit('camera:focus', { id: this.selectedId });
+    };
+
+    this.cleanups.push(
+      attachInput(canvas, {
+        onDrag: (dx, dy) => this.rig.rotate(dx, dy),
+        onPinch: (ratio) => this.rig.zoomBy(1 / ratio), // fingers apart (ratio > 1) = zoom in
+        onTap: (x, y) => bus.emit('object:selected', { id: objectAt(x, y) }),
+        onDoubleTap: (x, y) => {
+          const id = objectAt(x, y);
+          if (!id) return;
+          bus.emit('object:selected', { id });
+          bus.emit('camera:focus', { id });
+        },
+        onWheelZoom: (factor) => this.rig.zoomBy(factor),
+        onKeyZoom: (factor) => this.rig.zoomBy(factor),
+        onKeyRotate: (dx, dy) => this.rig.rotate(dx, dy),
+        onFocusKey: focusSelected,
+        onEscapeKey: () => {
+          bus.emit('object:selected', { id: null });
+          bus.emit('camera:focus', { id: null });
+        },
+      }),
+    );
+  }
+
+  private connectBus(): void {
+    const { bus } = this.options;
+    const on = <K extends keyof GameEvents>(name: K, fn: (p: GameEvents[K]) => void): void => {
+      this.cleanups.push(bus.on(name, fn));
+    };
+    on('object:selected', ({ id }) => {
+      this.selectedId = id;
+    });
+    on('camera:focus', ({ id }) => this.focusOn(id));
+    on('camera:zoom', ({ factor }) => this.rig.zoomBy(factor));
+  }
+
+  private pickCandidates(): PickCandidate[] {
+    return [...this.meshes.entries()].map(([id, mesh]) => ({
+      id,
+      center: mesh.position,
+      radius: VISUALS[id].radius,
+    }));
+  }
+
+  /** Fly the camera to an object (or back to the overview when id is null). */
+  private focusOn(id: string | null): void {
+    if (id !== null && !this.meshes.has(id)) return;
+    this.focusId = id;
+    if (id === null) {
+      this.rig.flyTo(OVERVIEW_DISTANCE, OVERVIEW_MIN_DISTANCE);
+    } else {
+      const radius = VISUALS[id].radius;
+      this.rig.flyTo(focusDistance(radius), closestDistance(radius));
+    }
+  }
+
+  /** Puts a rebuilt view back exactly where the old one was. */
+  private restoreState(state: ViewState | undefined): void {
+    if (!state) {
+      this.rig.setState({ yaw: 0, pitch: 0.4, distance: OVERVIEW_DISTANCE });
+      this.rig.target.set(0, 0, 0);
+      return;
+    }
+    this.simDays = state.simDays;
+    this.selectedId = state.selectedId;
+    this.focusId = state.focusId;
+    this.updatePositions();
+    const radius = state.focusId ? VISUALS[state.focusId]?.radius : undefined;
+    this.rig.setMinDistance(radius ? closestDistance(radius) : OVERVIEW_MIN_DISTANCE);
+    this.rig.setState(state.camera);
+    this.rig.target.copy(this.followedPosition());
+  }
+
+  private followedPosition(): THREE.Vector3 {
+    const mesh = this.focusId ? this.meshes.get(this.focusId) : undefined;
+    return mesh ? this.followPosition.copy(mesh.position) : this.followPosition.set(0, 0, 0);
+  }
+
   // ---- per-frame work -------------------------------------------------------------------
 
   private updatePositions(): void {
@@ -196,6 +347,17 @@ export class WebGLView implements View {
     this.meshes.get('moon')!.position.set(earth.x + moonOffset.x, 0, earth.z + moonOffset.z);
   }
 
+  private updateSelectionRing(): void {
+    const mesh = this.selectedId ? this.meshes.get(this.selectedId) : undefined;
+    this.selectionRing.visible = mesh !== undefined;
+    if (!mesh || !this.selectedId) return;
+    const distance = this.camera.position.distanceTo(mesh.position);
+    const radius = hitRadius(VISUALS[this.selectedId].radius * 1.25, distance);
+    this.selectionRing.position.copy(mesh.position);
+    this.selectionRing.scale.setScalar(radius);
+    this.selectionRing.quaternion.copy(this.camera.quaternion); // face the camera
+  }
+
   private readonly frame = (): void => {
     const now = performance.now();
     // Clamp the time step so a stalled tab does not make the planets jump.
@@ -203,6 +365,9 @@ export class WebGLView implements View {
     this.lastTime = now;
     this.simDays += dt * SIM_DAYS_PER_SECOND;
     this.updatePositions();
+    this.rig.update(dt, this.followedPosition());
+    this.rig.applyTo(this.camera);
+    this.updateSelectionRing();
     this.renderer.render(this.scene, this.camera);
   };
 

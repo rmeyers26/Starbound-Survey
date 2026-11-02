@@ -6,7 +6,9 @@ import objectsUrl from '../data/objects.json?url';
 import { log } from './engine/log';
 import { WebGLView } from './engine/webglView';
 import { loadObjects } from './game/dataLoader';
+import { EventBus, type GameEvents } from './game/events';
 import { showErrorScreen } from './ui/errorScreen';
+import { createHud } from './ui/hud';
 
 const app = document.querySelector<HTMLDivElement>('#app');
 if (!app) throw new Error('Missing #app container in index.html'); // fail loudly in development
@@ -16,11 +18,14 @@ async function start(container: HTMLElement): Promise<void> {
   try {
     const objects = await loadObjects(objectsUrl);
     container.replaceChildren(); // remove the "Loading..." text
+    const bus = new EventBus<GameEvents>();
     const view = new WebGLView({
       host: container,
       objects,
+      bus,
       quality: { pixelRatioCap: 2, resolutionScale: 1, starCount: 2500 },
     });
+    createHud(container, objects, bus);
     view.start();
   } catch (error) {
     log('Startup failed', error);

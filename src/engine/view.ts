@@ -1,6 +1,8 @@
 // The contract every renderer (WebGL 3D now, Canvas 2D fallback in step 7) must follow.
 // The rest of the game talks to this interface and never needs to know which one is running.
+import type { EventBus, GameEvents } from '../game/events';
 import type { CelestialObject } from '../game/types';
+import type { CameraState } from './cameraRig';
 
 export type ViewKind = 'webgl2' | 'canvas2d';
 
@@ -14,11 +16,29 @@ export interface ViewQuality {
   starCount: number;
 }
 
+/** Player-adjustable control settings (Settings screen). */
+export interface ControlSettings {
+  rotateSensitivity: number;
+  zoomSensitivity: number;
+  reducedMotion: boolean;
+}
+
+/** Everything needed to rebuild a view after a graphics failure (spec: "restore camera and scene state"). */
+export interface ViewState {
+  selectedId: string | null;
+  focusId: string | null;
+  simDays: number;
+  camera: CameraState;
+}
+
 export interface ViewOptions {
   /** Element the view puts its canvas into. */
   host: HTMLElement;
   objects: CelestialObject[];
   quality: ViewQuality;
+  bus: EventBus<GameEvents>;
+  /** Present when rebuilding after a failure. */
+  initialState?: ViewState;
 }
 
 export interface View {
@@ -26,4 +46,6 @@ export interface View {
   start(): void;
   dispose(): void;
   setQuality(quality: ViewQuality): void;
+  setControlSettings(settings: ControlSettings): void;
+  getState(): ViewState;
 }

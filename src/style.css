@@ -1,6 +1,7 @@
 /* Global styles. Dark, full-screen base for the 3D view. */
 html,
 body {
+  overscroll-behavior: none; /* stops pull-down-to-refresh while playing */
   margin: 0;
   height: 100%;
   background: #05070f;
@@ -18,6 +19,13 @@ body {
   display: block;
   width: 100%;
   height: 100%;
+  /* Spec: touch-action: none on the game canvas ONLY, so the browser doesn't scroll/zoom the page
+     while the player drags or pinches. Menus elsewhere still scroll normally. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  outline-offset: -3px;
 }
 
 /* Error screen with Retry button. 44px minimum tap target per the spec. */
@@ -32,4 +40,54 @@ body {
   min-height: 44px;
   padding: 0 1.5rem;
   font-size: 1rem;
+}
+
+/* ---- HUD (on-screen controls) ---- */
+.hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none; /* clicks pass through to the canvas except on the buttons */
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  box-sizing: border-box;
+}
+.hud > * {
+  pointer-events: auto;
+}
+.hud-objects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.hud-controls {
+  position: absolute;
+  right: max(12px, env(safe-area-inset-right));
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.hud-button {
+  min-width: 44px; /* spec: every tappable control is at least 44 CSS pixels */
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid #3a4a78;
+  border-radius: 22px;
+  background: rgba(10, 16, 36, 0.75);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.hud-button[aria-pressed='true'] {
+  border-color: #7fd4ff;
+  background: rgba(40, 90, 130, 0.8);
+}
+.hud-button:focus-visible,
+.game-canvas:focus-visible {
+  outline: 3px solid #ffd166;
+}
+.hud-round {
+  font-size: 1.4rem;
+  padding: 0;
 }
