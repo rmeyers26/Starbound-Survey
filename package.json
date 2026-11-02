@@ -13,12 +13,16 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/three": "^0.187.0",
     "fake-indexeddb": "^6.2.7",
     "prettier": "^3.9.10",
     "typescript": "~7.0.2",
     "vite": "^8.3.5",
-    "vitest": "^5.0.5"
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.0.5",
+    "workbox-build": "^7.4.1",
+    "workbox-window": "^7.4.1"
   },
   "description": "Browser-based 3D astronomy exploration game",
   "dependencies": {

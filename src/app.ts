@@ -14,6 +14,8 @@ import { createInfoPanel } from './ui/infoPanel';
 import { createSaveSection } from './ui/saveSection';
 import { createSettingsPanel } from './ui/settingsPanel';
 import { createToaster } from './ui/toast';
+import { maybeShowInstallHint } from './ui/installHint';
+import { registerServiceWorker } from './pwa';
 
 /** Builds and starts the game. Returns a function that tears everything down again. */
 export async function startApp(
@@ -111,6 +113,8 @@ export async function startApp(
   ];
 
   view.start();
+  registerServiceWorker(toaster);
+  maybeShowInstallHint(toaster);
   return () => {
     cleanups.forEach((fn) => fn());
     view?.dispose();
