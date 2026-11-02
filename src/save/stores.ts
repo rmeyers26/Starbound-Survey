@@ -93,13 +93,35 @@ export interface OpenedStore {
   durable: boolean;
 }
 
-/** Opens IndexedDB, or falls back to memory (e.g. some private-browsing modes) without crashing. */
-export async function openBestStore(): Promise<OpenedStore> {
+/** How long we wait for IndexedDB to open before giving up (some Safari versions can hang forever). */
+export const OPEN_TIMEOUT_MS = 5000;
+
+/**
+ * Opens IndexedDB, or falls back to memory (e.g. some private-browsing modes, or a browser whose
+ * IndexedDB hangs) without crashing or blocking the game from starting.
+ * `open` and `timeoutMs` are parameters so tests can simulate a hang.
+ */
+export async function openBestStore(
+  open: () => Promise<KeyValueStore> = () => {
+    if (typeof indexedDB === 'undefined')
+      return Promise.reject(new Error('IndexedDB is not available'));
+    return IndexedDBStore.open();
+  },
+  timeoutMs: number = OPEN_TIMEOUT_MS,
+): Promise<OpenedStore> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    if (typeof indexedDB === 'undefined') throw new Error('IndexedDB is not available');
-    return { store: await IndexedDBStore.open(), durable: true };
+    const timeout = new Promise<never>((_, reject) => {
+      timer = setTimeout(
+        () => reject(new Error(`IndexedDB did not open within ${timeoutMs} ms`)),
+        timeoutMs,
+      );
+    });
+    return { store: await Promise.race([open(), timeout]), durable: true };
   } catch (error) {
     log('IndexedDB unavailable, progress will not persist', error);
     return { store: new MemoryStore(), durable: false };
+  } finally {
+    clearTimeout(timer);
   }
 }

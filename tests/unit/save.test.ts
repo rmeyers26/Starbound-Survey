@@ -253,3 +253,22 @@ describe('requestPersistence', () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe('openBestStore', () => {
+  it('uses the real store when it opens in time', async () => {
+    const { openBestStore } = await import('../../src/save/stores');
+    const result = await openBestStore(() => Promise.resolve(new MemoryStore()), 50);
+    expect(result.durable).toBe(true);
+  });
+  it('falls back to memory when IndexedDB hangs forever', async () => {
+    const { openBestStore } = await import('../../src/save/stores');
+    const hangs = () => new Promise<KeyValueStore>(() => {}); // never settles
+    const result = await openBestStore(hangs, 30);
+    expect(result.durable).toBe(false);
+  });
+  it('falls back to memory when opening throws', async () => {
+    const { openBestStore } = await import('../../src/save/stores');
+    const result = await openBestStore(() => Promise.reject(new Error('private mode')), 50);
+    expect(result.durable).toBe(false);
+  });
+});

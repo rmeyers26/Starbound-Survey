@@ -7,7 +7,7 @@
     "region": "inner",
     "quick": "The Sun is the star at the centre of our Solar System. Its gravity holds the planets in orbit and its light and heat make life on Earth possible.",
     "data": {
-      "diameter": { "label": "Diameter", "value": 1392684, "unit": "km" },
+      "diameter": { "label": "Diameter", "value": 1391400, "unit": "km" },
       "mass": { "label": "Mass", "value": 1.9885e30, "unit": "kg" },
       "surfaceTemperature": { "label": "Surface temperature", "value": 5772, "unit": "K" },
       "distanceFromEarth": {
@@ -19,7 +19,7 @@
       "apparentMagnitude": { "label": "Apparent magnitude", "value": -26.74 },
       "spectralType": { "label": "Spectral type", "value": "G2V" }
     },
-    "source": "NASA Sun Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/sunfact.html); IAU 2015 Resolution B3 nominal solar values"
+    "source": "NASA Sun Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/sunfact.html); IAU 2015 Resolution B3 nominal solar values (radius 695,700 km, so diameter 1,391,400 km; effective temperature 5,772 K)"
   },
   {
     "id": "earth",

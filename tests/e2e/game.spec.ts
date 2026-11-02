@@ -82,3 +82,16 @@ test('settings open, change graphics quality, and survive a reload', async ({ pa
   await openSettings(page);
   await expect(page.getByLabel('Graphics quality')).toHaveValue('performance');
 });
+
+test('a real touch tap on the 3D view selects an object', async ({ browser }) => {
+  // A touch-enabled phone context: taps arrive as touch events, not mouse clicks.
+  const context = await browser.newContext({
+    hasTouch: true,
+    viewport: { width: 412, height: 800 },
+  });
+  const page = await context.newPage();
+  await openGame(page);
+  await page.touchscreen.tap(206, 400); // middle of the screen = the Sun at the start
+  await expect(page.locator('.info-title')).toHaveText('The Sun');
+  await context.close();
+});

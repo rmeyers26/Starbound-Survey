@@ -267,12 +267,14 @@ body {
     right: 0;
     bottom: 0;
     max-height: 42vh;
+    max-height: 42dvh; /* dvh follows the phone's collapsing browser toolbar; vh is the fallback */
     border-radius: 16px 16px 0 0;
     padding-bottom: env(safe-area-inset-bottom); /* keep clear of the home indicator */
     transition: max-height 0.2s ease-out;
   }
   .info-panel.expanded {
     max-height: 80vh;
+    max-height: 80dvh;
   }
   .sheet-handle {
     display: flex;

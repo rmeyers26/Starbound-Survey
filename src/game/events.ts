@@ -32,6 +32,8 @@ export interface GameEvents {
     profile: ProfileName;
     resolutionScale: number;
     renderer: string;
+    /** Share of frames since start that took over 50 ms (spec target: under 5%). */
+    slowFramePercent: number;
   };
 }
 

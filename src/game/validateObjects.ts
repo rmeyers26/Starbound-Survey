@@ -5,7 +5,6 @@ import {
   OBJECT_TYPES,
   type CelestialObject,
   type ImageType,
-  type Measurement,
   type ObjectType,
 } from './types';
 
@@ -80,6 +79,3 @@ export function validateObjects(raw: unknown): CelestialObject[] {
   // Safe cast: every field was checked above.
   return raw as CelestialObject[];
 }
-
-// Re-export for convenience of callers that only need the measurement type.
-export type { Measurement };

@@ -14,9 +14,12 @@ export function createFpsReadout(
   box.setAttribute('aria-hidden', 'true'); // decorative debug info: keep screen readers quiet
   container.append(box);
 
-  const offSample = bus.on('quality:sample', ({ fps, profile, resolutionScale, renderer }) => {
-    box.textContent = `${Math.round(fps)} fps · ${PROFILES[profile].label} ${Math.round(resolutionScale * 100)}% · ${renderer}`;
-  });
+  const offSample = bus.on(
+    'quality:sample',
+    ({ fps, profile, resolutionScale, renderer, slowFramePercent }) => {
+      box.textContent = `${Math.round(fps)} fps · ${PROFILES[profile].label} ${Math.round(resolutionScale * 100)}% · ${renderer} \u00b7 slow ${slowFramePercent.toFixed(1)}%`;
+    },
+  );
   const offSettings = bus.on('settings:changed', ({ settings }) => {
     box.hidden = !settings.showFps;
   });

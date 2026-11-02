@@ -1,9 +1,9 @@
 // Glue between the QualityManager (pure logic), the player's settings, and the running view.
 import type { EventBus, GameEvents } from '../game/events';
 import type { SettingsStore } from '../game/settings';
+import { FrameStats } from './frameStats';
 import { log } from './log';
 import {
-  LADDER,
   defaultProfileFor,
   ladderIndexFor,
   readDeviceHints,
@@ -31,6 +31,7 @@ export function createQualityController(
 ): QualityController {
   const deviceDefault: ProfileName = defaultProfileFor(hints);
   const manager = new QualityManager(ladderIndexFor(deviceDefault));
+  const stats = new FrameStats();
 
   /** Apply the player's profile choice: 'auto' = device default + adaptive; otherwise locked. */
   function applyChoice(announce: boolean): void {
@@ -64,6 +65,7 @@ export function createQualityController(
 
   return {
     onFrame(frameMs) {
+      stats.record(frameMs);
       const result = manager.recordFrame(frameMs);
       if (!result) return;
       const level = manager.level;
@@ -73,11 +75,10 @@ export function createQualityController(
         profile: level.profile,
         resolutionScale: level.resolutionScale,
         renderer: getView()?.kind ?? 'none',
+        slowFramePercent: stats.slowPercent,
       });
     },
     currentQuality: () => toViewQuality(manager.level),
     dispose: unsubscribe,
   };
 }
-
-export { LADDER };
