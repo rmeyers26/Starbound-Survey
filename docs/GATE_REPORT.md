@@ -32,8 +32,8 @@ Date of this report: 2026-11-02.
 
 ## What was verified, and how
 
-- 222 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
-- 83 browser tests (Playwright) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
+- 227 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
+- 87 browser tests (Playwright) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
   bottom-sheet handle only exists on phone-width screens).
 - Lint, type-check and production build pass. Production dependencies: 0 known vulnerabilities.
 - Lighthouse on the production build: accessibility 100, best practices 100, SEO 91.
@@ -67,6 +67,11 @@ Date of this report: 2026-11-02.
     but never turned with its orbit. It now turns along with the orbit while you are focused on anything that
     orbits something, so the Sun stays on one side of a planet and the Moon keeps its face still (its phases
     still change). Measured: Mercury's lit side moved 160 degrees in 10 s before and under 1 degree after.
+13. **Ten object buttons made the phone layout too tall, and the first fix nudged the whole game sideways.**
+    The buttons are now one row that scrolls. A first version let that row grow to 900 px on a 412 px phone, so
+    tapping the last button scrolled the "hidden" game container and pushed "The Sun" and the camera buttons
+    off the left edge. Fixed by clipping the container and stretching the row to the screen, with a test that
+    was checked to fail without the fix.
 
 ## Open problems and trade-offs
 

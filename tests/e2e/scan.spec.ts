@@ -104,7 +104,33 @@ test.describe('scanning', () => {
     await openGame(page);
     await expect(xpText(page)).toHaveText('40 / 200 XP');
     await page.getByRole('button', { name: /Open the Logbook/ }).click();
-    await expect(page.locator('.logbook-summary')).toHaveText('Discovered 2 of 6 objects.');
+    await expect(page.locator('.logbook-summary')).toHaveText('Discovered 2 of 10 objects.');
+  });
+});
+
+test.describe('ranks', () => {
+  test('scanning all ten objects earns the first rank-up (Navigator)', async ({ page }) => {
+    test.setTimeout(180_000); // ten scans, each with a flight and a short hold
+    await openForScanning(page);
+    const everyObject = [
+      'sun',
+      'mercury',
+      'venus',
+      'earth',
+      'moon',
+      'mars',
+      'phobos',
+      'deimos',
+      'vesta',
+      'ceres',
+    ];
+    for (const id of everyObject) await scanObject(page, id);
+    // 10 first scans x 20 XP = exactly the 200 XP Navigator needs.
+    await expect(
+      page.getByText('Rank up! You are now a Navigator.', { exact: false }),
+    ).toBeVisible();
+    await expect(xpText(page)).toContainText('200');
+    await expect(xpText(page)).toContainText('600'); // the next goal is Surveyor
   });
 });
 
@@ -117,8 +143,8 @@ test.describe('Logbook', () => {
     await page.getByRole('button', { name: /Open the Logbook/ }).click();
     const dialog = page.locator('dialog.logbook-dialog');
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByText('Discovered 1 of 6 objects.')).toBeVisible();
-    await expect(dialog.getByText('Not scanned yet')).toHaveCount(5);
+    await expect(dialog.getByText('Discovered 1 of 10 objects.')).toBeVisible();
+    await expect(dialog.getByText('Not scanned yet')).toHaveCount(9);
     await expect(dialog.getByText('Basic scan')).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden();

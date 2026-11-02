@@ -24,6 +24,13 @@ export interface VisualSpec {
    * camera. Without this the side you first see would be whatever the picture's edge happens to be.
    */
   startLongitudeDeg?: number;
+  /**
+   * Orbit time (in simulated days) used for DRAWING when the real one would be unwatchable. Phobos really
+   * circles Mars in 0.32 days, which at the game's speed is about 9 laps every second. The real period is
+   * still what the info panel shows. The order of speeds stays true (Phobos fastest, then Deimos, then the
+   * Moon), which a unit test checks. This is disclosed in the docs.
+   */
+  visualPeriodDays?: number;
 }
 
 export const VISUALS: Record<string, VisualSpec> = {
@@ -48,6 +55,24 @@ export const VISUALS: Record<string, VisualSpec> = {
     texture: 'mars',
     startLongitudeDeg: 70, // Syrtis Major and the Hellas basin
   },
+  // Mars's two small moons. Real sizes are tiny next to Mars; here they are just big enough to see.
+  phobos: {
+    radius: 0.18,
+    color: 0x8a7f78,
+    orbit: { parentId: 'mars', radius: 2.4 },
+    tidallyLocked: true,
+    visualPeriodDays: 12,
+  },
+  deimos: {
+    radius: 0.12,
+    color: 0xb5a595,
+    orbit: { parentId: 'mars', radius: 4 },
+    tidallyLocked: true,
+    visualPeriodDays: 21,
+  },
+  // The asteroid belt sits between Mars and Jupiter. Orbit distances are compressed, order kept true.
+  vesta: { radius: 0.3, color: 0x9a948c, orbit: { parentId: 'sun', radius: 100 } },
+  ceres: { radius: 0.35, color: 0x7d7a78, orbit: { parentId: 'sun', radius: 112 } },
 };
 
 /**

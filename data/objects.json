@@ -319,5 +319,205 @@
       }
     },
     "source": "NASA Mars Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html)"
+  },
+  {
+    "id": "phobos",
+    "name": "Phobos",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "inner",
+    "quick": "Phobos is the larger and closer of Mars's two small moons. It is a lumpy, cratered rock that races round Mars in under 8 hours, and it is slowly spiralling toward the planet.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 22.2,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.0659e16,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromMars": {
+        "label": "Average distance from Mars",
+        "value": 9376,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 0.31891,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.0057,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1876,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA planetary satellite fact sheet for the moons of Mars (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "deimos",
+    "name": "Deimos",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "inner",
+    "quick": "Deimos is the smaller and more distant of Mars's two moons. It is a small, dusty rock that looks smooth because loose dust has filled in many of its craters, and it takes about 30 hours to circle Mars.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 12.4,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1476200000000000.0,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromMars": {
+        "label": "Average distance from Mars",
+        "value": 23463,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 1.26244,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.003,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1471,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA planetary satellite fact sheet for the moons of Mars (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "vesta",
+    "name": "Vesta",
+    "type": "asteroid",
+    "imageType": "simulation",
+    "region": "inner",
+    "quick": "Vesta is one of the largest objects in the asteroid belt and the brightest asteroid in our sky. A giant crater at its south pole is so big it nearly cuts the asteroid in two, and the Dawn spacecraft orbited it in 2011 and 2012.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 525.4,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 2.59e20,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromSun": {
+        "label": "Average distance from the Sun",
+        "value": 353300000,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 1325.8,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "rotationPeriod": {
+        "label": "Rotation period",
+        "value": 5.34,
+        "unit": "hours",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.25,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 3456,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Solar System Exploration: 4 Vesta; JPL Small-Body Database, 4 Vesta (ssd.jpl.nasa.gov/tools/sbdb_lookup.html)"
+  },
+  {
+    "id": "ceres",
+    "name": "Ceres",
+    "type": "dwarfPlanet",
+    "imageType": "simulation",
+    "region": "inner",
+    "quick": "Ceres is the largest object in the asteroid belt between Mars and Jupiter, and the only dwarf planet in the inner Solar System. The Dawn spacecraft found bright patches of salt inside its craters.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 939.4,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 9.38e20,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromSun": {
+        "label": "Average distance from the Sun",
+        "value": 413700000,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 1681.6,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "rotationPeriod": {
+        "label": "Rotation period",
+        "value": 9.07,
+        "unit": "hours",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.28,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 2162,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Solar System Exploration: Ceres; JPL Small-Body Database, 1 Ceres (ssd.jpl.nasa.gov/tools/sbdb_lookup.html)"
   }
 ]

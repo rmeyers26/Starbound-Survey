@@ -48,6 +48,8 @@ Tick each one and note anything odd.
 
 **Motion**
 
+- [ ] The row of object buttons scrolls sideways with one finger (ten buttons, one line) and tapping one scrolls it into view.
+- [ ] Phobos and Deimos are visible circling Mars (Phobos faster); neither is a blur.
 - [ ] Seen from above, every planet circles the Sun **counter-clockwise**, and the Moon circles Earth the same way.
 - [ ] The Moon takes about 9 seconds to go once round Earth and always shows the same face to Earth.
 - [ ] Nothing looks frantic or frozen.

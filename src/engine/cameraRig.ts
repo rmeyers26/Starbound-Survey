@@ -10,7 +10,7 @@ export interface CameraState {
   distance: number; // how far the camera is from the target
 }
 
-export const OVERVIEW_DISTANCE = 175; // far enough to frame Mars's orbit
+export const OVERVIEW_DISTANCE = 240; // far enough to frame the asteroid belt (Ceres)
 export const OVERVIEW_MIN_DISTANCE = 12;
 export const MAX_DISTANCE = 400;
 export const FLY_DURATION_S = 2.5; // spec: 2 to 4 seconds

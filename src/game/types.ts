@@ -6,7 +6,16 @@ export const IMAGE_TYPES = ['observation', 'artistConcept', 'simulation'] as con
 export type ImageType = (typeof IMAGE_TYPES)[number];
 
 // What kind of object this is.
-export const OBJECT_TYPES = ['star', 'planet', 'moon', 'nebula', 'galaxy', 'blackHole'] as const;
+export const OBJECT_TYPES = [
+  'star',
+  'planet',
+  'dwarfPlanet',
+  'moon',
+  'asteroid',
+  'nebula',
+  'galaxy',
+  'blackHole',
+] as const;
 export type ObjectType = (typeof OBJECT_TYPES)[number];
 
 // Scanning reveals data in layers (spec: "Layered results"). Higher tiers need a higher scanner level.

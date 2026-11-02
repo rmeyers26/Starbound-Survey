@@ -4,13 +4,13 @@ Phase 1 is built in slices, each tested and merged on its own. **Gate exception:
 starts only after the prototype passes real-phone testing. That testing has not happened yet. Phase 1 was
 started early at the owner's request on 2026-11-02; the Phase 0 gate (see `GATE_REPORT.md`) is still open.
 
-| Slice | Contents                                                                                  | Status                                                                         |
-| ----- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| A     | Game state machine, scan mechanic, scan tiers, XP and ranks, Logbook, tap-to-scan setting | **Done** (this slice)                                                          |
-| B     | Flight School tutorial (8 beats), quizzes (bonus XP), first 3 missions                    | Not started                                                                    |
-| C     | All planets, moons, belts and orbits with cited data                                      | **Started:** Mercury, Venus, Mars added (data unverified, see `DATA_CHECK.md`) |
-| D     | Visual effects: bloom, atmosphere, warp (with Reduce motion fallbacks)                    | Not started                                                                    |
-| E     | Full quality manager review and Canvas fallback parity                                    | Not started                                                                    |
+| Slice | Contents                                                                                  | Status                                                                                       |
+| ----- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| A     | Game state machine, scan mechanic, scan tiers, XP and ranks, Logbook, tap-to-scan setting | **Done** (this slice)                                                                        |
+| B     | Flight School tutorial (8 beats), quizzes (bonus XP), first 3 missions                    | Not started                                                                                  |
+| C     | All planets, moons, belts and orbits with cited data                                      | **Started:** the whole inner system (10 objects) is in; data unverified, see `DATA_CHECK.md` |
+| D     | Visual effects: bloom, atmosphere, warp (with Reduce motion fallbacks)                    | Not started                                                                                  |
+| E     | Full quality manager review and Canvas fallback parity                                    | Not started                                                                                  |
 
 ## Slice A: how the pieces fit
 
@@ -44,10 +44,9 @@ Design choices (all tunable numbers are in one place each):
 
 ## Known limits of slice A
 
-- With six objects the most XP available is 120 (6 first scans at 20 XP), so **the first rank-up (200 XP) still
-  cannot be reached**. Four more inner-system objects (Phobos, Deimos, Ceres, Vesta, from the spec's list) would make it
-  exactly 200. Rank-up logic, messages and region unlocks are unit-tested but not yet reachable in play.
-  Slices B and C add the XP sources (quizzes, missions, more objects).
+- **The first rank-up is now reachable:** ten objects at 20 XP for a first scan is exactly the 200 XP Navigator needs
+  (an end-to-end test scans all ten). Navigator unlocks the Outer Solar System, which has no objects yet, so
+  there is nothing new to fly to after the rank-up until slice C continues.
 - Detailed and spectral scans cannot be done until a player reaches Navigator, for the same reason.
 - The scan has no 3D holographic sweep yet (slice D). The ring on the button is the only progress effect.
 - Left-handed layout (spec) is not built; the SCAN button is bottom-right.

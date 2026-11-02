@@ -12,6 +12,9 @@ body {
   position: fixed; /* the game fills the whole screen */
   inset: 0;
   overflow: hidden;
+  /* `clip` also stops the browser scrolling this box sideways to reveal a focused button, which
+     `hidden` still allows. Older browsers ignore the second line and keep `hidden`. */
+  overflow: clip;
 }
 
 /* The 3D canvas fills its container; its drawing size is set by JavaScript. */
@@ -50,14 +53,26 @@ body {
   padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
     max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
   box-sizing: border-box;
+  overflow: clip; /* see #app: nothing in the HUD may scroll the screen sideways */
 }
 .hud > * {
   pointer-events: auto;
 }
+/* Ten or more object buttons: one row that scrolls sideways instead of covering the screen. */
 .hud-objects {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
+  flex: 1 1 280px;
+  min-width: 0; /* lets the row shrink and scroll rather than push everything else away */
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #3a4a78 transparent;
+}
+.hud-objects > .hud-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 .hud-controls {
   position: absolute;
@@ -445,6 +460,12 @@ body {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+  }
+  /* Without this the top row would be as wide as ALL ten buttons laid end to end (about 900 px) instead of
+     the screen, and tapping a button would nudge the whole game sideways to bring it into view. */
+  .hud-top {
+    align-self: stretch;
+    min-width: 0;
   }
   .hud-controls {
     position: static;
