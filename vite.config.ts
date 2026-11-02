@@ -1,7 +1,11 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config'; // same as Vite's, plus a `test` section for Vitest
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  test: {
+    // Unit tests only. Browser tests in tests/e2e are run by Playwright (npm run test:e2e).
+    include: ['tests/unit/**/*.test.ts'],
+  },
   build: {
     // By default Vite embeds small files directly in the JavaScript as base64 text.
     // Game data must stay a separate file so it can be fetched at runtime (and so a failed
