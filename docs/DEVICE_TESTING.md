@@ -114,6 +114,9 @@ Tick each one and note anything odd.
 **Spacecraft** (tap **Pilot ship**, bottom left)
 
 - [ ] The ship appears where the camera was, with no jump. You can see the ship above the controls (not hidden behind them).
+- [ ] The ship looks like detailed hardware (panel seams, a glossy canopy, gold foil, twin engines, solar panels, a dish) in the Chase, Orbit and Cinematic views, and its red and green wingtip lights blink.
+- [ ] The first time you tap **Pilot ship** there may be a very short pause (the ship is built then): note how long it is. The frame rate while flying is still near 60.
+- [ ] The engine flames grow when you raise the throttle, and are short when you reverse.
 - [ ] Holding **+** speeds the ship up; letting go keeps the speed; **Stop** brings it to zero.
 - [ ] Holding **◀** and **▶** turns the ship, and it stops turning the moment you let go (try with two fingers: one turning, one on **+**).
 - [ ] **▲** and **▼** tilt the nose; dragging on the picture also steers in Chase and Cockpit.
