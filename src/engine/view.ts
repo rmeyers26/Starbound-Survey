@@ -3,6 +3,7 @@
 import type { EventBus, GameEvents } from '../game/events';
 import type { CelestialObject } from '../game/types';
 import type { CameraState } from './cameraRig';
+import type { BloomLevel } from './effects';
 
 export type ViewKind = 'webgl2' | 'canvas2d';
 
@@ -16,6 +17,12 @@ export interface ViewQuality {
   starCount: number;
   /** Width in pixels of the surface images to load (smaller on weaker devices to save memory). */
   textureSize: 1024 | 2048;
+  /** Glow around the Sun and other very bright things ('off' skips the post-processing code entirely). */
+  bloom: BloomLevel;
+  /** Thin glowing haze around planets that have an atmosphere. */
+  atmosphere: boolean;
+  /** Streaks shown while flying a long way. */
+  warp: boolean;
 }
 
 /** Player-adjustable control settings (Settings screen). */

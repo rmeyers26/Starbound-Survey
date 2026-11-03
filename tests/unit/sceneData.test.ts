@@ -145,6 +145,47 @@ describe('objects.json and the 3D scene agree', () => {
     });
   });
 
+  describe('atmosphere haze', () => {
+    const withAir = Object.keys(VISUALS).filter((id) => VISUALS[id].atmosphere);
+
+    it('only worlds that really have a substantial atmosphere get one', () => {
+      expect(withAir.sort()).toEqual(
+        ['earth', 'jupiter', 'mars', 'neptune', 'saturn', 'titan', 'uranus', 'venus'].sort(),
+      );
+    });
+
+    it('airless worlds get none (Mercury, our Moon, the asteroids and the small moons)', () => {
+      for (const id of [
+        'mercury',
+        'moon',
+        'ceres',
+        'vesta',
+        'phobos',
+        'deimos',
+        'europa',
+        'enceladus',
+      ]) {
+        expect(VISUALS[id].atmosphere, id).toBeUndefined();
+      }
+    });
+
+    it('every haze is a thin shell just outside its planet and not absurdly bright', () => {
+      for (const id of withAir) {
+        const { thickness, strength } = VISUALS[id].atmosphere!;
+        expect(thickness, id).toBeGreaterThan(1.02);
+        expect(thickness, id).toBeLessThan(1.3);
+        expect(strength, id).toBeGreaterThan(0);
+        expect(strength, id).toBeLessThanOrEqual(1.5);
+      }
+    });
+
+    it('Venus and Titan (famously thick air) are hazier than thin-aired Mars', () => {
+      const thickness = (id: string): number => VISUALS[id].atmosphere!.thickness;
+      expect(thickness('venus')).toBeGreaterThan(thickness('mars'));
+      expect(thickness('titan')).toBeGreaterThan(thickness('mars'));
+    });
+  });
+
   describe('retrograde orbits', () => {
     it('only Triton orbits the "wrong" way (Neptune\'s big moon is a captured object)', () => {
       expect(Object.keys(VISUALS).filter((id) => VISUALS[id].retrograde)).toEqual(['triton']);

@@ -41,6 +41,13 @@ export class CameraRig {
     return this.fly !== null;
   }
 
+  /** How far through the current flight we are, 0 at takeoff to 1 on arrival; null when not flying. */
+  get flightProgress(): number | null {
+    const f = this.fly;
+    if (!f) return null;
+    return f.duration <= 0 ? 1 : Math.min(1, f.elapsed / f.duration);
+  }
+
   getState(): CameraState {
     return { yaw: this.yaw, pitch: this.pitch, distance: this.distance };
   }

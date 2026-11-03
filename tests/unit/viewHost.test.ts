@@ -8,6 +8,9 @@ const quality = {
   resolutionScale: 1,
   starCount: 100,
   textureSize: 1024 as const,
+  bloom: 'off' as const,
+  atmosphere: false,
+  warp: false,
 };
 const sampleState: ViewState = {
   selectedId: 'moon',

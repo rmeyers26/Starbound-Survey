@@ -56,6 +56,17 @@ Tick each one and note anything odd.
 - [ ] Tap a planet: the Sun stays on the same side of it (it does not swing round), and only the stars drift.
 - [ ] Tap the Moon: its surface stays still on screen while its lit part changes through the phases.
 
+**Visual effects (graphics quality levels)**
+
+- [ ] High or Balanced: the Sun has a soft glow. Settings > Graphics quality > Performance removes it.
+- [ ] **Frame rate with effects on.** Note the frame rate on Balanced (phones start here) with the effects, then on
+      Performance. If Balanced is clearly slower, tell me: bloom is the first thing to trim.
+- [ ] Earth, Venus and the giants have a thin glowing edge on the side facing the Sun.
+- [ ] Tap Ceres from the overview: streaks rush past during the flight, then stop. Tap the Moon from Earth: no streaks (a short hop).
+- [ ] With **Reduce motion** on (Settings), no streaks appear and flights are instant.
+- [ ] The asteroid belt is a band of dots between Mars and Jupiter and turns slowly.
+- [ ] After the rank-up, the moons of Jupiter, Saturn and Neptune orbit their planets; Triton goes the opposite way to the others.
+
 **Regions**
 
 - [ ] On a new save the Jupiter, Saturn, Uranus and Neptune buttons are dim with dashed borders and the outer planets are not drawn.

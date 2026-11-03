@@ -3,6 +3,8 @@
 // 1 cm pea about 107 metres away. So the game uses these made-up "scene units" instead.
 // The info panel always shows the TRUE values from objects.json; this file is only for looks.
 
+import type { AtmosphereSpec } from './effects';
+
 export interface VisualSpec {
   /** Sphere radius in scene units. */
   radius: number;
@@ -33,6 +35,8 @@ export interface VisualSpec {
   visualPeriodDays?: number;
   /** True if it orbits the OPPOSITE way to everything else (clockwise seen from above north). Triton does. */
   retrograde?: boolean;
+  /** A glowing haze around the edge, for worlds with a real atmosphere. Decorative. */
+  atmosphere?: AtmosphereSpec;
   /** Rings drawn around the body (Saturn). Sizes are multiples of the body's radius. Decorative. */
   rings?: { inner: number; outer: number; color: number; opacity: number; tiltDeg: number };
 }
@@ -42,8 +46,18 @@ export const VISUALS: Record<string, VisualSpec> = {
   // Planets: sizes and orbit distances are squeezed so all fit (see the note at the top of the file).
   // Order of size and distance is kept true: Venus is nearly Earth's size, Mercury and Mars are smaller.
   mercury: { radius: 0.8, color: 0x8c8680, orbit: { parentId: 'sun', radius: 28 } },
-  venus: { radius: 1.9, color: 0xe3c07a, orbit: { parentId: 'sun', radius: 43 } },
-  earth: { radius: 2, color: 0x2f6fd6, orbit: { parentId: 'sun', radius: 60 } },
+  venus: {
+    radius: 1.9,
+    color: 0xe3c07a,
+    orbit: { parentId: 'sun', radius: 43 },
+    atmosphere: { color: 0xf4dca0, thickness: 1.16, strength: 1.1 }, // thick, bright cloud deck
+  },
+  earth: {
+    radius: 2,
+    color: 0x2f6fd6,
+    orbit: { parentId: 'sun', radius: 60 },
+    atmosphere: { color: 0x5fa0ff, thickness: 1.14, strength: 1.2 },
+  },
   moon: {
     radius: 0.55,
     color: 0xb9b9b9,
@@ -53,6 +67,7 @@ export const VISUALS: Record<string, VisualSpec> = {
     nightGlow: 0.08,
   },
   mars: {
+    atmosphere: { color: 0xe0a07a, thickness: 1.08, strength: 0.55 }, // thin air
     radius: 1.1,
     color: 0xc1572f,
     orbit: { parentId: 'sun', radius: 80 },
@@ -79,16 +94,32 @@ export const VISUALS: Record<string, VisualSpec> = {
   ceres: { radius: 0.35, color: 0x7d7a78, orbit: { parentId: 'sun', radius: 112 } },
   // The outer planets (unlock at Navigator). Real distances are 5 to 30 times Earth's; here they are squeezed
   // so the whole system still fits, with the true ORDER kept. Sizes keep the true order too.
-  jupiter: { radius: 5.5, color: 0xc8a27a, orbit: { parentId: 'sun', radius: 140 } },
+  jupiter: {
+    radius: 5.5,
+    color: 0xc8a27a,
+    orbit: { parentId: 'sun', radius: 140 },
+    atmosphere: { color: 0xe8cfa8, thickness: 1.06, strength: 0.55 },
+  },
   saturn: {
+    atmosphere: { color: 0xf2e4b8, thickness: 1.06, strength: 0.55 },
     radius: 4.8,
     color: 0xe0cf9b,
     orbit: { parentId: 'sun', radius: 165 },
     // Saturn's rings really reach from about 1.3 to 2.3 planet radii and are tilted about 27 degrees.
     rings: { inner: 1.3, outer: 2.3, color: 0xcdb98a, opacity: 0.75, tiltDeg: 26.7 },
   },
-  uranus: { radius: 3.2, color: 0x9fd6e0, orbit: { parentId: 'sun', radius: 190 } },
-  neptune: { radius: 3.1, color: 0x4a6fe0, orbit: { parentId: 'sun', radius: 212 } },
+  uranus: {
+    radius: 3.2,
+    color: 0x9fd6e0,
+    orbit: { parentId: 'sun', radius: 190 },
+    atmosphere: { color: 0xb4f4f8, thickness: 1.1, strength: 0.9 },
+  },
+  neptune: {
+    radius: 3.1,
+    color: 0x4a6fe0,
+    orbit: { parentId: 'sun', radius: 212 },
+    atmosphere: { color: 0x7fa0ff, thickness: 1.1, strength: 0.9 },
+  },
   // Moons of the outer planets. They unlock with their planet. Real laps range from 1.4 to 17 days, a blur at
   // game speed, so each is DRAWN with a slowed period (>= 9 days = 3 s a lap). Order of speed around each planet
   // stays true; a unit test checks it. Sizes keep the true order across ALL bodies (also tested).
@@ -129,6 +160,7 @@ export const VISUALS: Record<string, VisualSpec> = {
     visualPeriodDays: 9,
   },
   titan: {
+    atmosphere: { color: 0xe9a850, thickness: 1.22, strength: 1.0 }, // thick orange haze
     radius: 0.85,
     color: 0xd9a05b,
     orbit: { parentId: 'saturn', radius: 21 },

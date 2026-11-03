@@ -1,5 +1,6 @@
 // Graphics profiles (spec: "High / Balanced / Performance") and the "ladder" the quality manager climbs.
 // All numbers are STARTING VALUES to tune on real devices.
+import type { BloomLevel } from './effects';
 import type { ViewQuality } from './view';
 
 export type ProfileName = 'high' | 'balanced' | 'performance';
@@ -13,6 +14,10 @@ export interface Profile {
   starCount: number;
   /** Width of surface images in pixels. A 2048 x 1024 image takes about 4x the memory of 1024 x 512. */
   textureSize: 1024 | 2048;
+  /** Spec: High = full bloom, Balanced = reduced bloom, Performance = no post-processing. */
+  bloom: BloomLevel;
+  atmosphere: boolean;
+  warp: boolean;
 }
 
 export const PROFILES: Record<ProfileName, Profile> = {
@@ -23,6 +28,9 @@ export const PROFILES: Record<ProfileName, Profile> = {
     pixelRatioCap: 2,
     starCount: 4000,
     textureSize: 2048,
+    bloom: 'full',
+    atmosphere: true,
+    warp: true,
   },
   balanced: {
     label: 'Balanced',
@@ -30,6 +38,9 @@ export const PROFILES: Record<ProfileName, Profile> = {
     pixelRatioCap: 1.5,
     starCount: 2000,
     textureSize: 1024,
+    bloom: 'reduced',
+    atmosphere: true,
+    warp: true,
   },
   performance: {
     label: 'Performance',
@@ -37,6 +48,9 @@ export const PROFILES: Record<ProfileName, Profile> = {
     pixelRatioCap: 1,
     starCount: 800,
     textureSize: 1024,
+    bloom: 'off', // spec: no post-processing
+    atmosphere: false,
+    warp: false,
   },
 };
 
@@ -65,6 +79,9 @@ export function toViewQuality(level: Level): ViewQuality {
     resolutionScale: level.resolutionScale,
     starCount: profile.starCount,
     textureSize: profile.textureSize,
+    bloom: profile.bloom,
+    atmosphere: profile.atmosphere,
+    warp: profile.warp,
   };
 }
 
