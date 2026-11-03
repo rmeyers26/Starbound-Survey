@@ -33,7 +33,7 @@ Date of this report: 2026-11-02.
 ## What was verified, and how
 
 - 282 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
-- 91 browser tests (Playwright) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
+- 99 browser tests (Playwright; 5 skipped by design) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
   bottom-sheet handle only exists on phone-width screens).
 - Lint, type-check and production build pass. Production dependencies: 0 known vulnerabilities.
 - Lighthouse on the production build: accessibility 100, best practices 100, SEO 91.
