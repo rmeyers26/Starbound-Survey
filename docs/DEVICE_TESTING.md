@@ -56,6 +56,13 @@ Tick each one and note anything odd.
 - [ ] Tap a planet: the Sun stays on the same side of it (it does not swing round), and only the stars drift.
 - [ ] Tap the Moon: its surface stays still on screen while its lit part changes through the phases.
 
+**Practice mode** (Settings)
+
+- [ ] Switch **Practice mode** on: a gold "Practice" badge replaces the XP bar and Jupiter, Saturn, Uranus and Neptune appear straight away.
+- [ ] Scan Jupiter three times: each scan reveals deeper data, the message says "Practice scan: no XP", and the badge never changes.
+- [ ] Switch it off: the XP bar returns with your real XP, and the outer planets are locked again (if you are still a Cadet).
+- [ ] Close the browser, reopen: practice mode is still on, but the practice scans are gone.
+
 **Visual effects (graphics quality levels)**
 
 - [ ] High or Balanced: the Sun has a soft glow. Settings > Graphics quality > Performance removes it.

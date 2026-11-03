@@ -32,7 +32,7 @@ Date of this report: 2026-11-02.
 
 ## What was verified, and how
 
-- 282 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
+- 294 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
 - 99 browser tests (Playwright; 5 skipped by design) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
   bottom-sheet handle only exists on phone-width screens).
 - Lint, type-check and production build pass. Production dependencies: 0 known vulnerabilities.
@@ -92,6 +92,12 @@ Date of this report: 2026-11-02.
     is between 3 seconds and 10 minutes, no orbit is changed more than 60 times, and every change is explained.
 18. **Uranus had no moons in the game** although it has five big ones. Added (with Saturn's five mid-sized moons).
     The object button row is now 31 long: grouping buttons by planet is the next interface job.
+
+19. **Practice mode** (Settings): everything unlocked, every scan level available, no XP. Built as a virtual
+    "overlay" record (`game/practice.ts`) that the game reads while practice is on, so the real save is never
+    written to: turning practice off returns exactly to the real progress. Practice scans are kept in memory only.
+    Tested as pure rules, in the scan controller, and end to end (including that real XP and "objects inspected"
+    never change, and that the setting survives a reload).
 
 ## Open problems and trade-offs
 

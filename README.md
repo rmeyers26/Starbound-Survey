@@ -75,6 +75,10 @@ engine, then run with `PW_WEBKIT=1 npm run test:e2e`). Regenerate app icons with
 In **Settings** you can choose the graphics quality, turn on a frame-rate readout, change control
 speeds and Reduce motion, and export or import a backup of your progress.
 
+**Practice mode** (Settings): explore everything with no XP needed. Every region is unlocked and every scan level
+is available straight away. Practice scans still reveal data, but they give no XP, never change your saved
+progress, and are forgotten when you close the page. Turn it off and you are back exactly where you were.
+
 ## Project layout
 
 | Folder                      | Responsibility                                                              |

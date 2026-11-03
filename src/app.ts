@@ -3,6 +3,7 @@ import { createQualityController } from './engine/qualityController';
 import { readEffectsOverride } from './engine/effects';
 import { ViewHost, readRendererOverride } from './engine/viewHost';
 import { EventBus, type GameEvents } from './game/events';
+import { mergeScans, practiceRecord, type PracticeScans } from './game/practice';
 import { recordInspection } from './game/progress';
 import { isObjectUnlocked, rankThatUnlocks } from './game/regions';
 import { regionName } from './ui/format';
@@ -13,6 +14,7 @@ import { SaveService } from './save/saveService';
 import { openBestStore } from './save/stores';
 import { SettingsStore, defaultSettings, normalizeSettings, type Settings } from './game/settings';
 import type { CelestialObject } from './game/types';
+import type { SaveRecord } from './save/schema';
 import { loadPrefs, savePrefs } from './save/prefs';
 import { createFpsReadout } from './ui/fpsReadout';
 import { createHud } from './ui/hud';
@@ -54,6 +56,13 @@ export async function startApp(
       { durationMs: 15_000 },
     );
   }
+  // Practice mode (a setting): the game reads a VIRTUAL record (everything unlocked, best scanner) instead of the
+  // saved one, and practice scans are kept in memory only. See game/practice.ts.
+  let practiceScans: PracticeScans = {};
+  const isPractice = (): boolean => settings.get().practiceMode;
+  /** The record the game should use right now: the real save, or the practice overlay. */
+  const effectiveRecord = (): SaveRecord =>
+    isPractice() ? practiceRecord(save.current, practiceScans) : save.current;
   // Every time the player inspects an object, record it. The first save also asks the browser
   // to protect our data from being cleared (it may refuse, and nothing depends on the answer).
   let warnedAboutSaving = false;
@@ -61,7 +70,7 @@ export async function startApp(
   let selectedId: string | null = null;
   const offSelected = bus.on('object:selected', ({ id }) => {
     selectedId = id;
-    if (!id) return;
+    if (!id || isPractice()) return; // practice never touches the saved progress
     save
       .update((record) => recordInspection(record, id))
       .catch(() => {
@@ -86,7 +95,7 @@ export async function startApp(
     objects,
     bus,
     getQuality: quality.currentQuality,
-    getUnlockedRegions: () => save.current.unlockedRegions,
+    getUnlockedRegions: () => effectiveRecord().unlockedRegions,
     onFrame: quality.onFrame,
     forceCanvas: readRendererOverride(window.location.search) === 'canvas2d',
     effectsOff: readEffectsOverride(window.location.search) === 'off',
@@ -121,15 +130,22 @@ export async function startApp(
     bus,
     machine,
     objects,
-    getRecord: () => save.current,
-    commit: (change) =>
-      save.update(change).catch(() => {
+    getRecord: effectiveRecord,
+    isPractice,
+    commit: (change) => {
+      if (isPractice()) {
+        // Practice scans reveal data but are never saved: run the change on the overlay, keep only the scans.
+        practiceScans = mergeScans(practiceScans, change(effectiveRecord()).scannedObjects);
+        return Promise.resolve();
+      }
+      return save.update(change).catch(() => {
         if (warnedAboutSaving) return;
         warnedAboutSaving = true;
         toaster.show(
           'Could not save your progress on this device. Try exporting a backup from Settings.',
         );
-      }),
+      });
+    },
     getSelectedId: () => selectedId,
     getDistance: (id) => view?.distanceTo(id) ?? null,
     getSettings: () => settings.get(),
@@ -138,15 +154,28 @@ export async function startApp(
   // Show or hide bodies whenever progress could have changed which regions are unlocked (a rank-up, or a
   // backup being imported). If the selected object just became locked, clear the selection.
   const syncRegions = (): void => {
-    view?.setUnlockedRegions(save.current.unlockedRegions);
+    view?.setUnlockedRegions(effectiveRecord().unlockedRegions);
     const current = objects.find((o) => o.id === selectedId);
-    if (current && !isObjectUnlocked(current, save.current)) {
+    if (current && !isObjectUnlocked(current, effectiveRecord())) {
       bus.emit('object:selected', { id: null });
       bus.emit('camera:focus', { id: null });
     }
   };
   const offRegionsA = bus.on('rank:up', syncRegions);
   const offRegionsB = bus.on('progress:changed', syncRegions);
+  // Switching practice mode on or off changes what is unlocked, so update the views, buttons and bars.
+  let wasPractice = isPractice();
+  const offPractice = bus.on('settings:changed', () => {
+    if (isPractice() === wasPractice) return;
+    wasPractice = isPractice();
+    syncRegions();
+    bus.emit('progress:changed', { record: effectiveRecord() });
+    toaster.show(
+      wasPractice
+        ? 'Practice mode on: everything is unlocked and scans give no XP. Your saved progress is untouched.'
+        : 'Practice mode off: back to your real progress.',
+    );
+  });
   // Tapping a locked object's button explains how to unlock it.
   const offLocked = bus.on('object:locked', ({ id }) => {
     const object = objects.find((o) => o.id === id);
@@ -168,15 +197,16 @@ export async function startApp(
   });
 
   const cleanups = [
-    createHud(container, objects, bus, machine, () => save.current),
-    createXpBar(container, bus, () => save.current),
+    createHud(container, objects, bus, machine, effectiveRecord),
+    createXpBar(container, bus, effectiveRecord, isPractice),
     createScanHud(container, bus, objects, () => settings.get()),
-    createLogbook(container, objects, bus, machine, () => save.current),
-    createInfoPanel(container, objects, bus, () => save.current),
+    createLogbook(container, objects, bus, machine, effectiveRecord),
+    createInfoPanel(container, objects, bus, effectiveRecord),
     scan.dispose,
     offRankUp,
     offRegionsA,
     offRegionsB,
+    offPractice,
     offLocked,
     createFpsReadout(container, bus, settings.get().showFps),
     createSettingsPanel(container, settings, bus, [saveSection.element]),

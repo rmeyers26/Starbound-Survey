@@ -497,6 +497,10 @@ body {
   font-size: 0.8rem;
   color: #d6def5;
 }
+/* Practice mode: a gold outline so you can never mistake it for real progress. Must come after .xp-bar. */
+.xp-bar--practice {
+  border: 1px solid #ffd166;
+}
 .xp-rank {
   font-weight: 700;
 }

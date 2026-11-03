@@ -10,7 +10,13 @@ import { createEmptySave, type SaveRecord } from '../../src/save/schema';
 const objects = validateObjects(realData);
 
 /** Builds a controller with a fake clock and fake animation frames, so a 3 s scan runs instantly. */
-function setup(overrides: { settings?: Partial<Settings>; record?: Partial<SaveRecord> } = {}) {
+function setup(
+  overrides: {
+    settings?: Partial<Settings>;
+    record?: Partial<SaveRecord>;
+    practice?: boolean;
+  } = {},
+) {
   const bus = new EventBus<GameEvents>();
   const machine = new GameStateMachine(bus);
   machine.transition('TITLE');
@@ -48,6 +54,7 @@ function setup(overrides: { settings?: Partial<Settings>; record?: Partial<SaveR
     getSelectedId: () => selected,
     getDistance: () => distance,
     getSettings: () => settings,
+    isPractice: () => overrides.practice ?? false,
     scanSeconds: 3,
     now: () => clock,
     requestFrame: (cb) => {
@@ -232,5 +239,29 @@ describe('scan controller: housekeeping', () => {
     t.bus.on('scan:blocked', spy);
     t.press();
     expect(t.names()).not.toContain('scan:progress');
+  });
+});
+
+describe('scan controller: practice mode', () => {
+  it('completes the scan and reveals the data, but awards no XP and fires no XP or rank events', () => {
+    const t = setup({ practice: true, record: { xp: 190 } }); // 10 XP short of Navigator
+    t.press();
+    t.advance(3000);
+    expect(t.names()).toContain('scan:completed');
+    const completed = t.events.find(([n]) => n === 'scan:completed')![1] as { xpAwarded: number };
+    expect(completed.xpAwarded).toBe(0);
+    expect(t.record().scannedObjects).toEqual({ moon: 1 }); // the data is revealed ...
+    expect(t.record().xp).toBe(190); // ... without any XP
+    expect(t.record().rank).toBe('Cadet');
+    expect(t.names()).not.toContain('xp:changed');
+    expect(t.names()).not.toContain('rank:up');
+  });
+
+  it('the same scan with practice off DOES rank the player up', () => {
+    const t = setup({ practice: false, record: { xp: 190 } });
+    t.press();
+    t.advance(3000);
+    expect(t.record().xp).toBe(210);
+    expect(t.names()).toContain('rank:up');
   });
 });

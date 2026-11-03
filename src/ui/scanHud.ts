@@ -125,7 +125,11 @@ export function createScanHud(
     }),
     bus.on('scan:completed', ({ id, tier, xpAwarded }) => {
       setProgress(0);
-      const reward = xpAwarded > 0 ? ` +${xpAwarded} XP` : '';
+      const reward = getSettings().practiceMode
+        ? ' Practice scan: no XP.'
+        : xpAwarded > 0
+          ? ` +${xpAwarded} XP`
+          : '';
       say(`${TIER_LABEL[tier] ?? 'Scan'} scan of ${nameOf(id)} complete.${reward}`);
     }),
     bus.on('scan:cancelled', () => {
@@ -150,6 +154,8 @@ export function createXpBar(
   container: HTMLElement,
   bus: EventBus<GameEvents>,
   getRecord: () => SaveRecord,
+  /** True in practice mode: the bar says so instead of showing XP. */
+  isPractice: () => boolean = () => false,
 ): () => void {
   const bar = el('div', 'xp-bar');
   bar.setAttribute('role', 'group');
@@ -169,6 +175,15 @@ export function createXpBar(
   (container.querySelector('.hud-status') ?? container).append(bar);
 
   const render = (): void => {
+    bar.classList.toggle('xp-bar--practice', isPractice());
+    if (isPractice()) {
+      // No XP is earned in practice mode, so show that plainly (a full bar and no numbers to chase).
+      rank.textContent = 'Practice';
+      fill.style.width = '100%';
+      track.setAttribute('aria-valuenow', '100');
+      text.textContent = 'Everything unlocked, no XP';
+      return;
+    }
     const { xp } = getRecord();
     const p = progressToNextRank(xp);
     rank.textContent = p.rank.name;
@@ -181,7 +196,11 @@ export function createXpBar(
   };
   render();
 
-  const offs = [bus.on('xp:changed', render), bus.on('progress:changed', render)];
+  const offs = [
+    bus.on('xp:changed', render),
+    bus.on('progress:changed', render),
+    bus.on('settings:changed', render), // practice mode can be switched on or off
+  ];
   return () => {
     offs.forEach((off) => off());
     bar.remove();

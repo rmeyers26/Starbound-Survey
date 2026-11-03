@@ -21,6 +21,8 @@ export interface Settings {
   reducedMotion: boolean;
   /** 'hold' = keep the SCAN control pressed (spec). 'tap' = one tap starts a scan (no holding needed). */
   scanMode: ScanMode;
+  /** Practice mode: everything unlocked, every scan tier available, no XP and no changes to saved progress. */
+  practiceMode: boolean;
 }
 
 export const SENSITIVITY_MIN = 0.25;
@@ -35,6 +37,7 @@ export function defaultSettings(prefersReducedMotion: boolean): Settings {
     zoomSensitivity: 1,
     reducedMotion: prefersReducedMotion,
     scanMode: 'hold',
+    practiceMode: false,
   };
 }
 
@@ -60,6 +63,7 @@ export function normalizeSettings(raw: unknown, defaults: Settings): Settings {
     scanMode: SCAN_MODES.includes(r.scanMode as ScanMode)
       ? (r.scanMode as ScanMode)
       : defaults.scanMode,
+    practiceMode: typeof r.practiceMode === 'boolean' ? r.practiceMode : defaults.practiceMode,
   };
 }
 
