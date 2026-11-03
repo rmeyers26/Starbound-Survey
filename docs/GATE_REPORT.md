@@ -155,6 +155,12 @@ Date of this report: 2026-11-02.
     nucleus out to white in a screenshot), and a tail that is there for the whole replay, brighter and softer-edged.
     A screenshot also showed the first chunks were bigger than the nucleus; they are now small.
     **Settings now has a Close button at the top**, pinned there while the list scrolls (the one at the bottom stays).
+    **CI's Lighthouse check then failed (performance 48, minimum 50), and it was real, not noise.** Measured locally the same
+    way: `main` scored 49, 51 and 53; the new comet scored 46 three times (largest paint 4.0 s against about 3.3 s). Cause:
+    drawing the tails, glow and rocks from the first second made the page compile extra shader programs while it was still
+    loading, and a software renderer is slow at that. Fix: the comet's visuals are now built only after the page has had 6
+    seconds to settle, their shaders are compiled while still hidden, and then it fades in (a test checks nothing is built
+    in the first seconds). Measured afterwards: 54, 53 and 54. Lesson: optional eye candy must not run during startup.
 
 ## Open problems and trade-offs
 
