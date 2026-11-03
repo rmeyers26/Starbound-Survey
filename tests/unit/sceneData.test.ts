@@ -81,11 +81,16 @@ describe('objects.json and the 3D scene agree', () => {
       objects.find((o) => o.id === id)!.data.orbitalPeriod.value as number;
     const shownPeriod = (id: string): number => VISUALS[id].visualPeriodDays ?? realPeriod(id);
     const orbiting = Object.keys(VISUALS).filter((id) => VISUALS[id].orbit);
+    const MIN_LAP_DAYS = 3 * SIM_DAYS_PER_SECOND; // a lap under 3 seconds is too fast to follow
 
-    it('keeps the true order of speeds: whatever really orbits faster is drawn orbiting faster', () => {
-      const byReal = [...orbiting].sort((a, b) => realPeriod(a) - realPeriod(b));
-      const byShown = [...orbiting].sort((a, b) => shownPeriod(a) - shownPeriod(b));
-      expect(byShown).toEqual(byReal);
+    it('keeps the true order of speeds around each planet: Io laps faster than Europa, and so on', () => {
+      const parents = new Set(orbiting.map((id) => VISUALS[id].orbit!.parentId));
+      for (const parent of parents) {
+        const family = orbiting.filter((id) => VISUALS[id].orbit!.parentId === parent);
+        const byReal = [...family].sort((a, b) => realPeriod(a) - realPeriod(b));
+        const byShown = [...family].sort((a, b) => shownPeriod(a) - shownPeriod(b));
+        expect(byShown, `bodies orbiting ${parent}`).toEqual(byReal);
+      }
     });
 
     it('never makes a body orbit faster than it really does', () => {
@@ -93,13 +98,56 @@ describe('objects.json and the 3D scene agree', () => {
     });
 
     it('every lap takes at least 3 seconds, so nothing becomes a blur', () => {
-      for (const id of orbiting)
-        expect(shownPeriod(id) / SIM_DAYS_PER_SECOND).toBeGreaterThanOrEqual(3);
+      for (const id of orbiting) expect(shownPeriod(id)).toBeGreaterThanOrEqual(MIN_LAP_DAYS);
     });
 
-    it('only the moons that would otherwise be a blur are slowed', () => {
-      const slowed = orbiting.filter((id) => VISUALS[id].visualPeriodDays !== undefined);
-      expect(slowed.sort()).toEqual(['deimos', 'phobos']);
+    it('every body whose real lap would be a blur is slowed (and the slowing is declared)', () => {
+      for (const id of orbiting) {
+        if (realPeriod(id) < MIN_LAP_DAYS) {
+          expect(VISUALS[id].visualPeriodDays, `${id} needs a display period`).toBeDefined();
+        }
+      }
+    });
+
+    it('planets and asteroids circling the Sun are never slowed (they are drawn at their true speed)', () => {
+      for (const id of orbiting.filter((i) => VISUALS[i].orbit!.parentId === 'sun')) {
+        expect(VISUALS[id].visualPeriodDays, id).toBeUndefined();
+      }
+    });
+  });
+
+  describe("the direction every body really travels, from the game's own position code", () => {
+    // Angular momentum about north (+Y) of a body relative to what it orbits: positive = counter-clockwise
+    // seen from above the north pole, negative = clockwise.
+    const spinAboutParent = (id: string): number => {
+      const parent = VISUALS[id].orbit!.parentId;
+      const t0 = computePositions(objects, 3);
+      const t1 = computePositions(objects, 3.01);
+      const rel = (m: ReturnType<typeof computePositions>) => ({
+        x: m.get(id)!.x - m.get(parent)!.x,
+        z: m.get(id)!.z - m.get(parent)!.z,
+      });
+      const a = rel(t0);
+      const b = rel(t1);
+      return a.z * (b.x - a.x) - a.x * (b.z - a.z);
+    };
+
+    it('every planet, asteroid and normal moon goes counter-clockwise seen from above north', () => {
+      for (const id of Object.keys(VISUALS)) {
+        if (!VISUALS[id].orbit || VISUALS[id].retrograde) continue;
+        expect(spinAboutParent(id), id).toBeGreaterThan(0);
+      }
+    });
+
+    it('Triton goes clockwise round Neptune, the opposite way to Io round Jupiter', () => {
+      expect(spinAboutParent('io')).toBeGreaterThan(0);
+      expect(spinAboutParent('triton')).toBeLessThan(0);
+    });
+  });
+
+  describe('retrograde orbits', () => {
+    it('only Triton orbits the "wrong" way (Neptune\'s big moon is a captured object)', () => {
+      expect(Object.keys(VISUALS).filter((id) => VISUALS[id].retrograde)).toEqual(['triton']);
     });
   });
 
@@ -107,6 +155,14 @@ describe('objects.json and the 3D scene agree', () => {
     const firstScanXp = 20; // spec: first scan of an object = 20 XP
     const innerObjects = objects.filter((o) => o.region === 'inner');
     expect(innerObjects.length * firstScanXp).toBeGreaterThanOrEqual(RANKS[1].xp);
+  });
+
+  it('Surveyor is reachable using ONLY what Navigator can reach (first scan + detailed scan of every object)', () => {
+    const firstScanXp = 20;
+    const detailedScanXp = 10; // Navigator's scanner can do the detailed tier, not the spectral one
+    const navigatorRegions = new Set([...RANKS[0].regions, ...RANKS[1].regions]);
+    const reachable = objects.filter((o) => navigatorRegions.has(o.region));
+    expect(reachable.length * (firstScanXp + detailedScanXp)).toBeGreaterThanOrEqual(RANKS[2].xp);
   });
 
   it('every object belongs to a region that some rank unlocks', () => {

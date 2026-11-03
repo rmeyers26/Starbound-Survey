@@ -35,7 +35,7 @@ export function computePositions(
       const parent = resolve(orbit.parentId); // a body's position is its parent's + its orbit offset
       // Fast moons use a slowed display period so they can be seen (see VisualSpec.visualPeriodDays).
       const period = VISUALS[id].visualPeriodDays ?? periodDaysOf(objects, id);
-      const offset = orbitPosition(orbit.radius, period, simDays);
+      const offset = orbitPosition(orbit.radius, period, simDays, VISUALS[id].retrograde);
       position = { x: parent.x + offset.x, z: parent.z + offset.z };
     }
     positions.set(id, position);

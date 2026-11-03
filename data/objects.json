@@ -574,6 +574,194 @@
     "source": "NASA Jupiter Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/jupiterfact.html)"
   },
   {
+    "id": "io",
+    "name": "Io",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Io is the most volcanically active world in the Solar System, with hundreds of volcanoes. Jupiter's gravity squeezes and stretches it every orbit, and that heat powers the eruptions.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 3643.2,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 8.9319e22,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Jupiter",
+        "value": 421800,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 1.769138,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 1.796,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 3528,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Jovian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "europa",
+    "name": "Europa",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Europa is covered by a shell of ice, and scientists think a deep salty ocean lies underneath, possibly holding more water than all of Earth's oceans put together.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 3121.6,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 4.7998e22,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Jupiter",
+        "value": 671100,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 3.551181,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 1.315,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 3013,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Jovian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "ganymede",
+    "name": "Ganymede",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Ganymede is the largest moon in the Solar System, bigger than the planet Mercury. It is the only moon known to have its own magnetic field.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 5262.4,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.4819e23,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Jupiter",
+        "value": 1070400,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 7.154553,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 1.428,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1942,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Jovian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "callisto",
+    "name": "Callisto",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Callisto is one of the most heavily cratered worlds in the Solar System. Its ancient surface has hardly changed for billions of years.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 4820.6,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.0759e23,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Jupiter",
+        "value": 1882700,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 16.689017,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 1.235,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1834,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Jovian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
     "id": "saturn",
     "name": "Saturn",
     "type": "planet",
@@ -625,6 +813,100 @@
       }
     },
     "source": "NASA Saturn Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/saturnfact.html)"
+  },
+  {
+    "id": "titan",
+    "name": "Titan",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Titan is Saturn's largest moon, wrapped in a thick orange haze. It is the only moon with a dense atmosphere, and the only other world where we have seen liquid lakes on the surface, made of methane and ethane.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 5149.4,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.3452e23,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Saturn",
+        "value": 1221870,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 15.945421,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 1.352,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1881,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Saturnian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "enceladus",
+    "name": "Enceladus",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Enceladus is a small, bright, icy moon that sprays jets of water vapour and ice into space from cracks near its south pole, a sign of a hidden ocean under the ice.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 504.2,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.08e20,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Saturn",
+        "value": 238020,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 1.370218,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.113,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1609,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Saturnian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
   },
   {
     "id": "uranus",
@@ -731,5 +1013,52 @@
       }
     },
     "source": "NASA Neptune Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/neptunefact.html)"
+  },
+  {
+    "id": "triton",
+    "name": "Triton",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Triton is Neptune's largest moon, and it orbits backwards, against the direction Neptune spins. That hints it was captured from the Kuiper Belt. Voyager 2 saw plumes of nitrogen erupting from its surface.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 2706.8,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 2.139e22,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Neptune",
+        "value": 354759,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period (retrograde)",
+        "value": 5.876854,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.779,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 2061,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Neptunian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
   }
 ]

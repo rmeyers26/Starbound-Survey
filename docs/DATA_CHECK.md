@@ -124,3 +124,38 @@ Notes:
   the Sun (Earth is 60), where the true ratios would put Neptune 30 times farther out than Earth. The true ORDER and
   size order are kept and tested.
 - All four are flat-colour spheres with no cloud bands yet.
+
+## The outer moons: Io, Europa, Ganymede, Callisto, Titan, Enceladus and Triton
+
+**Status: UNVERIFIED**, entered from memory. Sources to compare with: NASA's Jovian, Saturnian and Neptunian
+Satellite Fact Sheets (NSSDC) and JPL's "Planetary Satellite Physical Parameters" (ssd.jpl.nasa.gov/sats/phys_par/).
+As with the other moons, I am not sure of the exact fact-sheet page addresses, so the `source` text names the
+resource instead of a link that might be wrong.
+
+| Value (as entered)                | Io        | Europa    | Ganymede  | Callisto  | Titan     | Enceladus | Triton     | Checked? |
+| --------------------------------- | --------- | --------- | --------- | --------- | --------- | --------- | ---------- | -------- |
+| Mean diameter (km)                | 3,643.2   | 3,121.6   | 5,262.4   | 4,820.6   | 5,149.4   | 504.2     | 2,706.8    | [ ]      |
+| Mass (kg)                         | 8.9319e22 | 4.7998e22 | 1.4819e23 | 1.0759e23 | 1.3452e23 | 1.08e20   | 2.139e22   | [ ]      |
+| Average distance from planet (km) | 421,800   | 671,100   | 1,070,400 | 1,882,700 | 1,221,870 | 238,020   | 354,759    | [ ]      |
+| Orbital period (days)             | 1.769138  | 3.551181  | 7.154553  | 16.689017 | 15.945421 | 1.370218  | 5.876854\* | [ ]      |
+| Surface gravity (m/s²)            | 1.796     | 1.315     | 1.428     | 1.235     | 1.352     | 0.113     | 0.779      | [ ]      |
+| Mean density (kg/m³)              | 3,528     | 3,013     | 1,942     | 1,834     | 1,881     | 1,609     | 2,061      | [ ]      |
+
+\* Triton orbits Neptune backwards ("retrograde"). The game draws it going the opposite way round to every other
+moon, and the label says "retrograde".
+
+Quick-facts text to check: Io "hundreds of volcanoes" and tidal heating; Europa "possibly more water than all of
+Earth's oceans put together"; Ganymede "bigger than Mercury" and "the only moon known to have its own magnetic
+field"; Callisto "one of the most heavily cratered"; Titan "the only moon with a dense atmosphere" and methane and ethane
+lakes; Enceladus water jets from the south pole; Triton "orbits backwards", "captured from the Kuiper Belt" and
+nitrogen plumes seen by Voyager 2.
+
+**How they are drawn:** real laps range from 1.4 to 17 days, a blur at game speed, so each moon is drawn with a
+slowed display period of 9 to 33 days (3 to 11 seconds a lap). The info panel shows the real periods. The order
+of speed around each planet is true and tested. They unlock with their planet at Navigator.
+
+## The asteroid belt
+
+A decorative band of up to 3,000 small dots between Mars and Jupiter (fewer on weaker graphics levels). It is **not
+data**: the real belt holds millions of rocks, spread much more thinly than any picture can show. Ceres and Vesta are
+the real, scannable members.

@@ -70,9 +70,16 @@ describe('data/objects.json (the real game data)', () => {
       'vesta',
       'ceres',
       'jupiter',
+      'io',
+      'europa',
+      'ganymede',
+      'callisto',
       'saturn',
+      'titan',
+      'enceladus',
       'uranus',
       'neptune',
+      'triton',
     ]);
   });
 });

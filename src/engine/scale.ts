@@ -31,6 +31,8 @@ export interface VisualSpec {
    * Moon), which a unit test checks. This is disclosed in the docs.
    */
   visualPeriodDays?: number;
+  /** True if it orbits the OPPOSITE way to everything else (clockwise seen from above north). Triton does. */
+  retrograde?: boolean;
   /** Rings drawn around the body (Saturn). Sizes are multiples of the body's radius. Decorative. */
   rings?: { inner: number; outer: number; color: number; opacity: number; tiltDeg: number };
 }
@@ -87,6 +89,60 @@ export const VISUALS: Record<string, VisualSpec> = {
   },
   uranus: { radius: 3.2, color: 0x9fd6e0, orbit: { parentId: 'sun', radius: 190 } },
   neptune: { radius: 3.1, color: 0x4a6fe0, orbit: { parentId: 'sun', radius: 212 } },
+  // Moons of the outer planets. They unlock with their planet. Real laps range from 1.4 to 17 days, a blur at
+  // game speed, so each is DRAWN with a slowed period (>= 9 days = 3 s a lap). Order of speed around each planet
+  // stays true; a unit test checks it. Sizes keep the true order across ALL bodies (also tested).
+  io: {
+    radius: 0.57,
+    color: 0xd9c36a,
+    orbit: { parentId: 'jupiter', radius: 9.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 9,
+  },
+  europa: {
+    radius: 0.5,
+    color: 0xcfc7b5,
+    orbit: { parentId: 'jupiter', radius: 12.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 14,
+  },
+  ganymede: {
+    radius: 0.9,
+    color: 0x8d8577,
+    orbit: { parentId: 'jupiter', radius: 16 },
+    tidallyLocked: true,
+    visualPeriodDays: 22,
+  },
+  callisto: {
+    radius: 0.6,
+    color: 0x6b6358,
+    orbit: { parentId: 'jupiter', radius: 20 },
+    tidallyLocked: true,
+    visualPeriodDays: 33,
+  },
+  // Saturn's rings reach 2.3 planet radii (about 11 units), so its moons orbit beyond them.
+  enceladus: {
+    radius: 0.2,
+    color: 0xf2f6f8,
+    orbit: { parentId: 'saturn', radius: 14 },
+    tidallyLocked: true,
+    visualPeriodDays: 9,
+  },
+  titan: {
+    radius: 0.85,
+    color: 0xd9a05b,
+    orbit: { parentId: 'saturn', radius: 21 },
+    tidallyLocked: true,
+    visualPeriodDays: 27,
+  },
+  triton: {
+    radius: 0.45,
+    color: 0xc9b8b0,
+    orbit: { parentId: 'neptune', radius: 7.5 },
+    tidallyLocked: true,
+    retrograde: true, // Triton circles Neptune backwards
+    visualPeriodDays: 15,
+  },
 };
 
 /**

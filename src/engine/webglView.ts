@@ -6,6 +6,7 @@ import { attachInput } from './inputController';
 import { log } from './log';
 import { hitRadius, pickObject, type PickCandidate } from './picking';
 import { bearing, coRotationYawDelta, faceTowards } from './orientation';
+import { BELT_PERIOD_DAYS, MAX_BELT_ROCKS, beltRockCount, generateBelt } from './belt';
 import { mulberry32 } from './random';
 import { visibleBodyIds } from '../game/regions';
 import {
@@ -40,6 +41,7 @@ export class WebGLView implements View {
   /** Camera distance that frames everything currently visible. */
   private overviewDistance = overviewDistanceFor(0);
   private readonly stars: THREE.Points;
+  private readonly belt: THREE.Points;
   private readonly selectionRing: THREE.Mesh;
   private readonly raycaster = new THREE.Raycaster();
   private readonly resizeObserver: ResizeObserver;
@@ -80,6 +82,9 @@ export class WebGLView implements View {
 
     this.scene.background = new THREE.Color(0x02030a);
     this.buildLights();
+    // The belt must exist before the bodies are built, because showing or hiding bodies also shows or hides it.
+    this.belt = this.buildBelt();
+    this.scene.add(this.belt);
     this.buildBodies();
     this.stars = this.buildStars();
     this.scene.add(this.stars);
@@ -149,6 +154,7 @@ export class WebGLView implements View {
       Math.min(window.devicePixelRatio || 1, quality.pixelRatioCap) * quality.resolutionScale;
     this.renderer.setPixelRatio(ratio);
     this.stars.geometry.setDrawRange(0, Math.min(quality.starCount, MAX_STARS));
+    this.belt.geometry.setDrawRange(0, beltRockCount(quality.starCount));
     this.resize();
   }
 
@@ -239,6 +245,7 @@ export class WebGLView implements View {
   private applyVisibility(): void {
     for (const [id, mesh] of this.meshes) mesh.visible = this.visibleIds.has(id);
     for (const [id, line] of this.orbitLines) line.visible = this.visibleIds.has(id);
+    this.belt.visible = this.visibleIds.has('ceres'); // the belt belongs to the inner region, with Ceres
   }
 
   setUnlockedRegions(regions: string[]): void {
@@ -291,6 +298,27 @@ export class WebGLView implements View {
       color: 0xffffff,
       size: 2.2,
       sizeAttenuation: false,
+    });
+    return new THREE.Points(geometry, material);
+  }
+
+  /** The asteroid belt: every rock in ONE Points object (one draw call), turned slowly each frame. */
+  private buildBelt(): THREE.Points {
+    const rocks = generateBelt(MAX_BELT_ROCKS);
+    const positions = new Float32Array(rocks.length * 3);
+    rocks.forEach((rock, i) => {
+      positions[i * 3] = Math.cos(rock.angle) * rock.radius;
+      positions[i * 3 + 1] = rock.height;
+      positions[i * 3 + 2] = -Math.sin(rock.angle) * rock.radius; // same direction as the planets
+    });
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({
+      color: 0x9a9388,
+      size: 1.8,
+      sizeAttenuation: false, // always a small dot on screen, however far away
+      transparent: true,
+      opacity: 0.8,
     });
     return new THREE.Points(geometry, material);
   }
@@ -496,6 +524,8 @@ export class WebGLView implements View {
     const dt = Math.min(frameMs / 1000, 0.1);
     this.simDays += dt * SIM_DAYS_PER_SECOND;
     this.updatePositions();
+    // The whole belt turns together, the same way the planets go round (counter-clockwise from above).
+    this.belt.rotation.y = (this.simDays / BELT_PERIOD_DAYS) * Math.PI * 2;
     this.coRotateCameraWithOrbit();
     this.rig.update(dt, this.followedPosition());
     this.rig.applyTo(this.camera);
