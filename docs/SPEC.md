@@ -54,7 +54,7 @@ On desktop the info panel sits at the side. On phones the 3D view is full screen
 
 **Desktop controls:** left-drag to look around, scroll or W/S to move, click to select, hold the SCAN button or Space to scan, M for the Star Map, Esc to go back. Touch controls are in the Touch-first navigation section below.
 
-**Camera:** orbit and fly-to. Selecting an object flies the camera there over 2 to 4 seconds with an easing curve, then orbits around it. This is much easier to control than free flight, especially on a phone.
+**Camera:** orbit and fly-to. Selecting an object flies the camera there over 2 to 4 seconds with an easing curve, then orbits around it. This is much easier to control than free flight, especially on a phone. _Added after this spec:_ an optional **pilot mode** (the Pilot ship button or the P key) lets the player steer a spacecraft with a throttle lever, keys or on-screen buttons, four camera views and an autopilot. It is deliberately arcade-style (you cannot crash), and the orbit and fly-to camera stays the default.
 
 **Game state machine:** the game is always in exactly one state, which prevents impossible situations such as scanning while a menu is open.
 

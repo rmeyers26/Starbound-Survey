@@ -111,6 +111,23 @@ Tick each one and note anything odd.
 - [ ] The frame rate with the image is still near 60 (note it before and after if you can).
 - [ ] Settings > Graphics quality > Performance still looks acceptable.
 
+**Spacecraft** (tap **Pilot ship**, bottom left)
+
+- [ ] The ship appears where the camera was, with no jump. You can see the ship above the controls (not hidden behind them).
+- [ ] Holding **+** speeds the ship up; letting go keeps the speed; **Stop** brings it to zero.
+- [ ] Holding **◀** and **▶** turns the ship, and it stops turning the moment you let go (try with two fingers: one turning, one on **+**).
+- [ ] **▲** and **▼** tilt the nose; dragging on the picture also steers in Chase and Cockpit.
+- [ ] All five views work (Chase, Cockpit, Orbit, Map, Cinematic). In Orbit, dragging swings round the ship.
+- [ ] Cinematic: the camera cuts between four shots about every 6 seconds, the black bars are thin, the object buttons at the top are still visible and work, and the ship is easy to see in every shot. Does it feel smooth, or does the cutting feel jarring?
+- [ ] Cinematic with Settings > Reduce motion on: one still angle, no cutting.
+- [ ] Tap an object button: the autopilot flies there, goes round the Sun if needed, and stops. "Arrived at ..." appears.
+- [ ] Hold **SCAN** after arriving: the scan works. Fly away from the planet and the scan says "Move closer".
+- [ ] With the info sheet open the steering pad hides but **Cancel flight** stays; closing the sheet brings the pad back.
+- [ ] The frame rate while flying fast (with the warp streaks) is still near 60. Note it on High, Balanced and Performance.
+- [ ] Nothing overlaps the SCAN button in portrait and landscape, and the page does not slide sideways.
+- [ ] Settings > Reduce motion: the autopilot jumps straight to the planet and there are no streaks.
+- [ ] Leave ship: the zoom / Overview / Logbook / Settings buttons come back and everything works as before.
+
 **Saving**
 
 - [ ] Select two objects. Close the browser completely, reopen: Settings shows 2 inspected.

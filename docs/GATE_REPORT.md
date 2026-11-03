@@ -114,6 +114,26 @@ Date of this report: 2026-11-02.
     and a toast's text lets taps through to whatever is underneath, apart from its own buttons. Reproduced first (five toasts
     reached the Settings button on a 390 x 664 screen), and the new test was confirmed to fail with the cap switched off.
 
+23. **A spacecraft you can fly** (Pilot ship, or the P key). Arcade flight, not real physics: a throttle lever, steering,
+    a top speed that shrinks near worlds (so you cannot crash), and an autopilot that flies to the selected object, goes
+    round the Sun, and stops in scanning range. Five camera views (Chase, Cockpit, Orbit, Map, and a self-directing
+    **Cinematic** camera that cuts between four shots through a film-style lens with letterbox bars, and holds one
+    still angle with Reduce motion; its shots are pure, tested functions in `engine/cinematic.ts`), keyboard controls
+    (W/S, A/D or arrows, X, V, P) and on-screen hold-to-steer buttons for phones. Near a world the ship is carried along
+    with it, otherwise orbiting planets slid away from a parked ship. Scanning now measures from the ship while piloting.
+    The rules live in `engine/flight.ts`, `engine/pilot.ts` and `engine/shipViews.ts` (pure, no Three.js) and are unit
+    tested, including: never inside a planet at full throttle, the same distance at 30 and 144 frames per second, the
+    autopilot going round the Sun, and catching a moving planet. Two real bugs were caught by tests or screenshots
+    while building it: the autopilot could never catch a planet that moves faster than it creeps in, and it overshot its
+    stopping point (an under-damped speed law); a quick tap of X braked for only one frame.
+    Why not free flight: the spec says orbit and fly-to are "much easier to control than free flight, especially on a
+    phone", so the original camera stays the default and the ship is an extra mode. The phone layout was redesigned after
+    a screenshot showed the controls hiding the ship and colliding with the top buttons (see the README).
+    While building the Cinematic view, a screenshot showed its black bars hiding the object buttons; the first test for it
+    passed anyway (the bars let taps through, so a click works under them), so it was rewritten to check the buttons'
+    labels are visible in the picture, and confirmed to fail with the bug put back.
+    Honesty: the ship's speeds are made up (u/s in scene units); the info panel's real values are unchanged.
+
 ## Open problems and trade-offs
 
 1. **WebGPU is not implemented.** The spec asks for WebGPU first. Three.js's WebGPU API is still moving

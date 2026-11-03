@@ -62,6 +62,24 @@ export function warpStrength(progress: number, travel: number, reducedMotion: bo
   return length * Math.sin(progress * Math.PI);
 }
 
+/** While piloting the spacecraft, streaks start to show above this speed (scene units per second)... */
+export const CRUISE_WARP_START = 12;
+/** ...and are at full strength from this speed. */
+export const CRUISE_WARP_FULL = 40;
+
+/**
+ * How strong the warp streaks are while PILOTING, from 0 to 1. They give a sense of speed in empty space (where
+ * nothing else moves past you) and fade in smoothly as you go faster. Reverse and slow flight show none.
+ */
+export function cruiseWarp(speed: number, reducedMotion: boolean): number {
+  if (reducedMotion) return 0;
+  if (!Number.isFinite(speed)) return 0; // never let a bad number (NaN) leak into an opacity
+  return Math.min(
+    1,
+    Math.max(0, (speed - CRUISE_WARP_START) / (CRUISE_WARP_FULL - CRUISE_WARP_START)),
+  );
+}
+
 /** How many warp streaks to draw at a graphics level (0 = none). */
 export function warpStreakCount(enabled: boolean): number {
   return enabled ? 160 : 0;

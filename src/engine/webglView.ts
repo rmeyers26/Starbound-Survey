@@ -8,9 +8,15 @@ import { hitRadius, pickObject, type PickCandidate } from './picking';
 import { bearing, coRotationYawDelta, faceTowards } from './orientation';
 import { BELT_PERIOD_DAYS, MAX_BELT_ROCKS, beltRockCount, generateBelt } from './belt';
 import { createAtmosphere } from './atmosphere';
+import type { Body } from './flight';
+import { PilotController, isFlightKey } from './pilot';
+import { createShipModel, type ShipModel } from './shipModel';
+import { shotAt } from './cinematic';
+import { DEFAULT_FOV, cameraPoseFor, shipModelScale } from './shipViews';
 import type { BloomPipeline } from './bloomPipeline';
 import {
   bloomPlan,
+  cruiseWarp,
   sunBrightness,
   warpStreakCount,
   warpStrength,
@@ -25,10 +31,18 @@ import {
   focusDistance,
   overviewDistanceFor,
   reachFromSun,
+  scanRange,
 } from './scale';
 import { computePositions } from './solarSystem';
 import { loadTexture, textureUrlFor } from './textures';
-import type { ControlSettings, View, ViewOptions, ViewQuality, ViewState } from './view';
+import type {
+  ControlSettings,
+  PilotStatus,
+  View,
+  ViewOptions,
+  ViewQuality,
+  ViewState,
+} from './view';
 import { WarpStreaks } from './warpEffect';
 
 /** Radius of the sphere the stars sit on (far beyond the planets). */
@@ -77,6 +91,19 @@ export class WebGLView implements View {
   private focusId: string | null = null;
   /** Last frame's bearing from the focused body to the body it orbits (null = not tracking). */
   private lockBearing: number | null = null;
+  /** The spacecraft: its flight rules live in PilotController; this class only draws it and moves the camera. */
+  private readonly pilot = new PilotController();
+  private readonly shipModel: ShipModel = createShipModel();
+  /** The orbit camera used for the spacecraft's "Orbit" view (separate, so leaving the ship does not disturb it). */
+  private readonly shipRig = new CameraRig();
+  /** True for one frame after the camera view changes, so the camera jumps there instead of gliding. */
+  private snapPilotCamera = true;
+  private pilotStatusClock = 0;
+  /** Seconds spent in the cinematic view, which decides which shot is on (restarts each time you choose it). */
+  private cinematicClock = 0;
+  /** The last shot number written to the canvas's data-shot attribute. */
+  private shotLabel = '';
+  private lastPilotStatus = '';
 
   constructor(options: ViewOptions) {
     this.options = options;
@@ -114,9 +141,13 @@ export class WebGLView implements View {
     this.scene.add(this.stars);
     this.selectionRing = this.buildSelectionRing();
     this.scene.add(this.selectionRing);
+    this.shipModel.group.visible = false;
+    this.scene.add(this.shipModel.group);
 
     this.restoreState(options.initialState);
+    this.updateCanvasLabels(); // report "pilot off" (and describe the controls) from the very first frame
     this.connectInput(canvas);
+    this.connectPilotKeys();
     this.connectBus();
 
     // Keep the canvas sized to its container, including when a phone rotates.
@@ -189,6 +220,9 @@ export class WebGLView implements View {
   setControlSettings(settings: ControlSettings): void {
     this.rig.sensitivity = { rotate: settings.rotateSensitivity, zoom: settings.zoomSensitivity };
     this.rig.reducedMotion = settings.reducedMotion;
+    this.shipRig.sensitivity = this.rig.sensitivity;
+    this.shipRig.reducedMotion = settings.reducedMotion;
+    this.pilot.reducedMotion = settings.reducedMotion;
   }
 
   getState(): ViewState {
@@ -197,12 +231,16 @@ export class WebGLView implements View {
       focusId: this.focusId,
       simDays: this.simDays,
       camera: this.rig.getState(),
+      ship: this.pilot.snapshot(),
     };
   }
 
+  /** Distance to an object for the scanner: from the SHIP while piloting, otherwise from the camera. */
   distanceTo(id: string): number | null {
     const mesh = this.meshes.get(id);
-    return mesh ? this.camera.position.distanceTo(mesh.position) : null;
+    if (!mesh) return null;
+    if (this.pilot.active) return this.pilot.distanceTo(this.bodyOf(id, mesh));
+    return this.camera.position.distanceTo(mesh.position);
   }
 
   /**
@@ -478,8 +516,8 @@ export class WebGLView implements View {
 
     this.cleanups.push(
       attachInput(canvas, {
-        onDrag: (dx, dy) => this.rig.rotate(dx, dy),
-        onPinch: (ratio) => this.rig.zoomBy(1 / ratio), // fingers apart (ratio > 1) = zoom in
+        onDrag: (dx, dy) => this.dragView(dx, dy),
+        onPinch: (ratio) => this.zoomView(1 / ratio), // fingers apart (ratio > 1) = zoom in
         onTap: (x, y) => bus.emit('object:selected', { id: objectAt(x, y) }),
         onDoubleTap: (x, y) => {
           const id = objectAt(x, y);
@@ -487,9 +525,12 @@ export class WebGLView implements View {
           bus.emit('object:selected', { id });
           bus.emit('camera:focus', { id });
         },
-        onWheelZoom: (factor) => this.rig.zoomBy(factor),
-        onKeyZoom: (factor) => this.rig.zoomBy(factor),
-        onKeyRotate: (dx, dy) => this.rig.rotate(dx, dy),
+        onWheelZoom: (factor) => this.wheel(factor),
+        onKeyZoom: (factor) => this.zoomView(factor),
+        // While piloting, the arrow keys steer the ship (see `onWindowKey`) rather than turning the camera.
+        onKeyRotate: (dx, dy) => {
+          if (!this.pilot.active) this.rig.rotate(dx, dy);
+        },
         onFocusKey: focusSelected,
         onEscapeKey: () => {
           bus.emit('object:selected', { id: null });
@@ -499,6 +540,48 @@ export class WebGLView implements View {
     );
   }
 
+  /**
+   * Flight keys are listened for on the whole window (not just the canvas) so they keep working after you click a
+   * button. P gets in and out of the ship; while piloting: W/S speed, A/D or left/right arrows turn, up/down arrows
+   * tilt the nose, X stops, V changes the camera view. Keys are ignored while typing or while a dialog is open.
+   */
+  private connectPilotKeys(): void {
+    const { bus } = this.options;
+    const isTyping = (target: EventTarget | null): boolean =>
+      target instanceof HTMLElement &&
+      (target.isContentEditable || ['INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName));
+
+    const onKeyDown = (e: KeyboardEvent): void => {
+      if (e.ctrlKey || e.metaKey || e.altKey || isTyping(e.target)) return;
+      if (document.querySelector('dialog[open]')) return; // Settings or the Logbook is open
+      const key = e.key.toLowerCase();
+      if (key === 'p') {
+        if (!e.repeat) bus.emit('pilot:set', { active: !this.pilot.active });
+        return;
+      }
+      if (!this.pilot.active) return;
+      if (key === 'v') {
+        if (!e.repeat) this.setPilotView(this.pilot.cycleView());
+        return;
+      }
+      if (isFlightKey(e.key) && this.pilot.setKey(e.key, true)) e.preventDefault(); // arrows must not scroll
+    };
+    // Letting go is always honoured, even if focus moved meanwhile, so a key can never get "stuck down".
+    const onKeyUp = (e: KeyboardEvent): void => {
+      if (isFlightKey(e.key)) this.pilot.setKey(e.key, false);
+    };
+    const onBlur = (): void => this.pilot.releaseAllControls();
+
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    window.addEventListener('blur', onBlur);
+    this.cleanups.push(() => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+      window.removeEventListener('blur', onBlur);
+    });
+  }
+
   private connectBus(): void {
     const { bus } = this.options;
     const on = <K extends keyof GameEvents>(name: K, fn: (p: GameEvents[K]) => void): void => {
@@ -506,9 +589,232 @@ export class WebGLView implements View {
     };
     on('object:selected', ({ id }) => {
       this.selectedId = id;
+      if (this.pilot.active) this.emitPilotStatus(true); // the distance readout is about the selection
     });
-    on('camera:focus', ({ id }) => this.focusOn(id));
-    on('camera:zoom', ({ factor }) => this.rig.zoomBy(factor));
+    // While piloting, "go to this object" means "autopilot there", and "overview" means "leave the ship".
+    on('camera:focus', ({ id }) => (this.pilot.active ? this.pilotFocus(id) : this.focusOn(id)));
+    on('camera:zoom', ({ factor }) => this.zoomView(factor));
+    on('pilot:set', ({ active }) => this.setPilotActive(active));
+    on('pilot:view', ({ view }) => this.setPilotView(view));
+    on('pilot:input', ({ axis, value }) => this.pilot.setButton(axis, value));
+    on('pilot:brake', () => {
+      if (this.pilot.active) this.pilot.brake();
+    });
+    on('pilot:autopilot', ({ id }) => {
+      if (!this.pilot.active) return;
+      if (id === null) this.pilot.cancelAutopilot();
+      else if (this.visibleIds.has(id) && this.meshes.has(id)) this.pilot.startAutopilot(id);
+      this.emitPilotStatus(true);
+    });
+  }
+
+  // ---- the spacecraft ---------------------------------------------------------------------
+
+  /** Mouse or finger drag: swings the camera round the ship (Orbit view), steers the ship, or turns the normal camera. */
+  private dragView(dx: number, dy: number): void {
+    if (!this.pilot.active) this.rig.rotate(dx, dy);
+    else if (this.pilot.view === 'orbit') this.shipRig.rotate(dx, dy);
+    else this.pilot.drag(dx, dy);
+  }
+
+  /** Zoom buttons, + and -, and pinching. */
+  private zoomView(factor: number): void {
+    if (!this.pilot.active) this.rig.zoomBy(factor);
+    else if (this.pilot.view === 'orbit') this.shipRig.zoomBy(factor);
+    else this.pilot.zoomView(factor);
+  }
+
+  /** The mouse wheel: zooms the normal camera, but works the throttle lever while piloting (spec: "scroll or W/S to move"). */
+  private wheel(factor: number): void {
+    if (!this.pilot.active) this.rig.zoomBy(factor);
+    else if (this.pilot.view === 'orbit') this.shipRig.zoomBy(factor);
+    else this.pilot.nudgeThrottle(-Math.log(factor) * 0.8); // scroll up (factor < 1) = faster
+  }
+
+  private pilotFocus(id: string | null): void {
+    if (id === null) this.setPilotActive(false);
+    else if (this.visibleIds.has(id) && this.meshes.has(id)) {
+      this.pilot.startAutopilot(id);
+      this.emitPilotStatus(true);
+    }
+  }
+
+  private setPilotView(view: unknown): void {
+    if (!this.pilot.setView(view)) return;
+    this.snapPilotCamera = true; // jump to the new view instead of sliding there
+    this.updateCanvasLabels();
+    this.emitPilotStatus(true);
+  }
+
+  private setPilotActive(active: boolean): void {
+    if (active === this.pilot.active) return;
+    if (active) {
+      // The ship appears where the camera is, facing what it was looking at, so starting causes no jump.
+      this.pilot.setActive(
+        true,
+        { position: this.camera.position, lookAt: this.rig.target },
+        this.pilotBodies(),
+      );
+      this.startShipRig();
+      this.snapPilotCamera = true;
+    } else {
+      // Hand the camera back to the normal orbit camera from where the pilot view was, then fly out to the overview.
+      const offset = this.camera.position.clone().sub(this.shipPositionVector());
+      const dist = Math.max(offset.length(), 0.001);
+      this.pilot.setActive(false);
+      this.camera.up.set(0, 1, 0);
+      this.setFov(DEFAULT_FOV);
+      this.cinematicClock = 0;
+      this.updateShotLabel();
+      this.shipModel.group.visible = false;
+      this.rig.setMinDistance(OVERVIEW_MIN_DISTANCE);
+      this.rig.setState({
+        yaw: Math.atan2(offset.x, offset.z),
+        pitch: Math.asin(THREE.MathUtils.clamp(offset.y / dist, -1, 1)),
+        distance: dist,
+      });
+      this.rig.target.copy(this.shipPositionVector());
+      this.focusOn(null);
+    }
+    this.updateViewOffset();
+    this.updateCanvasLabels();
+    this.emitPilotStatus(true);
+  }
+
+  /** Points the Orbit view's camera at the ship from behind. */
+  private startShipRig(): void {
+    this.shipRig.setMinDistance(1.2);
+    this.shipRig.setState({ yaw: this.pilot.ship.yaw, pitch: 0.35, distance: 6 });
+  }
+
+  private shipPositionVector(): THREE.Vector3 {
+    const p = this.pilot.ship.position;
+    return this.shipPosition.set(p.x, p.y, p.z);
+  }
+  private readonly shipPosition = new THREE.Vector3();
+  private readonly cameraGoal = new THREE.Vector3();
+
+  /** Every body the ship can see, as plain numbers for the flight rules. */
+  private pilotBodies(): Body[] {
+    const bodies: Body[] = [];
+    for (const [id, mesh] of this.meshes) {
+      if (this.visibleIds.has(id)) bodies.push(this.bodyOf(id, mesh));
+    }
+    return bodies;
+  }
+
+  private bodyOf(id: string, mesh: THREE.Mesh): Body {
+    const { x, y, z } = mesh.position;
+    return { id, position: { x, y, z }, radius: VISUALS[id].radius };
+  }
+
+  /** Puts the camera where the chosen view wants it. */
+  private applyPilotCamera(dt: number): void {
+    const { ship, view, viewScale } = this.pilot;
+    let fov = DEFAULT_FOV;
+    if (view === 'orbit') {
+      this.camera.up.set(0, 1, 0);
+      this.shipRig.update(dt, this.shipPositionVector());
+      this.shipRig.applyTo(this.camera);
+    } else {
+      const pose = cameraPoseFor(
+        view,
+        ship,
+        viewScale,
+        this.cinematicClock,
+        this.pilot.reducedMotion,
+      );
+      this.cameraGoal.set(pose.position.x, pose.position.y, pose.position.z);
+      // The chase camera trails the ship a little, which gives a feeling of speed. Everything else is exact.
+      if (view === 'chase' && !this.snapPilotCamera && !this.pilot.reducedMotion) {
+        this.camera.position.lerp(this.cameraGoal, 1 - Math.exp(-12 * dt));
+      } else {
+        this.camera.position.copy(this.cameraGoal);
+      }
+      this.camera.up.set(pose.up.x, pose.up.y, pose.up.z);
+      this.camera.lookAt(pose.lookAt.x, pose.lookAt.y, pose.lookAt.z);
+      fov = pose.fov ?? DEFAULT_FOV;
+    }
+    this.setFov(fov);
+    this.updateShotLabel();
+    this.snapPilotCamera = false;
+  }
+
+  /** Changes the lens angle (the cinematic view uses a narrower, film-like one). */
+  private setFov(fov: number): void {
+    if (this.camera.fov === fov) return;
+    this.camera.fov = fov;
+    this.camera.updateProjectionMatrix();
+  }
+
+  /** A read-only status for automated tests: which cinematic shot is on (1 to 4; 0 = held still by Reduce motion). */
+  private updateShotLabel(): void {
+    let label = '';
+    if (this.pilot.active && this.pilot.view === 'cinematic') {
+      label = this.pilot.reducedMotion ? '0' : String(shotAt(this.cinematicClock).index + 1);
+    }
+    if (label === this.shotLabel) return;
+    this.shotLabel = label;
+    if (label === '') delete this.renderer.domElement.dataset.shot;
+    else this.renderer.domElement.dataset.shot = label;
+  }
+
+  /** Moves and turns the 3D ship to match the flight rules. The cockpit view hides it (you are inside). */
+  private updateShipModel(): void {
+    const { ship, view } = this.pilot;
+    const model = this.shipModel.group;
+    model.visible = view !== 'cockpit';
+    model.position.set(ship.position.x, ship.position.y, ship.position.z);
+    model.rotation.set(ship.pitch, ship.yaw, 0, 'YXZ'); // turn left/right first, then tilt the nose
+    model.scale.setScalar(shipModelScale(view, this.camera.position.distanceTo(model.position)));
+    this.shipModel.setThrottle(ship.throttle);
+  }
+
+  /** Tells the controls what to show. Sent at most five times a second, and only when something visible changed. */
+  private emitPilotStatus(force = false): void {
+    const mesh = this.selectedId ? this.meshes.get(this.selectedId) : undefined;
+    const target =
+      mesh && this.selectedId && this.visibleIds.has(this.selectedId)
+        ? this.bodyOf(this.selectedId, mesh)
+        : null;
+    const targetDistance = target ? this.pilot.distanceTo(target) : null;
+    const status: PilotStatus = {
+      active: this.pilot.active,
+      view: this.pilot.view,
+      throttle: this.pilot.ship.throttle,
+      speed: this.pilot.ship.speed,
+      autopilotId: this.pilot.autopilotId,
+      headingDeg: Math.round((((this.pilot.ship.yaw * 180) / Math.PI) % 360) + 360) % 360,
+      targetDistance,
+      inScanRange:
+        target !== null && targetDistance !== null && targetDistance <= scanRange(target.radius),
+    };
+    // Compare rounded values so a tiny change does not cause a message every frame.
+    const label = [
+      status.active,
+      status.view,
+      status.throttle.toFixed(2),
+      status.speed.toFixed(1),
+      status.autopilotId,
+      status.headingDeg,
+      targetDistance === null ? '-' : targetDistance.toFixed(1),
+      status.inScanRange,
+    ].join('|');
+    if (label === this.lastPilotStatus && !force) return;
+    this.lastPilotStatus = label;
+    this.options.bus.emit('pilot:status', status);
+  }
+
+  /** The canvas's accessible description and the read-only status attribute used by automated tests. */
+  private updateCanvasLabels(): void {
+    const canvas = this.renderer.domElement;
+    canvas.dataset.pilot = this.pilot.active ? this.pilot.view : 'off';
+    canvas.setAttribute(
+      'aria-label',
+      this.pilot.active
+        ? 'Spacecraft view. W and S change speed, A and D or the left and right arrows turn, the up and down arrows tilt the nose, X stops, V changes the camera view, Escape leaves the ship.'
+        : '3D view of the Solar System. Arrow keys rotate, plus and minus zoom, Enter focuses the selected object, Escape returns to the overview. P takes the controls of the spacecraft.',
+    );
   }
 
   private pickCandidates(): PickCandidate[] {
@@ -551,6 +857,12 @@ export class WebGLView implements View {
     this.rig.setMinDistance(radius ? closestDistance(radius) : OVERVIEW_MIN_DISTANCE);
     this.rig.setState(state.camera);
     this.rig.target.copy(this.followedPosition());
+    if (state.ship) {
+      this.pilot.restore(state.ship);
+      if (this.pilot.active) this.startShipRig();
+      this.updateViewOffset();
+      this.updateCanvasLabels();
+    }
   }
 
   private followedPosition(): THREE.Vector3 {
@@ -613,19 +925,46 @@ export class WebGLView implements View {
     // Clamp the time step so a stalled tab does not make the planets jump.
     const dt = Math.min(frameMs / 1000, 0.1);
     this.simDays += dt * SIM_DAYS_PER_SECOND;
+    const piloting = this.pilot.active;
+    const bodiesBefore = piloting ? this.pilotBodies() : []; // where everything was, so a parked ship can go with it
     this.updatePositions();
     // The whole belt turns together, the same way the planets go round (counter-clockwise from above).
     this.belt.rotation.y = (this.simDays / BELT_PERIOD_DAYS) * Math.PI * 2;
-    this.coRotateCameraWithOrbit();
-    this.rig.update(dt, this.followedPosition());
-    this.rig.applyTo(this.camera);
+    if (piloting) {
+      const outcome = this.pilot.step(dt, bodiesBefore, this.pilotBodies(), (body) =>
+        focusDistance(body.radius),
+      );
+      if (outcome.arrivedId) {
+        this.options.bus.emit('pilot:arrived', { id: outcome.arrivedId });
+        this.emitPilotStatus(true);
+      }
+      this.cinematicClock = this.pilot.view === 'cinematic' ? this.cinematicClock + dt : 0;
+      this.applyPilotCamera(dt);
+      this.updateShipModel();
+      this.pilotStatusClock += dt;
+      if (this.pilotStatusClock >= 0.2) {
+        this.pilotStatusClock = 0;
+        this.emitPilotStatus();
+      }
+    } else {
+      this.coRotateCameraWithOrbit();
+      this.rig.update(dt, this.followedPosition());
+      this.rig.applyTo(this.camera);
+    }
+    // The stars are infinitely far away: they travel with the camera, so flying never gets you any nearer to one.
+    this.stars.position.copy(this.camera.position);
     this.updateSelectionRing();
     // Warp streaks: strong in the middle of a long flight, none otherwise (and never with Reduce motion).
+    // While piloting, the streaks follow the ship's speed instead (a sense of speed in empty space).
     const progress = this.rig.flightProgress;
-    const warpAmount =
-      this.quality.warp && progress !== null
-        ? warpStrength(progress, this.warpTravel, this.rig.reducedMotion)
-        : 0;
+    let warpAmount = 0;
+    if (this.quality.warp) {
+      warpAmount = piloting
+        ? cruiseWarp(this.pilot.ship.speed, this.pilot.reducedMotion)
+        : progress !== null
+          ? warpStrength(progress, this.warpTravel, this.rig.reducedMotion)
+          : 0;
+    }
     this.warp.update(warpAmount, now / 1000);
     // A read-only status for automated tests ("data-warp" on the canvas, 0.00 to 1.00). Counting coloured pixels
     // to check the streaks is unreliable between browsers, so tests read the strength itself.
@@ -656,7 +995,22 @@ export class WebGLView implements View {
     if (w === 0 || h === 0) return;
     this.renderer.setSize(w, h, false); // false: CSS controls the canvas size, not JavaScript
     this.camera.aspect = w / h;
-    this.camera.updateProjectionMatrix();
+    this.updateViewOffset(w, h);
     this.bloomPipeline?.setSize(w, h, this.renderer.getPixelRatio());
+  }
+
+  /**
+   * On a portrait phone the steering controls cover the lower half of the screen, which is exactly where the chase
+   * camera draws the ship. While piloting there, slide the whole picture up (a camera "view offset") so the ship
+   * sits above the controls. Taps still land on the right objects, because picking uses the same camera.
+   */
+  private updateViewOffset(
+    w = this.options.host.clientWidth,
+    h = this.options.host.clientHeight,
+  ): void {
+    const lift = this.pilot.active && w <= 700 && h > w ? 0.3 : 0;
+    if (lift > 0) this.camera.setViewOffset(w, h, 0, h * lift, w, h);
+    else if (this.camera.view?.enabled) this.camera.clearViewOffset();
+    this.camera.updateProjectionMatrix();
   }
 }

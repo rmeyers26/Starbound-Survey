@@ -20,6 +20,7 @@ import { createFpsReadout } from './ui/fpsReadout';
 import { createHud } from './ui/hud';
 import { createInfoPanel } from './ui/infoPanel';
 import { createLogbook } from './ui/logbook';
+import { createPilotPanel } from './ui/pilotPanel';
 import { createSaveSection } from './ui/saveSection';
 import { createScanHud, createXpBar } from './ui/scanHud';
 import { createSettingsPanel } from './ui/settingsPanel';
@@ -202,6 +203,8 @@ export async function startApp(
     createScanHud(container, bus, objects, () => settings.get()),
     createLogbook(container, objects, bus, machine, effectiveRecord),
     createInfoPanel(container, objects, bus, effectiveRecord),
+    // The spacecraft needs the 3D view; the simplified 2D star chart cannot show it.
+    createPilotPanel(container, bus, objects, () => view?.kind === 'webgl2'),
     scan.dispose,
     offRankUp,
     offRegionsA,

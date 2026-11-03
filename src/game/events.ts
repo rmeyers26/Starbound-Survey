@@ -4,7 +4,8 @@
 // 3D view both listen, and none of them import each other.
 
 import type { ProfileName } from '../engine/profiles';
-import type { ViewKind } from '../engine/view';
+import type { PilotStatus, ViewKind } from '../engine/view';
+import type { ShipView } from '../engine/shipViews';
 import type { SaveRecord } from '../save/schema';
 import type { ScanBlock } from './scanner';
 import type { Settings } from './settings';
@@ -20,6 +21,20 @@ export interface GameEvents {
   'camera:focus': { id: string | null };
   /** Zoom the camera: factor < 1 moves closer, > 1 moves away. */
   'camera:zoom': { factor: number };
+  /** Get into (true) or out of (false) the pilot's seat of the spacecraft. */
+  'pilot:set': { active: boolean };
+  /** Choose a camera view for the spacecraft. */
+  'pilot:view': { view: ShipView };
+  /** A steering or throttle control was pressed (value 1 or -1) or released (0). Held until released. */
+  'pilot:input': { axis: 'yaw' | 'pitch' | 'throttle'; value: number };
+  /** Stop the ship. */
+  'pilot:brake': undefined;
+  /** Fly the ship to an object by itself (null = cancel). */
+  'pilot:autopilot': { id: string | null };
+  /** Fired a few times a second while piloting: what the controls should show. */
+  'pilot:status': PilotStatus;
+  /** The autopilot finished and the ship is parked beside this object. */
+  'pilot:arrived': { id: string };
   /** A setting changed (already validated and saved). */
   'settings:changed': { settings: Settings };
   /** The player asked to open the Settings screen. */
