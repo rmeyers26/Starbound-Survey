@@ -56,6 +56,10 @@ Tick each one and note anything odd.
 - [ ] Tap a planet: the Sun stays on the same side of it (it does not swing round), and only the stars drift.
 - [ ] Tap the Moon: its surface stays still on screen while its lit part changes through the phases.
 
+**Notifications**
+
+- [ ] Turn practice mode on and off a few times in a row: never more than two messages show, and the Settings button is never hidden under them.
+
 **The Sun's layers**
 
 - [ ] Select the Sun: a third tab, **Layers**, appears (no other object has it). Before any scan it asks you to scan the Sun.

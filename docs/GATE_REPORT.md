@@ -32,7 +32,7 @@ Date of this report: 2026-11-02.
 
 ## What was verified, and how
 
-- 312 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
+- 318 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
 - 99 browser tests (Playwright; 5 skipped by design) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
   bottom-sheet handle only exists on phone-width screens).
 - Lint, type-check and production build pass. Production dependencies: 0 known vulnerabilities.
@@ -107,6 +107,12 @@ Date of this report: 2026-11-02.
 21. **The Sun's layers** (core, radiative zone, convection zone, photosphere, chromosphere, transition region, corona) are a
     new Layers tab with a cutaway picture, revealed by scan level. The wording is NASA's as pasted by the owner (page address
     unconfirmed); the extra detail and the picture's proportions are from general knowledge and are listed for checking.
+
+22. **Notifications could bury the Settings button on a small iPhone.** CI (WebKit, iPhone layout) could not tap Settings because
+    a stack of toasts, including the iPhone install tip, sat on top of it. Toasts stacked without limit and also swallowed
+    taps. Now at most two show at once (oldest dropped first, but a toast with an action button, such as "Reload", is kept),
+    and a toast's text lets taps through to whatever is underneath, apart from its own buttons. Reproduced first (five toasts
+    reached the Settings button on a 390 x 664 screen), and the new test was confirmed to fail with the cap switched off.
 
 ## Open problems and trade-offs
 

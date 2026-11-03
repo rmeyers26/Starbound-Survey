@@ -426,8 +426,10 @@ body {
     bottom: calc(42dvh + 12px);
   }
 }
+/* A toast is only a message: taps on its text pass through to whatever is underneath (a toast must never trap a
+   game button). Its own buttons (Reload, dismiss) still work. */
 .toast {
-  pointer-events: auto;
+  pointer-events: none;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -436,6 +438,9 @@ body {
   border-radius: 14px;
   background: rgba(12, 20, 44, 0.96);
   font-size: 0.9rem;
+}
+.toast button {
+  pointer-events: auto;
 }
 .toast-text {
   flex: 1;
