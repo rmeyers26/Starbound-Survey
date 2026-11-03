@@ -147,6 +147,19 @@ Date of this report: 2026-11-02.
     ignored by the "carry the ship along" rule (tested, and the test confirmed to fail without the rule); and the first
     version of the glow (a flat polygon) and tails (hard-edged cones) looked wrong in a screenshot and were reworked.
 
+25. **A much more realistic spacecraft** (owner feedback: "need much more photo realistic space craft"). The first ship was a
+    cone, two boxes and a ball. It is now a detailed model built from code (`engine/shipModel.ts`; its proportions are
+    pure, tested data in `engine/shipDesign.ts`): a smooth lathed fuselage with drawn panel seams, rivets, soot and
+    markings (also used as a bump map so the seams catch the light), a glossy canopy, swept delta wings with winglets,
+    a tail fin, a gold thermal-foil service ring, twin engine housings with flared bells and soft blue flames, solar
+    panels on booms, an antenna dish, vents, thruster blocks and blinking red/green/white navigation lights. It uses
+    physically based materials (metalness and roughness) lit by the Sun plus reflections of a small made-up space
+    (Sun, an Earthshine-blue glow, stars), and a faint self-lit glow so the side facing away from the Sun does not turn
+    black. It is built only the first time you step into the ship (71 ms here), so players who never fly it pay nothing.
+    **Honest limit: this is detailed, shaded game art, not a photograph.** True photo-realism needs a modelled and
+    textured asset made by an artist. I could not download one here, so if you can supply a licensed `.glb` spacecraft
+    I can load that instead. While building it, measuring the model showed my own `SHIP_HEIGHT` constant was wrong (0.26;
+    really 0.36) and a unit test caught that the first tail-fin outline was a stub barely above the hull.
 25. **The comet looked like a moon** (owner's feedback: needs a tail and more broken-up rocks and ice). The nucleus was a
     smooth grey ball and the tail only appeared inside 3.2 AU, so the first third of every loop was a bare ball. Now: a
     lumpy, faceted, stretched nucleus with a dark crust and bright ice patches (`engine/cometNucleus.ts` has the pure

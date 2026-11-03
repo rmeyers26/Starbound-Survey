@@ -126,7 +126,8 @@ export class WebGLView implements View {
   private lockBearing: number | null = null;
   /** The spacecraft: its flight rules live in PilotController; this class only draws it and moves the camera. */
   private readonly pilot = new PilotController();
-  private readonly shipModel: ShipModel = createShipModel();
+  /** Built the first time you step into the ship (its textures and reflections are not worth loading before). */
+  private shipModel: ShipModel | null = null;
   /** The orbit camera used for the spacecraft's "Orbit" view (separate, so leaving the ship does not disturb it). */
   private readonly shipRig = new CameraRig();
   /** True for one frame after the camera view changes, so the camera jumps there instead of gliding. */
@@ -180,9 +181,6 @@ export class WebGLView implements View {
     this.scene.add(this.stars);
     this.selectionRing = this.buildSelectionRing();
     this.scene.add(this.selectionRing);
-    this.shipModel.group.visible = false;
-    this.scene.add(this.shipModel.group);
-
     this.restoreState(options.initialState);
     this.updateCanvasLabels(); // report "pilot off" (and describe the controls) from the very first frame
     this.connectInput(canvas);
@@ -238,6 +236,8 @@ export class WebGLView implements View {
         });
       }
     });
+    this.shipModel?.dispose();
+    this.shipModel = null;
     this.bloomPipeline?.dispose();
     this.bloomPipeline = null;
     this.renderer.dispose();
@@ -862,7 +862,7 @@ export class WebGLView implements View {
       this.setFov(DEFAULT_FOV);
       this.cinematicClock = 0;
       this.updateShotLabel();
-      this.shipModel.group.visible = false;
+      if (this.shipModel) this.shipModel.group.visible = false;
       this.rig.setMinDistance(OVERVIEW_MIN_DISTANCE);
       this.rig.setState({
         yaw: Math.atan2(offset.x, offset.z),
@@ -958,12 +958,27 @@ export class WebGLView implements View {
   /** Moves and turns the 3D ship to match the flight rules. The cockpit view hides it (you are inside). */
   private updateShipModel(): void {
     const { ship, view } = this.pilot;
-    const model = this.shipModel.group;
+    const shipModel = this.ensureShipModel();
+    const model = shipModel.group;
     model.visible = view !== 'cockpit';
     model.position.set(ship.position.x, ship.position.y, ship.position.z);
     model.rotation.set(ship.pitch, ship.yaw, 0, 'YXZ'); // turn left/right first, then tilt the nose
     model.scale.setScalar(shipModelScale(view, this.camera.position.distanceTo(model.position)));
-    this.shipModel.setThrottle(ship.throttle);
+    shipModel.setThrottle(ship.throttle);
+    shipModel.update(performance.now() / 1000); // makes the navigation lights blink
+  }
+
+  /** Builds the 3D ship the first time it is needed, and adds it to the scene. */
+  private ensureShipModel(): ShipModel {
+    if (!this.shipModel) {
+      const started = performance.now();
+      this.shipModel = createShipModel(this.renderer);
+      // Visible in the browser's performance tools (and to tests) as "spacecraft-model-build".
+      performance.measure('spacecraft-model-build', { start: started, end: performance.now() });
+      this.shipModel.group.visible = false;
+      this.scene.add(this.shipModel.group);
+    }
+    return this.shipModel;
   }
 
   /** Tells the controls what to show. Sent at most five times a second, and only when something visible changed. */
