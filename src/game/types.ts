@@ -33,6 +33,7 @@ export const OBJECT_TYPES = [
   'dwarfPlanet',
   'moon',
   'asteroid',
+  'comet',
   'nebula',
   'galaxy',
   'blackHole',

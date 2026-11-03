@@ -3,6 +3,7 @@
 // 1 cm pea about 107 metres away. So the game uses these made-up "scene units" instead.
 // The info panel always shows the TRUE values from objects.json; this file is only for looks.
 
+import { auToScene } from './comet';
 import type { AtmosphereSpec } from './effects';
 
 export interface VisualSpec {
@@ -37,6 +38,15 @@ export interface VisualSpec {
   retrograde?: boolean;
   /** A glowing haze around the edge, for worlds with a real atmosphere. Decorative. */
   atmosphere?: AtmosphereSpec;
+  /**
+   * Present for a comet. Its orbit is NOT a circle: the shape (perihelion distance, eccentricity, tilt) comes from
+   * the data file, and `engine/comet.ts` turns it into positions. The fields here are what the data file cannot
+   * (yet) supply, so every one is a DISPLAY PLACEHOLDER and says so on the object's info panel:
+   *   nodeDeg, argPerihelionDeg: which way the orbit points. Not yet checked against JPL, so drawn as 0.
+   *   windowAu: the comet is shown only within this distance of the Sun (the rest of its flyby is far outside the
+   *             game's compressed map), and that stretch of the flyby is replayed on a loop.
+   */
+  comet?: { nodeDeg: number; argPerihelionDeg: number; windowAu: number };
   /** Rings drawn around the body (Saturn). Sizes are multiples of the body's radius. Decorative. */
   rings?: { inner: number; outer: number; color: number; opacity: number; tiltDeg: number };
 }
@@ -95,6 +105,13 @@ export const VISUALS: Record<string, VisualSpec> = {
     color: 0x9a948c,
     orbit: { parentId: 'sun', radius: 100 },
     visualPeriodDays: 810, // drawn about 1.6 times faster than real, so it visibly moves
+  },
+  // Comet C/2026 A2 (Bok): not on a circle, so no `orbit`; its path comes from the `comet` spec and the data file.
+  // The nucleus size is NOT known (the data says "Not yet checked"), so this radius is only a small dot to select.
+  c2026a2: {
+    radius: 0.25,
+    color: 0x6a645c, // real nuclei are very dark (they reflect only a few percent of the light)
+    comet: { nodeDeg: 0, argPerihelionDeg: 0, windowAu: 3.5 },
   },
   ceres: {
     radius: 0.35,
@@ -286,7 +303,10 @@ export const scanRange = (radius: number): number => focusDistance(radius) * 2;
  */
 export function reachFromSun(ids: Iterable<string>): number {
   const distanceFromSun = (id: string): number => {
-    const orbit = VISUALS[id]?.orbit;
+    const spec = VISUALS[id];
+    // A comet is shown out to its window, mapped to the game's compressed scale.
+    if (spec?.comet) return auToScene(spec.comet.windowAu);
+    const orbit = spec?.orbit;
     return orbit ? orbit.radius + distanceFromSun(orbit.parentId) : 0;
   };
   return Math.max(0, ...[...ids].map(distanceFromSun));

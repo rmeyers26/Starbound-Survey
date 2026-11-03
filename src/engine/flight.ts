@@ -69,6 +69,12 @@ export const AUTOPILOT_APPROACH = 1.5;
 /** Autopilot: the most its speed may change per second (so it never lurches). */
 export const AUTOPILOT_ACCELERATION = 90;
 export const ARRIVE_TOLERANCE = 0.4;
+/**
+ * The most a body can move in one step and still carry a nearby ship with it. Planets move a fraction of a unit a
+ * frame. A body that JUMPS (a replayed comet going back to the start of its loop) is a teleport, not an orbit, and
+ * must not drag a parked ship across the map with it.
+ */
+export const MAX_CARRY_PER_STEP = 15;
 
 // ---- small vector helpers (we avoid Three.js here so these rules stay testable on their own) ----
 export const vec = (x = 0, y = 0, z = 0): Vec3 => ({ x, y, z });
@@ -208,7 +214,9 @@ export function carryAlong(position: Vec3, before: readonly Body[], after: reado
   const was = before.find((body) => body.id === id);
   const now = after.find((body) => body.id === id);
   if (!was || !now) return position;
-  return add(position, sub(now.position, was.position));
+  const moved = sub(now.position, was.position);
+  if (length(moved) > MAX_CARRY_PER_STEP) return position; // a teleport, not an orbit: leave the ship where it is
+  return add(position, moved);
 }
 
 /** Moves the speed toward `target` smoothly. The same result at 30 and at 144 frames per second. */

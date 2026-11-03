@@ -28,6 +28,8 @@ Phase 1 has started early: **slice A (scanning, XP, ranks, Logbook) is done**. S
 5. **Earn XP:** first scan of an object = **20 XP**, a deeper scan = 10 XP, re-scanning the same level = 0.
    The bar at the top right shows your rank (Cadet, Navigator, Surveyor, Astronomer, Director) and progress.
 6. **Logbook:** open it to see what you have discovered.
+7. **Find the comet:** C/2026 A2 (Bok) is the button after Ceres. Its flyby is replayed on a loop with its tail pointing away
+   from the Sun. Only the numbers that could be found are in the game; the rest say "Not yet checked" (`docs/DATA_CHECK.md`).
 
 Deeper scans (Detailed at Navigator, Spectral at Surveyor) need a higher rank. More ways to earn XP
 (Flight School, quizzes, missions) arrive in the next Phase 1 slices.

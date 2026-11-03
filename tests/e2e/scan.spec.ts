@@ -104,7 +104,7 @@ test.describe('scanning', () => {
     await openGame(page);
     await expect(xpText(page)).toHaveText('40 / 200 XP');
     await page.getByRole('button', { name: /Open the Logbook/ }).click();
-    await expect(page.locator('.logbook-summary')).toContainText('Discovered 2 of 10 objects.');
+    await expect(page.locator('.logbook-summary')).toContainText('Discovered 2 of 11 objects.');
   });
 });
 
@@ -131,7 +131,7 @@ test.describe('regions', () => {
     await openGame(page);
     await page.getByRole('button', { name: /Open the Logbook/ }).click();
     const dialog = page.locator('dialog.logbook-dialog');
-    await expect(dialog.getByText('Discovered 0 of 10 objects.')).toBeVisible();
+    await expect(dialog.getByText('Discovered 0 of 11 objects.')).toBeVisible();
     await expect(dialog.getByText('More objects unlock as you rank up.')).toBeVisible();
     await expect(dialog.getByText('Jupiter')).toHaveCount(0);
   });
@@ -167,7 +167,7 @@ test.describe('ranks', () => {
     await expect(xpText(page)).toContainText('220');
     await page.getByRole('button', { name: /Open the Logbook/ }).click();
     await expect(
-      page.locator('dialog.logbook-dialog').getByText('Discovered 11 of 31 objects.'),
+      page.locator('dialog.logbook-dialog').getByText('Discovered 11 of 32 objects.'),
     ).toBeVisible();
   });
 });
@@ -181,8 +181,8 @@ test.describe('Logbook', () => {
     await page.getByRole('button', { name: /Open the Logbook/ }).click();
     const dialog = page.locator('dialog.logbook-dialog');
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByText('Discovered 1 of 10 objects.')).toBeVisible();
-    await expect(dialog.getByText('Not scanned yet')).toHaveCount(9);
+    await expect(dialog.getByText('Discovered 1 of 11 objects.')).toBeVisible();
+    await expect(dialog.getByText('Not scanned yet')).toHaveCount(10);
     await expect(dialog.getByText('Basic scan')).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden();

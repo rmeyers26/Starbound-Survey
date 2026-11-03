@@ -594,6 +594,59 @@
     "source": "NASA Solar System Exploration: Ceres; JPL Small-Body Database, 1 Ceres (ssd.jpl.nasa.gov/tools/sbdb_lookup.html)"
   },
   {
+    "id": "c2026a2",
+    "name": "C/2026 A2 (Bok)",
+    "type": "comet",
+    "imageType": "simulation",
+    "region": "inner",
+    "quick": "C/2026 A2 (Bok) is a comet on a huge, stretched-out orbit. It falls in from the far outer Solar System, swings past the Sun at about twice Earth's distance (between Mars and the asteroid belt), and heads back out for thousands of years. Its orbit is tilted almost straight up from the flat plane the planets go round in. In this game its flyby is replayed on a loop, with its tail pointing away from the Sun. Some of its details are still marked 'Not yet checked'.",
+    "data": {
+      "perihelionDistance": {
+        "label": "Closest distance to the Sun (perihelion)",
+        "value": 1.94,
+        "unit": "AU",
+        "tier": "basic"
+      },
+      "inclination": {
+        "label": "Orbit tilt (inclination)",
+        "value": 82,
+        "unit": "degrees",
+        "tier": "basic"
+      },
+      "eccentricity": {
+        "label": "Orbit shape (eccentricity; just under 1 means an extremely long, thin orbit)",
+        "value": 0.99761492,
+        "tier": "detailed"
+      },
+      "orbitalPeriod": {
+        "label": "Time for one orbit (calculated from the shape, very uncertain)",
+        "value": "about 23,000 years",
+        "tier": "detailed"
+      },
+      "perihelionDate": {
+        "label": "Date of closest approach",
+        "value": "Not yet checked",
+        "tier": "detailed"
+      },
+      "nucleusDiameter": {
+        "label": "Size of the nucleus",
+        "value": "Not yet checked",
+        "tier": "detailed"
+      },
+      "ascendingNode": {
+        "label": "Longitude of the ascending node (which way the orbit points)",
+        "value": "Not yet checked (drawn as 0 degrees for now)",
+        "tier": "spectral"
+      },
+      "argumentOfPerihelion": {
+        "label": "Argument of perihelion (where along the orbit the closest point is)",
+        "value": "Not yet checked (drawn as 0 degrees for now)",
+        "tier": "spectral"
+      }
+    },
+    "source": "Perihelion distance 1.94 AU and inclination 82 degrees: LESIA (Paris Observatory) comet database, record 31828. Eccentricity 0.99761492 (epoch 2026 May 26): JPL orbit data as quoted by TheSkyLive. NOT yet checked against NASA/JPL's own Small-Body Database page (ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=C%2F2026%20A2) because that site was blocked when this was entered. The orbital period is calculated by the game from the perihelion distance and eccentricity (a = q / (1 - e), period = a^1.5 years), not published. Values marked 'Not yet checked' are missing, not estimated."
+  },
+  {
     "id": "jupiter",
     "name": "Jupiter",
     "type": "planet",

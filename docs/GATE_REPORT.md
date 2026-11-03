@@ -91,7 +91,7 @@ Date of this report: 2026-11-02.
     says how much faster than real. The old rule "nothing is ever drawn faster than real" was replaced with: every lap
     is between 3 seconds and 10 minutes, no orbit is changed more than 60 times, and every change is explained.
 18. **Uranus had no moons in the game** although it has five big ones. Added (with Saturn's five mid-sized moons).
-    The object button row is now 31 long: grouping buttons by planet is the next interface job.
+    The object button row is now 32 long: grouping buttons by planet is the next interface job.
 
 19. **Practice mode** (Settings): everything unlocked, every scan level available, no XP. Built as a virtual
     "overlay" record (`game/practice.ts`) that the game reads while practice is on, so the real save is never
@@ -133,6 +133,19 @@ Date of this report: 2026-11-02.
     passed anyway (the bars let taps through, so a click works under them), so it was rewritten to check the buttons'
     labels are visible in the picture, and confirmed to fail with the bug put back.
     Honesty: the ship's speeds are made up (u/s in scene units); the info panel's real values are unchanged.
+
+24. **Comet C/2026 A2 (Bok)** is the 32nd object (inner region, right after Ceres). A new object type, "comet", with a
+    real Kepler orbit (`engine/comet.ts`, pure and unit tested against the laws of physics: Kepler's equation, the
+    energy equation, the tilt, direction of travel) instead of a circle, a height above the planets' plane (a new optional
+    `y`), a glowing coma and two tails that point away from the Sun, and its path drawn as a line. The flyby is
+    replayed on a loop at the game's clock. **Only the numbers I could find are in the data** (perihelion 1.94 AU,
+    tilt 82 degrees, eccentricity 0.99761492, from two web pages summarised by a search); everything else says "Not yet
+    checked", and the two missing orbit angles are drawn as 0 degrees and labelled as placeholders (see `DATA_CHECK.md`).
+    The host that has the full orbit (JPL) was blocked from the container. While building it: a unit test showed my
+    claim that a comet is "slow far out" was overstated inside 3.5 AU (real speed varies by about 35% there); a ship
+    parked beside the comet would have been dragged across the map when the replay loops, so a body that jumps is now
+    ignored by the "carry the ship along" rule (tested, and the test confirmed to fail without the rule); and the first
+    version of the glow (a flat polygon) and tails (hard-edged cones) looked wrong in a screenshot and were reworked.
 
 ## Open problems and trade-offs
 

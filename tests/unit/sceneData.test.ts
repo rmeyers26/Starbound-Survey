@@ -11,7 +11,8 @@ import {
 } from '../../src/engine/scale';
 import { visibleBodyIds } from '../../src/game/regions';
 import { speedNote } from '../../src/ui/format';
-import { computePositions } from '../../src/engine/solarSystem';
+import { auToScene, checkElements } from '../../src/engine/comet';
+import { cometElementsOf, cometMoment, computePositions } from '../../src/engine/solarSystem';
 import { textureUrlFor } from '../../src/engine/textures';
 import { RANKS } from '../../src/game/ranks';
 import { validateObjects } from '../../src/game/validateObjects';
@@ -47,7 +48,8 @@ describe('objects.json and the 3D scene agree', () => {
   it('every body is drawn in the same size order as its real diameter (Deimos smallest, Sun largest)', () => {
     const real = (id: string): number =>
       objects.find((o) => o.id === id)!.data.diameter.value as number;
-    const ids = Object.keys(VISUALS);
+    // A comet's nucleus size is "Not yet checked" (there is no number to order by), so it is left out of this one.
+    const ids = Object.keys(VISUALS).filter((id) => !VISUALS[id].comet);
     const byScene = [...ids].sort((a, b) => VISUALS[a].radius - VISUALS[b].radius);
     const byReal = [...ids].sort((a, b) => real(a) - real(b));
     expect(byScene).toEqual(byReal);
@@ -256,5 +258,88 @@ describe('objects.json and the 3D scene agree', () => {
 
   it('Saturn has rings and nothing else does', () => {
     expect(Object.keys(VISUALS).filter((id) => VISUALS[id].rings)).toEqual(['saturn']);
+  });
+});
+
+describe('comet C/2026 A2 (Bok): only checked numbers, and everything else plainly marked', () => {
+  const comet = objects.find((o) => o.id === 'c2026a2')!;
+  const MISSING = 'Not yet checked';
+
+  it('is a comet in the inner region, with a scene entry that names it a comet', () => {
+    expect(comet.type).toBe('comet');
+    expect(comet.region).toBe('inner');
+    expect(VISUALS.c2026a2.comet).toBeDefined();
+    expect(VISUALS.c2026a2.orbit).toBeUndefined(); // its orbit is not a circle
+  });
+
+  it('has exactly the checked numbers: closest distance 1.94 AU, tilt 82 degrees, shape 0.99761492', () => {
+    expect(comet.data.perihelionDistance).toMatchObject({ value: 1.94, unit: 'AU' });
+    expect(comet.data.inclination).toMatchObject({ value: 82, unit: 'degrees' });
+    expect(comet.data.eccentricity.value).toBe(0.99761492);
+  });
+
+  it('marks every missing value "Not yet checked" instead of inventing it', () => {
+    for (const key of [
+      'perihelionDate',
+      'nucleusDiameter',
+      'ascendingNode',
+      'argumentOfPerihelion',
+    ]) {
+      expect(String(comet.data[key].value), key).toContain(MISSING);
+    }
+    // The two angles the scene has to draw anyway are said to be placeholders on the info panel.
+    expect(String(comet.data.ascendingNode.value)).toContain('drawn as 0 degrees');
+    expect(String(comet.data.argumentOfPerihelion.value)).toContain('drawn as 0 degrees');
+    // ...and the scene really does use 0 for them (the data and the scene must agree).
+    expect(VISUALS.c2026a2.comet!.nodeDeg).toBe(0);
+    expect(VISUALS.c2026a2.comet!.argPerihelionDeg).toBe(0);
+  });
+
+  it('says where each value came from, and that it has NOT yet been checked against JPL', () => {
+    expect(comet.source).toMatch(/LESIA/);
+    expect(comet.source).toMatch(/JPL/);
+    expect(comet.source).toMatch(/NOT yet checked/);
+    expect(comet.quick).toMatch(/replayed on a loop/);
+  });
+
+  it('gives the comet orbit built from the data a closed orbit that the maths accepts', () => {
+    const elements = cometElementsOf(objects, 'c2026a2');
+    expect(elements).toMatchObject({
+      perihelionAu: 1.94,
+      eccentricity: 0.99761492,
+      inclinationDeg: 82,
+    });
+    expect(() => checkElements(elements)).not.toThrow();
+  });
+
+  it("is drawn at a distance from the Sun that fits the inner region's view, and never touches the Sun", () => {
+    for (let days = 0; days < 400; days += 4) {
+      const { x, y, z } = cometMoment(objects, 'c2026a2', days);
+      const distanceFromSun = Math.hypot(x, y, z);
+      expect(distanceFromSun).toBeGreaterThan(VISUALS.sun.radius + 5);
+      expect(distanceFromSun).toBeLessThanOrEqual(
+        auToScene(VISUALS.c2026a2.comet!.windowAu) + 1e-6,
+      );
+    }
+  });
+
+  it("is part of the overview framing, which covers the comet's whole path", () => {
+    const inner = visibleBodyIds(objects, ['inner']);
+    expect(inner.has('c2026a2')).toBe(true);
+    expect(reachFromSun(inner)).toBeGreaterThanOrEqual(auToScene(VISUALS.c2026a2.comet!.windowAu));
+  });
+
+  it('shows up in the position list with a height (its orbit is tilted), and everything else stays flat', () => {
+    // Day 200 into the loop: the comet is part way through its flyby, well above or below the planets' plane.
+    const positions = computePositions(objects, 200);
+    expect(Math.abs(positions.get('c2026a2')!.y!)).toBeGreaterThan(1);
+    for (const [id, p] of positions) {
+      if (id !== 'c2026a2') expect(p.y, id).toBeUndefined();
+    }
+  });
+
+  it('is reachable without breaking the first rank-up (more objects only makes it easier)', () => {
+    const inner = objects.filter((o) => o.region === 'inner');
+    expect(inner.length * 20).toBeGreaterThanOrEqual(RANKS[1].xp);
   });
 });
