@@ -4,6 +4,8 @@ import type { EventBus, GameEvents } from '../game/events';
 import type { CelestialObject } from '../game/types';
 import type { CameraState } from './cameraRig';
 import type { BloomLevel } from './effects';
+import type { ShipState } from './flight';
+import type { ShipView } from './shipViews';
 
 export type ViewKind = 'webgl2' | 'canvas2d';
 
@@ -32,12 +34,41 @@ export interface ControlSettings {
   reducedMotion: boolean;
 }
 
+/** The spacecraft as it stands, so a rebuilt view can put it back exactly where it was. */
+export interface ShipSnapshot {
+  active: boolean;
+  state: ShipState;
+  view: ShipView;
+  autopilotId: string | null;
+  viewScale: number;
+}
+
 /** Everything needed to rebuild a view after a graphics failure (spec: "restore camera and scene state"). */
 export interface ViewState {
   selectedId: string | null;
   focusId: string | null;
   simDays: number;
   camera: CameraState;
+  /** Present once the player has used the spacecraft. */
+  ship?: ShipSnapshot;
+}
+
+/** What the pilot controls show: updated a few times a second while piloting. */
+export interface PilotStatus {
+  active: boolean;
+  view: ShipView;
+  /** The throttle lever, -0.3 to 1. */
+  throttle: number;
+  /** Current speed in scene units per second (negative = reversing). */
+  speed: number;
+  /** The object the autopilot is flying to, or null. */
+  autopilotId: string | null;
+  /** Which way the nose points, in degrees from 0 to 359 (0 = toward -Z, the way the default camera looks). */
+  headingDeg: number;
+  /** Distance from the ship to the selected object's centre, in scene units; null if nothing is selected. */
+  targetDistance: number | null;
+  /** True when the selected object is close enough to scan. */
+  inScanRange: boolean;
 }
 
 export interface ViewOptions {

@@ -32,6 +32,32 @@ Phase 1 has started early: **slice A (scanning, XP, ranks, Logbook) is done**. S
 Deeper scans (Detailed at Navigator, Spectral at Surveyor) need a higher rank. More ways to earn XP
 (Flight School, quizzes, missions) arrive in the next Phase 1 slices.
 
+### Fly the spacecraft
+
+By default the camera orbits whatever you pick. To steer the ship yourself, press **Pilot ship** (or the **P** key).
+The ship appears where the camera was. Scanning then measures the distance **from the ship**, so you have to fly there.
+
+| Control                      | Keyboard                          | Touch / mouse                             |
+| ---------------------------- | --------------------------------- | ----------------------------------------- |
+| Faster / slower (or reverse) | **W** / **S**, or the mouse wheel | **+** / **-** buttons (hold)              |
+| Turn left / right            | **A** / **D**, or **←** / **→**   | **◀** / **▶** buttons (hold), or drag     |
+| Nose up / down               | **↑** / **↓**                     | **▲** / **▼** buttons (hold), or drag     |
+| Stop                         | **X** (one tap)                   | **Stop** button                           |
+| Change camera view           | **V**                             | **Chase / Cockpit / Orbit / Map** buttons |
+| Fly to the selected object   | an object button, or **Enter**    | an object button, or **Fly to ...**       |
+| Leave the ship               | **P** or **Esc**                  | **Leave ship**                            |
+
+- **Chase** (behind the ship), **Cockpit** (from the nose), **Orbit** (drag to swing round the ship) and **Map**
+  (looking straight down, your heading pointing up the screen).
+- **The throttle is a lever.** It stays where you leave it, so the ship keeps cruising when you let go of **W**.
+- **You cannot crash.** The top speed shrinks as you get near a world, and the ship stops at its surface.
+- **Autopilot** flies to the selected object, goes round the Sun if it is in the way, and stops in scanning range.
+  Steering by hand cancels it. With _Reduce motion_ on it jumps straight there.
+- Near a world the ship is carried along with it as it orbits, so you can stay beside a planet to scan it.
+- On a phone the steering pad hides while the info sheet is open (close the sheet to steer; the autopilot button stays).
+- **Speeds are not real.** "u/s" is the game's made-up unit (see _Not to scale_). Real spacecraft take months or years.
+- Needs 3D graphics: the simplified 2D chart has no ship.
+
 ## What you need installed
 
 - [Node.js](https://nodejs.org) 22 or newer (this also installs `npm`, the package manager)
@@ -81,18 +107,18 @@ progress, and are forgotten when you close the page. Turn it off and you are bac
 
 ## Project layout
 
-| Folder                      | Responsibility                                                              |
-| --------------------------- | --------------------------------------------------------------------------- |
-| `src/engine/`               | 3D renderer, camera, input, quality manager, renderer fallback (`ViewHost`) |
-| `src/fallback/`             | Canvas 2D star chart for devices without 3D                                 |
-| `src/game/`                 | Data types, validation and loading, settings, progress, event bus           |
-| `src/save/`                 | Save service (IndexedDB), migrations, preferences                           |
-| `src/ui/`                   | HUD, info panel, settings, toasts, error screen                             |
-| `src/shaders/`              | Reserved for visual-effect shaders (later phases)                           |
-| `data/`                     | JSON content with cited sources                                             |
-| `tests/unit/`, `tests/e2e/` | Vitest unit tests and Playwright browser tests                              |
-| `docs/`                     | Spec, gate report, device checklist, testing log                            |
-| `scripts/`                  | Icon generator and Lighthouse check                                         |
+| Folder                      | Responsibility                                                                                       |
+| --------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `src/engine/`               | 3D renderer, camera, spacecraft flight rules, input, quality manager, renderer fallback (`ViewHost`) |
+| `src/fallback/`             | Canvas 2D star chart for devices without 3D                                                          |
+| `src/game/`                 | Data types, validation and loading, settings, progress, event bus                                    |
+| `src/save/`                 | Save service (IndexedDB), migrations, preferences                                                    |
+| `src/ui/`                   | HUD, info panel, settings, toasts, error screen                                                      |
+| `src/shaders/`              | Reserved for visual-effect shaders (later phases)                                                    |
+| `data/`                     | JSON content with cited sources                                                                      |
+| `tests/unit/`, `tests/e2e/` | Vitest unit tests and Playwright browser tests                                                       |
+| `docs/`                     | Spec, gate report, device checklist, testing log                                                     |
+| `scripts/`                  | Icon generator and Lighthouse check                                                                  |
 
 ## How the pieces fit
 
