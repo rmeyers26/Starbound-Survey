@@ -61,3 +61,23 @@ describe('orbit direction', () => {
     expect(later.z).toBeLessThan(0);
   });
 });
+
+describe('retrograde orbits', () => {
+  const spin = (retrograde: boolean): number => {
+    const step = 0.001;
+    const a = orbitPosition(10, 100, 5, retrograde);
+    const b = orbitPosition(10, 100, 5 + step, retrograde);
+    return a.z * ((b.x - a.x) / step) - a.x * ((b.z - a.z) / step);
+  };
+  it('goes the opposite way round to a normal orbit', () => {
+    expect(spin(false)).toBeGreaterThan(0); // counter-clockwise seen from above north
+    expect(spin(true)).toBeLessThan(0); // clockwise
+  });
+  it('is the same circle, at the same speed, starting from the same place', () => {
+    const normal = orbitPosition(10, 100, 25);
+    const back = orbitPosition(10, 100, 25, true);
+    expect(back.x).toBeCloseTo(normal.x); // same x ...
+    expect(back.z).toBeCloseTo(-normal.z); // ... mirrored z
+    expect(orbitPosition(10, 100, 0, true).x).toBeCloseTo(10);
+  });
+});

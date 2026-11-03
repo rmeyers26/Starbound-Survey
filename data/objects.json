@@ -48,7 +48,80 @@
         "tier": "detailed"
       }
     },
-    "source": "NASA Sun Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/sunfact.html); IAU 2015 Resolution B3 nominal solar values (radius 695,700 km, so diameter 1,391,400 km; effective temperature 5,772 K)"
+    "source": "NASA Sun Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/sunfact.html); IAU 2015 Resolution B3 nominal solar values (radius 695,700 km, so diameter 1,391,400 km; effective temperature 5,772 K)",
+    "layers": [
+      {
+        "id": "core",
+        "name": "The Core",
+        "zone": "interior",
+        "summary": "The central region where nuclear reactions consume hydrogen to form helium. These reactions release the energy that ultimately leaves the surface as visible light.",
+        "detail": "It is the hottest part of the Sun, at about 15 million °C, and holds roughly the inner quarter of the Sun's radius. Every second the Sun turns about 600 million tonnes of hydrogen into helium here.",
+        "tier": "spectral",
+        "ring": [0, 0.195],
+        "color": "#fff2b8"
+      },
+      {
+        "id": "radiative-zone",
+        "name": "The Radiative Zone",
+        "zone": "interior",
+        "summary": "Extends outward from the outer edge of the core to the base of the convection zone. It is characterized by the method of energy transport: radiation.",
+        "detail": "Light is absorbed and given out again again and again as it zigzags outward, so a packet of energy can take tens of thousands of years or more to cross this zone.",
+        "tier": "detailed",
+        "ring": [0.195, 0.546],
+        "color": "#ffd45a"
+      },
+      {
+        "id": "convection-zone",
+        "name": "The Convection Zone",
+        "zone": "interior",
+        "summary": "The outermost layer of the solar interior, extending from a depth of about 200,000 km to the visible surface, where its motion is seen as granules and supergranules.",
+        "detail": "Hot gas rises, cools near the top and sinks again, like water boiling in a pan. Granules at the surface are about 1,000 km across; supergranules are about 30,000 km across.",
+        "tier": "detailed",
+        "ring": [0.546, 0.78],
+        "color": "#ff9a2e"
+      },
+      {
+        "id": "photosphere",
+        "name": "The Photosphere",
+        "zone": "atmosphere",
+        "summary": "The visible surface of the Sun.",
+        "detail": "It is only a few hundred kilometres thick and about 5,500 °C, and almost all of the Sun's visible light comes from it. Sunspots, cooler and darker patches, appear here.",
+        "tier": "basic",
+        "ring": [0.78, 0.81],
+        "color": "#fff6a8"
+      },
+      {
+        "id": "chromosphere",
+        "name": "The Chromosphere",
+        "zone": "atmosphere",
+        "summary": "An irregular layer above the photosphere where the temperature rises from 6,000 °C to about 20,000 °C.",
+        "detail": "Its name means \"sphere of colour\": it flashes red-pink around the edge of the Sun at the start and end of a total solar eclipse. It is a few thousand kilometres thick.",
+        "tier": "basic",
+        "ring": [0.81, 0.86],
+        "color": "#ff5a78"
+      },
+      {
+        "id": "transition-region",
+        "name": "The Transition Region",
+        "zone": "atmosphere",
+        "summary": "A thin and very irregular layer of the Sun's atmosphere that separates the hot corona from the much cooler chromosphere.",
+        "detail": "Across this thin layer the temperature leaps from tens of thousands of degrees to about a million. It is mostly seen in ultraviolet light, which our eyes cannot see.",
+        "tier": "basic",
+        "ring": [0.86, 0.885],
+        "color": "#b678ff"
+      },
+      {
+        "id": "corona",
+        "name": "The Corona",
+        "zone": "atmosphere",
+        "summary": "The Sun's outer atmosphere.",
+        "detail": "It is far hotter than the surface, over a million °C, and stretches millions of kilometres into space. It can be seen with the naked eye only during a total solar eclipse, it is where the solar wind comes from, and scientists are still working out why it is so hot.",
+        "tier": "basic",
+        "ring": [0.885, 1],
+        "color": "#c4d8ff"
+      }
+    ],
+    "layersSource": "NASA's description of the Sun's layers. The summary of each layer is NASA's wording, supplied by the project owner (the original page address is not yet confirmed). The extra detail sentences and the proportions of the diagram come from general solar-physics knowledge and are listed in docs/DATA_CHECK.md for checking."
   },
   {
     "id": "mercury",
@@ -574,6 +647,194 @@
     "source": "NASA Jupiter Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/jupiterfact.html)"
   },
   {
+    "id": "io",
+    "name": "Io",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Io is the most volcanically active world in the Solar System, with hundreds of volcanoes. Jupiter's gravity squeezes and stretches it every orbit, and that heat powers the eruptions.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 3643.2,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 8.9319e22,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Jupiter",
+        "value": 421800,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 1.769138,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 1.796,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 3528,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Jovian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "europa",
+    "name": "Europa",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Europa is covered by a shell of ice, and scientists think a deep salty ocean lies underneath, possibly holding more water than all of Earth's oceans put together.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 3121.6,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 4.7998e22,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Jupiter",
+        "value": 671100,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 3.551181,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 1.315,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 3013,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Jovian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "ganymede",
+    "name": "Ganymede",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Ganymede is the largest moon in the Solar System, bigger than the planet Mercury. It is the only moon known to have its own magnetic field.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 5262.4,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.4819e23,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Jupiter",
+        "value": 1070400,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 7.154553,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 1.428,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1942,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Jovian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "callisto",
+    "name": "Callisto",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Callisto is one of the most heavily cratered worlds in the Solar System. Its ancient surface has hardly changed for billions of years.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 4820.6,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.0759e23,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Jupiter",
+        "value": 1882700,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 16.689017,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 1.235,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1834,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Jovian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
     "id": "saturn",
     "name": "Saturn",
     "type": "planet",
@@ -625,6 +886,335 @@
       }
     },
     "source": "NASA Saturn Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/saturnfact.html)"
+  },
+  {
+    "id": "mimas",
+    "name": "Mimas",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Mimas is a small icy moon with one enormous crater, Herschel, which makes it look a little like the Death Star from the movies. The crater is about a third as wide as Mimas itself.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 396.4,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 3.7493e19,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Saturn",
+        "value": 185540,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 0.942422,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.064,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1150,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Saturnian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "enceladus",
+    "name": "Enceladus",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Enceladus is a small, bright, icy moon that sprays jets of water vapour and ice into space from cracks near its south pole, a sign of a hidden ocean under the ice.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 504.2,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.08e20,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Saturn",
+        "value": 238020,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 1.370218,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.113,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1609,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Saturnian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "tethys",
+    "name": "Tethys",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Tethys is a bright moon of Saturn made almost entirely of water ice. A huge canyon, Ithaca Chasma, runs most of the way round it.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 1062.2,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 6.1745e20,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Saturn",
+        "value": 294620,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 1.887802,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.146,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 984,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Saturnian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "dione",
+    "name": "Dione",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Dione is an icy moon of Saturn with a rocky core and bright, wispy cliffs on one side. Spacecraft measurements hint at a possible ocean deep underneath.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 1122.8,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.0955e21,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Saturn",
+        "value": 377400,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 2.736915,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.232,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1478,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Saturnian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "rhea",
+    "name": "Rhea",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Rhea is Saturn's second-largest moon, a heavily cratered ball of ice mixed with a little rock.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 1527.6,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 2.3065e21,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Saturn",
+        "value": 527100,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 4.5175,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.264,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1236,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Saturnian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "titan",
+    "name": "Titan",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Titan is Saturn's largest moon, wrapped in a thick orange haze. It is the only moon with a dense atmosphere, and the only other world where we have seen liquid lakes on the surface, made of methane and ethane.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 5149.4,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.3452e23,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Saturn",
+        "value": 1221870,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 15.945421,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 1.352,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1881,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Saturnian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "iapetus",
+    "name": "Iapetus",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Iapetus has two faces: one side is as dark as coal and the other as bright as snow. A mountain ridge about 20 kilometres high runs around its middle like the seam on a walnut.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 1468.2,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.8056e21,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Saturn",
+        "value": 3561300,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 79.3215,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.223,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1088,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Saturnian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
   },
   {
     "id": "uranus",
@@ -680,6 +1270,241 @@
     "source": "NASA Uranus Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/uranusfact.html)"
   },
   {
+    "id": "miranda",
+    "name": "Miranda",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Miranda is the smallest of Uranus's five big moons. It looks as if it was smashed apart and put back together, with giant cliffs and patchwork land. Only one spacecraft, Voyager 2, has ever visited.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 471.6,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 6.59e19,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Uranus",
+        "value": 129390,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 1.413479,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.079,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1200,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Uranian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "ariel",
+    "name": "Ariel",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Ariel is the brightest of Uranus's big moons, an icy world crisscrossed by deep valleys and smooth plains that show it was once geologically active.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 1157.8,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.251e21,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Uranus",
+        "value": 191020,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 2.520379,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.269,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1592,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Uranian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "umbriel",
+    "name": "Umbriel",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Umbriel is the darkest of Uranus's big moons. A mysterious bright ring inside a crater called Wunda stands out against its dark ground.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 1169.4,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.275e21,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Uranus",
+        "value": 266300,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 4.144176,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.2,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1459,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Uranian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "titania",
+    "name": "Titania",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Titania is the largest moon of Uranus, an icy world with huge canyons and cracks. It is named after the queen of the fairies in Shakespeare's play A Midsummer Night's Dream.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 1576.8,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 3.42e21,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Uranus",
+        "value": 435910,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 8.705867,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.379,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1662,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Uranian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "oberon",
+    "name": "Oberon",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Oberon is the second-largest moon of Uranus and is heavily cratered. It is named after the king of the fairies in Shakespeare's play A Midsummer Night's Dream.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 1522.8,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 3.08e21,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Uranus",
+        "value": 583520,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 13.463234,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.347,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1559,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Uranian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
     "id": "neptune",
     "name": "Neptune",
     "type": "planet",
@@ -731,5 +1556,52 @@
       }
     },
     "source": "NASA Neptune Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/neptunefact.html)"
+  },
+  {
+    "id": "triton",
+    "name": "Triton",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Triton is Neptune's largest moon, and it orbits backwards, against the direction Neptune spins. That hints it was captured from the Kuiper Belt. Voyager 2 saw plumes of nitrogen erupting from its surface.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 2706.8,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 2.139e22,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Neptune",
+        "value": 354759,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period (retrograde)",
+        "value": 5.876854,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.779,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 2061,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Neptunian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
   }
 ]

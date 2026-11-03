@@ -6,6 +6,16 @@ import { attachInput } from './inputController';
 import { log } from './log';
 import { hitRadius, pickObject, type PickCandidate } from './picking';
 import { bearing, coRotationYawDelta, faceTowards } from './orientation';
+import { BELT_PERIOD_DAYS, MAX_BELT_ROCKS, beltRockCount, generateBelt } from './belt';
+import { createAtmosphere } from './atmosphere';
+import type { BloomPipeline } from './bloomPipeline';
+import {
+  bloomPlan,
+  sunBrightness,
+  warpStreakCount,
+  warpStrength,
+  type BloomLevel,
+} from './effects';
 import { mulberry32 } from './random';
 import { visibleBodyIds } from '../game/regions';
 import {
@@ -19,6 +29,7 @@ import {
 import { computePositions } from './solarSystem';
 import { loadTexture, textureUrlFor } from './textures';
 import type { ControlSettings, View, ViewOptions, ViewQuality, ViewState } from './view';
+import { WarpStreaks } from './warpEffect';
 
 /** Radius of the sphere the stars sit on (far beyond the planets). */
 const STAR_SPHERE_RADIUS = 1500;
@@ -40,6 +51,19 @@ export class WebGLView implements View {
   /** Camera distance that frames everything currently visible. */
   private overviewDistance = overviewDistanceFor(0);
   private readonly stars: THREE.Points;
+  private readonly belt: THREE.Points;
+  /** Glowing hazes around worlds with air, so they can be switched off as a group by the quality level. */
+  private readonly atmospheres: THREE.Mesh[] = [];
+  /** The Sun's material, whose brightness is boosted while bloom is on (see `sunBrightness`). */
+  private sunMaterial: THREE.MeshBasicMaterial | null = null;
+  /** The bloom pipeline, once its code has downloaded (null = bloom off or not ready yet). */
+  private bloomPipeline: BloomPipeline | null = null;
+  private bloomWanted: BloomLevel = 'off';
+  private readonly warp = new WarpStreaks(warpStreakCount(true));
+  /** How far the camera's target moves in the current flight, used to decide how strong the warp is. */
+  private warpTravel = 0;
+  /** The last strength written to the canvas's data-warp attribute (so it is only written when it changes). */
+  private warpLabel = '';
   private readonly selectionRing: THREE.Mesh;
   private readonly raycaster = new THREE.Raycaster();
   private readonly resizeObserver: ResizeObserver;
@@ -79,7 +103,12 @@ export class WebGLView implements View {
     canvas.addEventListener('webglcontextlost', this.onContextLost);
 
     this.scene.background = new THREE.Color(0x02030a);
+    this.scene.add(this.camera); // the warp streaks are the camera's children, so the camera must be in the scene
+    this.camera.add(this.warp.object);
     this.buildLights();
+    // The belt must exist before the bodies are built, because showing or hiding bodies also shows or hides it.
+    this.belt = this.buildBelt();
+    this.scene.add(this.belt);
     this.buildBodies();
     this.stars = this.buildStars();
     this.scene.add(this.stars);
@@ -138,6 +167,8 @@ export class WebGLView implements View {
         });
       }
     });
+    this.bloomPipeline?.dispose();
+    this.bloomPipeline = null;
     this.renderer.dispose();
     this.renderer.domElement.remove();
   }
@@ -149,7 +180,10 @@ export class WebGLView implements View {
       Math.min(window.devicePixelRatio || 1, quality.pixelRatioCap) * quality.resolutionScale;
     this.renderer.setPixelRatio(ratio);
     this.stars.geometry.setDrawRange(0, Math.min(quality.starCount, MAX_STARS));
+    this.belt.geometry.setDrawRange(0, beltRockCount(quality.starCount));
+    for (const haze of this.atmospheres) haze.visible = quality.atmosphere;
     this.resize();
+    void this.setBloom(quality.bloom);
   }
 
   setControlSettings(settings: ControlSettings): void {
@@ -171,6 +205,58 @@ export class WebGLView implements View {
     return mesh ? this.camera.position.distanceTo(mesh.position) : null;
   }
 
+  /**
+   * Turns bloom on, off or changes its strength. The post-processing code is a separate download, fetched the
+   * first time it is needed, so this is asynchronous. If the download fails the game simply runs without bloom.
+   */
+  private async setBloom(level: BloomLevel): Promise<void> {
+    this.bloomWanted = level;
+    if (level === 'off') {
+      this.bloomPipeline?.dispose();
+      this.bloomPipeline = null;
+      this.applySunBrightness('off');
+      return;
+    }
+    // Ask the graphics card what it can do. If it cannot draw into a floating-point picture, skip bloom.
+    const plan = bloomPlan(level, {
+      canRenderToFloat:
+        this.renderer.extensions.has('EXT_color_buffer_float') ||
+        this.renderer.extensions.has('EXT_color_buffer_half_float'),
+      maxSamples: this.renderer.capabilities.maxSamples,
+    });
+    if (!plan) {
+      log('This graphics card cannot do bloom; continuing without it');
+      return;
+    }
+    const settings = plan;
+    if (!this.bloomPipeline) {
+      try {
+        const { createBloomPipeline } = await import('./bloomPipeline');
+        // While the code downloaded, the view may have been closed or the level changed to "off".
+        if (this.disposed || this.bloomWanted === 'off') return;
+        if (!this.bloomPipeline) {
+          this.bloomPipeline = createBloomPipeline(
+            this.renderer,
+            this.scene,
+            this.camera,
+            settings,
+          );
+        }
+      } catch (error) {
+        log('Bloom could not start, continuing without it:', error);
+        return;
+      }
+    }
+    this.bloomPipeline.configure(settings);
+    this.resize(); // gives the new pipeline its size
+    this.applySunBrightness(this.bloomWanted);
+  }
+
+  /** Boosts the Sun above "white" while bloom is on so it glows, and returns it to normal when off. */
+  private applySunBrightness(level: BloomLevel): void {
+    this.sunMaterial?.color.set(VISUALS.sun.color).multiplyScalar(sunBrightness(level));
+  }
+
   // ---- scene construction -------------------------------------------------------------
 
   private buildLights(): void {
@@ -185,11 +271,16 @@ export class WebGLView implements View {
       const geometry = new THREE.SphereGeometry(spec.radius, 48, 32);
       // The Sun glows by itself (Basic material ignores lights); planets are lit by the Sun.
       const material = isSun
-        ? new THREE.MeshBasicMaterial({ color: spec.color })
+        ? (this.sunMaterial = new THREE.MeshBasicMaterial({ color: spec.color }))
         : new THREE.MeshStandardMaterial({ color: spec.color, roughness: 1, metalness: 0 }); // matte, like real rock and dust
       const mesh = new THREE.Mesh(geometry, material);
       mesh.userData.objectId = id;
       if (spec.rings) mesh.add(this.buildRings(spec.radius, spec.rings));
+      if (spec.atmosphere) {
+        const haze = createAtmosphere(spec.radius, spec.atmosphere);
+        this.atmospheres.push(haze);
+        mesh.add(haze);
+      }
       if (spec.startLongitudeDeg !== undefined) {
         // The centre of a sphere's picture faces +X and longitude grows toward -Z, so turning by
         // (-90 degrees - longitude) brings that longitude round to face +Z, where the camera starts.
@@ -239,6 +330,7 @@ export class WebGLView implements View {
   private applyVisibility(): void {
     for (const [id, mesh] of this.meshes) mesh.visible = this.visibleIds.has(id);
     for (const [id, line] of this.orbitLines) line.visible = this.visibleIds.has(id);
+    this.belt.visible = this.visibleIds.has('ceres'); // the belt belongs to the inner region, with Ceres
   }
 
   setUnlockedRegions(regions: string[]): void {
@@ -246,7 +338,10 @@ export class WebGLView implements View {
     this.applyVisibility();
     this.overviewDistance = overviewDistanceFor(reachFromSun(this.visibleIds));
     // If you are looking at the whole system, widen the view to take in the newly unlocked planets.
-    if (this.focusId === null) this.rig.flyTo(this.overviewDistance, OVERVIEW_MIN_DISTANCE);
+    if (this.focusId === null) {
+      this.warpTravel = 0; // widening the view is not a journey
+      this.rig.flyTo(this.overviewDistance, OVERVIEW_MIN_DISTANCE);
+    }
   }
 
   /** A soft halo around the Sun. Purely decorative (labelled as such in the spec). */
@@ -291,6 +386,27 @@ export class WebGLView implements View {
       color: 0xffffff,
       size: 2.2,
       sizeAttenuation: false,
+    });
+    return new THREE.Points(geometry, material);
+  }
+
+  /** The asteroid belt: every rock in ONE Points object (one draw call), turned slowly each frame. */
+  private buildBelt(): THREE.Points {
+    const rocks = generateBelt(MAX_BELT_ROCKS);
+    const positions = new Float32Array(rocks.length * 3);
+    rocks.forEach((rock, i) => {
+      positions[i * 3] = Math.cos(rock.angle) * rock.radius;
+      positions[i * 3 + 1] = rock.height;
+      positions[i * 3 + 2] = -Math.sin(rock.angle) * rock.radius; // same direction as the planets
+    });
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({
+      color: 0x9a9388,
+      size: 1.8,
+      sizeAttenuation: false, // always a small dot on screen, however far away
+      transparent: true,
+      opacity: 0.8,
     });
     return new THREE.Points(geometry, material);
   }
@@ -416,6 +532,8 @@ export class WebGLView implements View {
       const radius = VISUALS[id].radius;
       this.rig.flyTo(focusDistance(radius), closestDistance(radius));
     }
+    // How far the camera's target must travel decides how strong the warp streaks are (short hops get none).
+    this.warpTravel = this.rig.target.distanceTo(this.followedPosition());
   }
 
   /** Puts a rebuilt view back exactly where the old one was. */
@@ -496,11 +614,29 @@ export class WebGLView implements View {
     const dt = Math.min(frameMs / 1000, 0.1);
     this.simDays += dt * SIM_DAYS_PER_SECOND;
     this.updatePositions();
+    // The whole belt turns together, the same way the planets go round (counter-clockwise from above).
+    this.belt.rotation.y = (this.simDays / BELT_PERIOD_DAYS) * Math.PI * 2;
     this.coRotateCameraWithOrbit();
     this.rig.update(dt, this.followedPosition());
     this.rig.applyTo(this.camera);
     this.updateSelectionRing();
-    this.renderer.render(this.scene, this.camera);
+    // Warp streaks: strong in the middle of a long flight, none otherwise (and never with Reduce motion).
+    const progress = this.rig.flightProgress;
+    const warpAmount =
+      this.quality.warp && progress !== null
+        ? warpStrength(progress, this.warpTravel, this.rig.reducedMotion)
+        : 0;
+    this.warp.update(warpAmount, now / 1000);
+    // A read-only status for automated tests ("data-warp" on the canvas, 0.00 to 1.00). Counting coloured pixels
+    // to check the streaks is unreliable between browsers, so tests read the strength itself.
+    const warpLabel = warpAmount.toFixed(2);
+    if (warpLabel !== this.warpLabel) {
+      this.warpLabel = warpLabel;
+      this.renderer.domElement.dataset.warp = warpLabel;
+    }
+    // With bloom on, draw through the glow pipeline; otherwise straight to the screen.
+    if (this.bloomPipeline) this.bloomPipeline.render();
+    else this.renderer.render(this.scene, this.camera);
   };
 
   private resume(): void {
@@ -521,5 +657,6 @@ export class WebGLView implements View {
     this.renderer.setSize(w, h, false); // false: CSS controls the canvas size, not JavaScript
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
+    this.bloomPipeline?.setSize(w, h, this.renderer.getPixelRatio());
   }
 }

@@ -34,10 +34,19 @@ export interface ScanOutcome {
   newRegions: string[];
 }
 
-/** Applies a finished scan to a save record and reports what changed. Does not mutate the input. */
-export function applyScan(record: SaveRecord, objectId: string, tier: number): ScanOutcome {
+/**
+ * Applies a finished scan to a save record and reports what changed. Does not mutate the input.
+ * With `awardProgress` false (practice mode) the scan is still recorded so its data is revealed, but it
+ * earns no XP, so there is no rank-up and no new region.
+ */
+export function applyScan(
+  record: SaveRecord,
+  objectId: string,
+  tier: number,
+  awardProgress = true,
+): ScanOutcome {
   const previous = record.scannedObjects[objectId] ?? 0;
-  const xpAwarded = xpForScan(previous, tier);
+  const xpAwarded = awardProgress ? xpForScan(previous, tier) : 0;
   const xp = record.xp + xpAwarded;
 
   const oldIndex = rankIndexForXp(record.xp);

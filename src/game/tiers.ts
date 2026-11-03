@@ -1,5 +1,5 @@
 // Helpers for "layered" scan data: which measurements a given scan level reveals.
-import { SCAN_TIERS, type CelestialObject, type Measurement } from './types';
+import { SCAN_TIERS, type CelestialObject, type Layer, type Measurement } from './types';
 
 /** 'basic' -> 1, 'detailed' -> 2, 'spectral' -> 3. Measurements with no tier count as basic. */
 export function tierNumber(measurement: Pick<Measurement, 'tier'>): number {
@@ -24,5 +24,17 @@ export function splitByTier(object: CelestialObject, scannedTier: number): TierS
   const locked: Measurement[] = [];
   for (const m of Object.values(object.data))
     (tierNumber(m) <= scannedTier ? unlocked : locked).push(m);
+  return { unlocked, locked };
+}
+
+/** Splits an object's layers into those a scan of `scannedTier` has revealed and those still hidden. */
+export function splitLayersByTier(
+  object: CelestialObject,
+  scannedTier: number,
+): { unlocked: Layer[]; locked: Layer[] } {
+  const unlocked: Layer[] = [];
+  const locked: Layer[] = [];
+  for (const layer of object.layers ?? [])
+    (tierNumber(layer) <= scannedTier ? unlocked : locked).push(layer);
   return { unlocked, locked };
 }

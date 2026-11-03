@@ -7,6 +7,7 @@ import { attachInput } from '../engine/inputController';
 import { log } from '../engine/log';
 import { mulberry32 } from '../engine/random';
 import { SIM_DAYS_PER_SECOND, VISUALS, focusDistance, reachFromSun } from '../engine/scale';
+import { BELT_PERIOD_DAYS, MAX_BELT_ROCKS, beltRockCount, generateBelt } from '../engine/belt';
 import { visibleBodyIds } from '../game/regions';
 import { computePositions, type BodyPosition } from '../engine/solarSystem';
 import type { ControlSettings, View, ViewOptions, ViewQuality, ViewState } from '../engine/view';
@@ -41,6 +42,7 @@ export class Canvas2DView implements View {
   private positions = new Map<string, BodyPosition>();
   /** Bodies the player may see (their region is unlocked), and how far out they reach. */
   private visibleIds: Set<string>;
+  private readonly belt = generateBelt(MAX_BELT_ROCKS);
   private reach: number;
   private simDays = 0;
   private lastTime = 0;
@@ -313,6 +315,25 @@ export class Canvas2DView implements View {
     const count = Math.round(Math.min(this.quality.starCount, STAR_COUNT_MAX) / 8);
     for (let i = 0; i < count; i++) {
       ctx.fillRect(this.stars[i * 2] * width, this.stars[i * 2 + 1] * height, 1.5, 1.5);
+    }
+
+    // The asteroid belt: faint dots turning slowly with the rest of the system (only when the inner region is shown).
+    const sun = this.positions.get('sun');
+    if (this.positions.has('ceres') && sun) {
+      const turn = (this.simDays / BELT_PERIOD_DAYS) * Math.PI * 2;
+      const [bx, by] = toScreen(sun);
+      ctx.fillStyle = 'rgba(170, 163, 150, 0.85)';
+      const dots = Math.round(beltRockCount(this.quality.starCount) / 3);
+      for (let i = 0; i < dots; i++) {
+        const rock = this.belt[i];
+        const angle = rock.angle + turn;
+        ctx.fillRect(
+          bx + Math.cos(angle) * rock.radius * s,
+          by - Math.sin(angle) * rock.radius * s, // up on screen is -z, and planets travel x to -z
+          2,
+          2,
+        );
+      }
     }
 
     // Orbit rings: one circle per body, centred on the body it circles (planets: the Sun; the Moon: Earth).

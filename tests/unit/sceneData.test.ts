@@ -10,6 +10,7 @@ import {
   reachFromSun,
 } from '../../src/engine/scale';
 import { visibleBodyIds } from '../../src/game/regions';
+import { speedNote } from '../../src/ui/format';
 import { computePositions } from '../../src/engine/solarSystem';
 import { textureUrlFor } from '../../src/engine/textures';
 import { RANKS } from '../../src/game/ranks';
@@ -76,30 +77,135 @@ describe('objects.json and the 3D scene agree', () => {
     }
   });
 
-  describe('slowed display speed for very fast moons', () => {
+  describe('display speed of orbits (sped up if too slow to see, slowed if a blur)', () => {
     const realPeriod = (id: string): number =>
       objects.find((o) => o.id === id)!.data.orbitalPeriod.value as number;
     const shownPeriod = (id: string): number => VISUALS[id].visualPeriodDays ?? realPeriod(id);
     const orbiting = Object.keys(VISUALS).filter((id) => VISUALS[id].orbit);
+    const MIN_LAP_DAYS = 3 * SIM_DAYS_PER_SECOND; // a lap under 3 seconds is too fast to follow
 
-    it('keeps the true order of speeds: whatever really orbits faster is drawn orbiting faster', () => {
-      const byReal = [...orbiting].sort((a, b) => realPeriod(a) - realPeriod(b));
-      const byShown = [...orbiting].sort((a, b) => shownPeriod(a) - shownPeriod(b));
-      expect(byShown).toEqual(byReal);
+    it('keeps the true order of speeds around each planet: Io laps faster than Europa, and so on', () => {
+      const parents = new Set(orbiting.map((id) => VISUALS[id].orbit!.parentId));
+      for (const parent of parents) {
+        const family = orbiting.filter((id) => VISUALS[id].orbit!.parentId === parent);
+        const byReal = [...family].sort((a, b) => realPeriod(a) - realPeriod(b));
+        const byShown = [...family].sort((a, b) => shownPeriod(a) - shownPeriod(b));
+        expect(byShown, `bodies orbiting ${parent}`).toEqual(byReal);
+      }
     });
 
-    it('never makes a body orbit faster than it really does', () => {
-      for (const id of orbiting) expect(shownPeriod(id)).toBeGreaterThanOrEqual(realPeriod(id));
+    const MAX_LAP_DAYS = 10 * 60 * SIM_DAYS_PER_SECOND; // a lap over 10 minutes looks frozen
+
+    it('every lap takes between 3 seconds and 10 minutes: never a blur, never frozen', () => {
+      for (const id of orbiting) {
+        expect(shownPeriod(id), `${id} is too fast`).toBeGreaterThanOrEqual(MIN_LAP_DAYS);
+        expect(shownPeriod(id), `${id} is too slow to see`).toBeLessThanOrEqual(MAX_LAP_DAYS);
+      }
     });
 
-    it('every lap takes at least 3 seconds, so nothing becomes a blur', () => {
-      for (const id of orbiting)
-        expect(shownPeriod(id) / SIM_DAYS_PER_SECOND).toBeGreaterThanOrEqual(3);
+    it('no orbit is drawn more than 60 times faster or slower than real', () => {
+      for (const id of orbiting) {
+        const change = Math.max(realPeriod(id) / shownPeriod(id), shownPeriod(id) / realPeriod(id));
+        expect(change, id).toBeLessThanOrEqual(60);
+      }
     });
 
-    it('only the moons that would otherwise be a blur are slowed', () => {
-      const slowed = orbiting.filter((id) => VISUALS[id].visualPeriodDays !== undefined);
-      expect(slowed.sort()).toEqual(['deimos', 'phobos']);
+    it('every body whose real lap would be a blur or frozen declares a display period', () => {
+      for (const id of orbiting) {
+        const real = realPeriod(id);
+        if (real < MIN_LAP_DAYS || real > MAX_LAP_DAYS) {
+          expect(VISUALS[id].visualPeriodDays, `${id} needs a display period`).toBeDefined();
+        }
+      }
+    });
+
+    it('the inner planets, the Moon and Iapetus are drawn at their true speed', () => {
+      for (const id of ['mercury', 'venus', 'earth', 'mars', 'moon', 'iapetus']) {
+        expect(VISUALS[id].visualPeriodDays, id).toBeUndefined();
+      }
+    });
+
+    it('every orbit drawn at a different speed is explained to the player in the info panel', () => {
+      for (const id of orbiting) {
+        if (VISUALS[id].visualPeriodDays === undefined) continue;
+        expect(speedNote(realPeriod(id), shownPeriod(id)), id).not.toBeNull();
+      }
+    });
+  });
+
+  describe("the direction every body really travels, from the game's own position code", () => {
+    // Angular momentum about north (+Y) of a body relative to what it orbits: positive = counter-clockwise
+    // seen from above the north pole, negative = clockwise.
+    const spinAboutParent = (id: string): number => {
+      const parent = VISUALS[id].orbit!.parentId;
+      const t0 = computePositions(objects, 3);
+      const t1 = computePositions(objects, 3.01);
+      const rel = (m: ReturnType<typeof computePositions>) => ({
+        x: m.get(id)!.x - m.get(parent)!.x,
+        z: m.get(id)!.z - m.get(parent)!.z,
+      });
+      const a = rel(t0);
+      const b = rel(t1);
+      return a.z * (b.x - a.x) - a.x * (b.z - a.z);
+    };
+
+    it('every planet, asteroid and normal moon goes counter-clockwise seen from above north', () => {
+      for (const id of Object.keys(VISUALS)) {
+        if (!VISUALS[id].orbit || VISUALS[id].retrograde) continue;
+        expect(spinAboutParent(id), id).toBeGreaterThan(0);
+      }
+    });
+
+    it('Triton goes clockwise round Neptune, the opposite way to Io round Jupiter', () => {
+      expect(spinAboutParent('io')).toBeGreaterThan(0);
+      expect(spinAboutParent('triton')).toBeLessThan(0);
+    });
+  });
+
+  describe('atmosphere haze', () => {
+    const withAir = Object.keys(VISUALS).filter((id) => VISUALS[id].atmosphere);
+
+    it('only worlds that really have a substantial atmosphere get one', () => {
+      expect(withAir.sort()).toEqual(
+        ['earth', 'jupiter', 'mars', 'neptune', 'saturn', 'titan', 'uranus', 'venus'].sort(),
+      );
+    });
+
+    it('airless worlds get none (Mercury, our Moon, the asteroids and the small moons)', () => {
+      for (const id of [
+        'mercury',
+        'moon',
+        'ceres',
+        'vesta',
+        'phobos',
+        'deimos',
+        'europa',
+        'enceladus',
+      ]) {
+        expect(VISUALS[id].atmosphere, id).toBeUndefined();
+      }
+    });
+
+    it('every haze is a thin shell just outside its planet and not absurdly bright', () => {
+      for (const id of withAir) {
+        const { thickness, strength } = VISUALS[id].atmosphere!;
+        expect(thickness, id).toBeGreaterThan(1.02);
+        expect(thickness, id).toBeLessThan(1.3);
+        expect(strength, id).toBeGreaterThan(0);
+        expect(strength, id).toBeLessThanOrEqual(1.5);
+      }
+    });
+
+    it('Venus and Titan (famously thick air) are hazier than thin-aired Mars', () => {
+      const thickness = (id: string): number => VISUALS[id].atmosphere!.thickness;
+      expect(thickness('venus')).toBeGreaterThan(thickness('mars'));
+      expect(thickness('titan')).toBeGreaterThan(thickness('mars'));
+    });
+  });
+
+  describe('retrograde orbits', () => {
+    it('only Triton orbits the "wrong" way (Neptune\'s big moon is a captured object)', () => {
+      expect(Object.keys(VISUALS).filter((id) => VISUALS[id].retrograde)).toEqual(['triton']);
     });
   });
 
@@ -107,6 +213,14 @@ describe('objects.json and the 3D scene agree', () => {
     const firstScanXp = 20; // spec: first scan of an object = 20 XP
     const innerObjects = objects.filter((o) => o.region === 'inner');
     expect(innerObjects.length * firstScanXp).toBeGreaterThanOrEqual(RANKS[1].xp);
+  });
+
+  it('Surveyor is reachable using ONLY what Navigator can reach (first scan + detailed scan of every object)', () => {
+    const firstScanXp = 20;
+    const detailedScanXp = 10; // Navigator's scanner can do the detailed tier, not the spectral one
+    const navigatorRegions = new Set([...RANKS[0].regions, ...RANKS[1].regions]);
+    const reachable = objects.filter((o) => navigatorRegions.has(o.region));
+    expect(reachable.length * (firstScanXp + detailedScanXp)).toBeGreaterThanOrEqual(RANKS[2].xp);
   });
 
   it('every object belongs to a region that some rank unlocks', () => {

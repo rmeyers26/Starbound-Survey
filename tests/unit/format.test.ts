@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { formatMeasurement, formatNumber, regionName, typeLabel } from '../../src/ui/format';
+import {
+  formatMeasurement,
+  formatNumber,
+  regionName,
+  speedNote,
+  typeLabel,
+} from '../../src/ui/format';
 import { sheetAction } from '../../src/ui/sheetGesture';
 
 describe('formatNumber', () => {
@@ -54,5 +60,31 @@ describe('sheetAction', () => {
   it('an in-between wobble does nothing', () => {
     expect(sheetAction(20)).toBeNull();
     expect(sheetAction(-20)).toBeNull();
+  });
+});
+
+describe('speedNote (honest display speed)', () => {
+  it('says nothing when an orbit is drawn at its true speed', () => {
+    expect(speedNote(365.256, 365.256)).toBeNull();
+    expect(speedNote(365.256, 366)).toBeNull(); // within 2 percent counts as true
+  });
+
+  it('says when an orbit is drawn faster than real', () => {
+    expect(speedNote(60182, 1320)).toBe(
+      'Its orbit is drawn about 46 times faster than real, so you can watch it move.',
+    );
+    expect(speedNote(1000, 500)).toContain('2 times faster');
+  });
+
+  it('says when an orbit is drawn slower than real', () => {
+    expect(speedNote(0.31891, 12)).toBe(
+      'Its orbit is drawn about 38 times slower than real, so you can follow it.',
+    );
+  });
+
+  it('copes with nonsense without throwing or printing NaN', () => {
+    expect(speedNote(0, 10)).toBeNull();
+    expect(speedNote(10, 0)).toBeNull();
+    expect(speedNote(NaN, 10)).toBeNull();
   });
 });

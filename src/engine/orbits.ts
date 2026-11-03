@@ -21,7 +21,10 @@ export function orbitPosition(
   radius: number,
   periodDays: number,
   simDays: number,
+  retrograde = false,
 ): { x: number; z: number } {
   const angle = orbitAngle(periodDays, simDays);
-  return { x: Math.cos(angle) * radius, z: -Math.sin(angle) * radius };
+  // Retrograde means "backwards": the same circle, travelled the other way (Neptune's moon Triton does this).
+  const direction = retrograde ? 1 : -1;
+  return { x: Math.cos(angle) * radius, z: direction * Math.sin(angle) * radius };
 }

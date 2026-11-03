@@ -12,9 +12,13 @@ export function trackErrors(page: Page): string[] {
 
 /** Opens the game and waits until the canvas and object buttons exist. */
 export async function openGame(page: Page, query = ''): Promise<void> {
-  await page.goto(`/${query}`);
+  // Visual effects (bloom, haze, warp) make the software-rendered 3D several times slower, and almost no test
+  // cares about them, so they are off unless a test asks for them with `?effects=on`.
+  const withEffects = /[?&]effects=/.test(query);
+  const full = withEffects ? query : `${query}${query.includes('?') ? '&' : '?'}effects=off`;
+  await page.goto(`/${full}`);
   await expect(page.locator('canvas.game-canvas')).toBeVisible();
-  await expect(page.locator('.hud-objects button')).toHaveCount(14);
+  await expect(page.locator('.hud-objects button')).toHaveCount(31);
 }
 
 export const chip = (page: Page, id: string) => page.locator(`button[data-object-id="${id}"]`);
@@ -61,3 +65,12 @@ export async function scanObject(page: Page, id: string): Promise<void> {
 }
 
 export const xpText = (page: Page) => page.locator('.xp-text');
+
+/** Turns practice mode on or off in Settings, then closes Settings. */
+export async function setPractice(page: Page, on: boolean): Promise<void> {
+  await openSettings(page);
+  const box = page.getByLabel('Practice mode');
+  if (on) await box.check();
+  else await box.uncheck();
+  await page.getByRole('button', { name: 'Close' }).last().click();
+}

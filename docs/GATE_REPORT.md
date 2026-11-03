@@ -32,8 +32,8 @@ Date of this report: 2026-11-02.
 
 ## What was verified, and how
 
-- 242 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
-- 91 browser tests (Playwright) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
+- 318 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
+- 99 browser tests (Playwright; 5 skipped by design) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
   bottom-sheet handle only exists on phone-width screens).
 - Lint, type-check and production build pass. Production dependencies: 0 known vulnerabilities.
 - Lighthouse on the production build: accessibility 100, best practices 100, SEO 91.
@@ -79,6 +79,41 @@ Date of this report: 2026-11-02.
     and the Logbook counts only what you can reach. A unit test also checks that the inner region alone is enough XP
     to reach Navigator, so the game can never dead-end.
 
+15. **Turning on bloom made the whole browser-test suite three times slower** (11 minutes instead of 3.6) and one
+    unrelated scanning test failed under the load, because every desktop test was suddenly software-rendering heavy
+    effects. Tests now load the game with `?effects=off`; only the effect tests turn them on. (A real GPU does not have
+    this problem, but it is a reminder that bloom is the first thing to trim if a phone is slow.)
+16. **A "should never happen" bad number (NaN) could have broken the warp streaks.** A test of silly inputs found it
+    before any player could.
+
+17. **The outer planets looked frozen.** At the game's speed Jupiter takes 24 minutes to go round and Neptune 5 and a
+    half hours. Far worlds are now drawn with faster laps (4 to 7 minutes), keeping the true order, and the info panel
+    says how much faster than real. The old rule "nothing is ever drawn faster than real" was replaced with: every lap
+    is between 3 seconds and 10 minutes, no orbit is changed more than 60 times, and every change is explained.
+18. **Uranus had no moons in the game** although it has five big ones. Added (with Saturn's five mid-sized moons).
+    The object button row is now 31 long: grouping buttons by planet is the next interface job.
+
+19. **Practice mode** (Settings): everything unlocked, every scan level available, no XP. Built as a virtual
+    "overlay" record (`game/practice.ts`) that the game reads while practice is on, so the real save is never
+    written to: turning practice off returns exactly to the real progress. Practice scans are kept in memory only.
+    Tested as pure rules, in the scan controller, and end to end (including that real XP and "objects inspected"
+    never change, and that the setting survives a reload).
+
+20. **Warp-streak tests failed only in Safari's engine (WebKit) on CI.** They counted "bluish pixels", which differs between
+    browsers even with no warp at all (3,000 to 4,000 on the Performance profile in WebKit, about 0 in Chromium), so the
+    check did not carry over. The 3D view now publishes its warp strength as a read-only `data-warp` value and the tests
+    read that. Whether the streaks are _drawn_ correctly in Safari could not be reproduced here (WebKit cannot be
+    downloaded in this container): the iPhone test covers it.
+21. **The Sun's layers** (core, radiative zone, convection zone, photosphere, chromosphere, transition region, corona) are a
+    new Layers tab with a cutaway picture, revealed by scan level. The wording is NASA's as pasted by the owner (page address
+    unconfirmed); the extra detail and the picture's proportions are from general knowledge and are listed for checking.
+
+22. **Notifications could bury the Settings button on a small iPhone.** CI (WebKit, iPhone layout) could not tap Settings because
+    a stack of toasts, including the iPhone install tip, sat on top of it. Toasts stacked without limit and also swallowed
+    taps. Now at most two show at once (oldest dropped first, but a toast with an action button, such as "Reload", is kept),
+    and a toast's text lets taps through to whatever is underneath, apart from its own buttons. Reproduced first (five toasts
+    reached the Settings button on a 390 x 664 screen), and the new test was confirmed to fail with the cap switched off.
+
 ## Open problems and trade-offs
 
 1. **WebGPU is not implemented.** The spec asks for WebGPU first. Three.js's WebGPU API is still moving
@@ -110,7 +145,8 @@ Date of this report: 2026-11-02.
    not handled.
 10. **Bundle size.** 587 KB of JavaScript (150 KB compressed), mostly Three.js. Fine for the 5 MB target;
     code-splitting is a later optimisation.
-11. **Visuals are mostly placeholders.** The Moon and Mars now have real surface pictures (JPEG, size chosen by graphics
+11. **Visuals are partly placeholders.** (Bloom, atmosphere haze and warp streaks now exist, are decorative, and
+    their cost on a real phone is unmeasured.) The Moon and Mars now have real surface pictures (JPEG, size chosen by graphics
     profile; see `TEXTURES.md`). Its **credit and licence are not yet confirmed** (the supplied file has no credit
     inside and NASA's page could not be opened), so no in-game credit is shown. The other bodies are flat colours.
     KTX2 is still not used, and texture memory and frame rate on a real phone are untested.

@@ -124,3 +124,120 @@ Notes:
   the Sun (Earth is 60), where the true ratios would put Neptune 30 times farther out than Earth. The true ORDER and
   size order are kept and tested.
 - All four are flat-colour spheres with no cloud bands yet.
+
+## The outer moons: Io, Europa, Ganymede, Callisto, Titan, Enceladus and Triton
+
+**Status: UNVERIFIED**, entered from memory. Sources to compare with: NASA's Jovian, Saturnian and Neptunian
+Satellite Fact Sheets (NSSDC) and JPL's "Planetary Satellite Physical Parameters" (ssd.jpl.nasa.gov/sats/phys_par/).
+As with the other moons, I am not sure of the exact fact-sheet page addresses, so the `source` text names the
+resource instead of a link that might be wrong.
+
+| Value (as entered)                | Io        | Europa    | Ganymede  | Callisto  | Titan     | Enceladus | Triton     | Checked? |
+| --------------------------------- | --------- | --------- | --------- | --------- | --------- | --------- | ---------- | -------- |
+| Mean diameter (km)                | 3,643.2   | 3,121.6   | 5,262.4   | 4,820.6   | 5,149.4   | 504.2     | 2,706.8    | [ ]      |
+| Mass (kg)                         | 8.9319e22 | 4.7998e22 | 1.4819e23 | 1.0759e23 | 1.3452e23 | 1.08e20   | 2.139e22   | [ ]      |
+| Average distance from planet (km) | 421,800   | 671,100   | 1,070,400 | 1,882,700 | 1,221,870 | 238,020   | 354,759    | [ ]      |
+| Orbital period (days)             | 1.769138  | 3.551181  | 7.154553  | 16.689017 | 15.945421 | 1.370218  | 5.876854\* | [ ]      |
+| Surface gravity (m/s²)            | 1.796     | 1.315     | 1.428     | 1.235     | 1.352     | 0.113     | 0.779      | [ ]      |
+| Mean density (kg/m³)              | 3,528     | 3,013     | 1,942     | 1,834     | 1,881     | 1,609     | 2,061      | [ ]      |
+
+\* Triton orbits Neptune backwards ("retrograde"). The game draws it going the opposite way round to every other
+moon, and the label says "retrograde".
+
+Quick-facts text to check: Io "hundreds of volcanoes" and tidal heating; Europa "possibly more water than all of
+Earth's oceans put together"; Ganymede "bigger than Mercury" and "the only moon known to have its own magnetic
+field"; Callisto "one of the most heavily cratered"; Titan "the only moon with a dense atmosphere" and methane and ethane
+lakes; Enceladus water jets from the south pole; Triton "orbits backwards", "captured from the Kuiper Belt" and
+nitrogen plumes seen by Voyager 2.
+
+**How they are drawn:** real laps range from 1.4 to 17 days, a blur at game speed, so each moon is drawn with a
+slowed display period of 9 to 33 days (3 to 11 seconds a lap). The info panel shows the real periods. The order
+of speed around each planet is true and tested. They unlock with their planet at Navigator.
+
+## The asteroid belt
+
+A decorative band of up to 3,000 small dots between Mars and Jupiter (fewer on weaker graphics levels). It is **not
+data**: the real belt holds millions of rocks, spread much more thinly than any picture can show. Ceres and Vesta are
+the real, scannable members.
+
+## More moons: Saturn's mid-sized moons and Uranus's five big moons
+
+**Status: UNVERIFIED**, entered from memory. Sources to compare with: NASA's Saturnian and Uranian Satellite Fact
+Sheets (NSSDC) and JPL's "Planetary Satellite Physical Parameters" (ssd.jpl.nasa.gov/sats/phys_par/). The two
+sources **disagree** in places for the Uranian moons, especially mass and distance; the game uses the JPL-style
+values below. Pick one source and make all of them match it.
+
+| Value (as entered)                | Mimas     | Tethys    | Dione     | Rhea      | Iapetus   | Checked? |
+| --------------------------------- | --------- | --------- | --------- | --------- | --------- | -------- |
+| Mean diameter (km)                | 396.4     | 1,062.2   | 1,122.8   | 1,527.6   | 1,468.2   | [ ]      |
+| Mass (kg)                         | 3.7493e19 | 6.1745e20 | 1.0955e21 | 2.3065e21 | 1.8056e21 | [ ]      |
+| Average distance from Saturn (km) | 185,540   | 294,620   | 377,400   | 527,100   | 3,561,300 | [ ]      |
+| Orbital period (days)             | 0.942422  | 1.887802  | 2.736915  | 4.5175    | 79.3215   | [ ]      |
+| Surface gravity (m/s²)            | 0.064     | 0.146     | 0.232     | 0.264     | 0.223     | [ ]      |
+| Mean density (kg/m³)              | 1,150     | 984       | 1,478     | 1,236     | 1,088     | [ ]      |
+
+| Value (as entered)                | Miranda  | Ariel    | Umbriel  | Titania  | Oberon    | Checked? |
+| --------------------------------- | -------- | -------- | -------- | -------- | --------- | -------- |
+| Mean diameter (km)                | 471.6    | 1,157.8  | 1,169.4  | 1,576.8  | 1,522.8   | [ ]      |
+| Mass (kg)                         | 6.59e19  | 1.251e21 | 1.275e21 | 3.42e21  | 3.08e21   | [ ]      |
+| Average distance from Uranus (km) | 129,390  | 191,020  | 266,300  | 435,910  | 583,520   | [ ]      |
+| Orbital period (days)             | 1.413479 | 2.520379 | 4.144176 | 8.705867 | 13.463234 | [ ]      |
+| Surface gravity (m/s²)            | 0.079    | 0.269    | 0.2      | 0.379    | 0.347     | [ ]      |
+| Mean density (kg/m³)              | 1,200    | 1,592    | 1,459    | 1,662    | 1,559     | [ ]      |
+
+Quick-facts text to check: Mimas's crater Herschel being "about a third as wide as Mimas"; Tethys's canyon Ithaca Chasma
+running "most of the way round"; Dione's "possible ocean" (a hint, not a confirmation); Iapetus's two faces and its
+"20 kilometre" equatorial ridge; Miranda looking "smashed apart and put back together"; Ariel "the brightest" of the
+big Uranian moons; Umbriel "the darkest" and the bright ring in the crater Wunda; Titania and Oberon being named
+after the fairy queen and king in Shakespeare's _A Midsummer Night's Dream_.
+
+**Mercury and Venus have no moons** (that is real, not a gap in the game). Earth has the Moon, Mars two, and each
+giant now has several. Many dozens of smaller moons are not in the game.
+
+## How fast the orbits are drawn (and why you are told)
+
+At the game's speed (3 simulated days per second) Jupiter would take 24 minutes to go round the Sun and Neptune
+5 and a half hours, so the outer planets looked frozen. Each far-out world is now drawn with a **faster** lap, and
+each very fast moon with a **slower** one, always keeping the true order of speeds:
+
+| World   | Real orbit | Drawn lap | Drawn as                   |
+| ------- | ---------- | --------- | -------------------------- |
+| Vesta   | 3.6 years  | 4.5 min   | 1.6 times faster than real |
+| Ceres   | 4.6 years  | 5 min     | 1.9 times faster           |
+| Jupiter | 11.9 years | 5.3 min   | 4.5 times faster           |
+| Saturn  | 29.5 years | 6 min     | 10 times faster            |
+| Uranus  | 84 years   | 6.7 min   | 26 times faster            |
+| Neptune | 165 years  | 7.3 min   | 46 times faster            |
+
+The planets from Mercury to Mars, the Moon and Iapetus keep their true speed. Whenever an orbit is drawn at a
+different speed, the info panel says so ("Its orbit is drawn about 46 times faster than real, so you can watch it
+move"), and a test checks that every changed orbit has that explanation.
+
+## The Sun's layers (Layers tab)
+
+The seven layers come from NASA's description of the Sun's structure, whose text the project owner pasted into the
+chat. The **summary** line of each layer is that NASA wording (lightly punctuated). I recognise the wording as NASA's,
+but the original page address is **not confirmed**, so the game says so under the tab ("not yet confirmed"). Please find
+the page, confirm the wording, and add its address to `layersSource` in `data/objects.json`.
+
+Everything I added is in the **detail** line and in the picture. It comes from general solar-physics knowledge, not
+from the pasted text, so please check each one:
+
+| Layer             | Added detail (from memory)                                                                                                                                           | Checked? |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| The Core          | about 15 million °C; the inner quarter of the Sun's radius; about 600 million tonnes of hydrogen turned into helium every second                                     | [ ]      |
+| Radiative Zone    | light is absorbed and re-emitted again and again; energy takes tens of thousands of years or more to cross                                                           | [ ]      |
+| Convection Zone   | hot gas rises, cools and sinks like boiling water; granules about 1,000 km, supergranules about 30,000 km                                                            | [ ]      |
+| Photosphere       | a few hundred km thick; about 5,500 °C; nearly all visible light; sunspots are cooler, darker patches                                                                | [ ]      |
+| Chromosphere      | "sphere of colour"; red-pink flash at a total eclipse; a few thousand km thick                                                                                       | [ ]      |
+| Transition Region | temperature leaps from tens of thousands of degrees to about a million; seen in ultraviolet                                                                          | [ ]      |
+| Corona            | over a million °C; millions of km into space; visible to the naked eye only at a total eclipse; source of the solar wind; why it is so hot is still being worked out | [ ]      |
+
+**The picture's proportions** (also from memory): the core reaches about 25% of the Sun's radius, the radiative zone about
+70%, and the convection zone the rest (so inside the Sun the bands are drawn to scale). The atmosphere layers are far thinner
+than the picture shows, so they are drawn thicker on purpose (the caption says so).
+
+**Game design choices (not facts):** the four atmosphere layers are revealed by a basic scan (they can be seen from
+outside), the convection and radiative zones by a detailed scan (Navigator), and the core by a spectral scan (Surveyor).
+Practice mode reveals them all. Only the Sun has layers so far; Earth (crust, mantle, core) and the gas giants could use the
+same Layers tab later.

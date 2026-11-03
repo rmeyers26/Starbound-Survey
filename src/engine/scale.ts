@@ -3,6 +3,8 @@
 // 1 cm pea about 107 metres away. So the game uses these made-up "scene units" instead.
 // The info panel always shows the TRUE values from objects.json; this file is only for looks.
 
+import type { AtmosphereSpec } from './effects';
+
 export interface VisualSpec {
   /** Sphere radius in scene units. */
   radius: number;
@@ -31,6 +33,10 @@ export interface VisualSpec {
    * Moon), which a unit test checks. This is disclosed in the docs.
    */
   visualPeriodDays?: number;
+  /** True if it orbits the OPPOSITE way to everything else (clockwise seen from above north). Triton does. */
+  retrograde?: boolean;
+  /** A glowing haze around the edge, for worlds with a real atmosphere. Decorative. */
+  atmosphere?: AtmosphereSpec;
   /** Rings drawn around the body (Saturn). Sizes are multiples of the body's radius. Decorative. */
   rings?: { inner: number; outer: number; color: number; opacity: number; tiltDeg: number };
 }
@@ -40,8 +46,18 @@ export const VISUALS: Record<string, VisualSpec> = {
   // Planets: sizes and orbit distances are squeezed so all fit (see the note at the top of the file).
   // Order of size and distance is kept true: Venus is nearly Earth's size, Mercury and Mars are smaller.
   mercury: { radius: 0.8, color: 0x8c8680, orbit: { parentId: 'sun', radius: 28 } },
-  venus: { radius: 1.9, color: 0xe3c07a, orbit: { parentId: 'sun', radius: 43 } },
-  earth: { radius: 2, color: 0x2f6fd6, orbit: { parentId: 'sun', radius: 60 } },
+  venus: {
+    radius: 1.9,
+    color: 0xe3c07a,
+    orbit: { parentId: 'sun', radius: 43 },
+    atmosphere: { color: 0xf4dca0, thickness: 1.16, strength: 1.1 }, // thick, bright cloud deck
+  },
+  earth: {
+    radius: 2,
+    color: 0x2f6fd6,
+    orbit: { parentId: 'sun', radius: 60 },
+    atmosphere: { color: 0x5fa0ff, thickness: 1.14, strength: 1.2 },
+  },
   moon: {
     radius: 0.55,
     color: 0xb9b9b9,
@@ -51,6 +67,7 @@ export const VISUALS: Record<string, VisualSpec> = {
     nightGlow: 0.08,
   },
   mars: {
+    atmosphere: { color: 0xe0a07a, thickness: 1.08, strength: 0.55 }, // thin air
     radius: 1.1,
     color: 0xc1572f,
     orbit: { parentId: 'sun', radius: 80 },
@@ -73,20 +90,175 @@ export const VISUALS: Record<string, VisualSpec> = {
     visualPeriodDays: 21,
   },
   // The asteroid belt sits between Mars and Jupiter. Orbit distances are compressed, order kept true.
-  vesta: { radius: 0.3, color: 0x9a948c, orbit: { parentId: 'sun', radius: 100 } },
-  ceres: { radius: 0.35, color: 0x7d7a78, orbit: { parentId: 'sun', radius: 112 } },
+  vesta: {
+    radius: 0.3,
+    color: 0x9a948c,
+    orbit: { parentId: 'sun', radius: 100 },
+    visualPeriodDays: 810, // drawn about 1.6 times faster than real, so it visibly moves
+  },
+  ceres: {
+    radius: 0.35,
+    color: 0x7d7a78,
+    orbit: { parentId: 'sun', radius: 112 },
+    visualPeriodDays: 900, // about 1.9 times faster than real
+  },
   // The outer planets (unlock at Navigator). Real distances are 5 to 30 times Earth's; here they are squeezed
   // so the whole system still fits, with the true ORDER kept. Sizes keep the true order too.
-  jupiter: { radius: 5.5, color: 0xc8a27a, orbit: { parentId: 'sun', radius: 140 } },
+  jupiter: {
+    radius: 5.5,
+    color: 0xc8a27a,
+    orbit: { parentId: 'sun', radius: 140 },
+    visualPeriodDays: 960, // drawn about 4.5 times faster than real
+    atmosphere: { color: 0xe8cfa8, thickness: 1.06, strength: 0.55 },
+  },
   saturn: {
+    atmosphere: { color: 0xf2e4b8, thickness: 1.06, strength: 0.55 },
     radius: 4.8,
     color: 0xe0cf9b,
     orbit: { parentId: 'sun', radius: 165 },
+    visualPeriodDays: 1080, // about 10 times faster than real
     // Saturn's rings really reach from about 1.3 to 2.3 planet radii and are tilted about 27 degrees.
     rings: { inner: 1.3, outer: 2.3, color: 0xcdb98a, opacity: 0.75, tiltDeg: 26.7 },
   },
-  uranus: { radius: 3.2, color: 0x9fd6e0, orbit: { parentId: 'sun', radius: 190 } },
-  neptune: { radius: 3.1, color: 0x4a6fe0, orbit: { parentId: 'sun', radius: 212 } },
+  uranus: {
+    radius: 3.2,
+    color: 0x9fd6e0,
+    orbit: { parentId: 'sun', radius: 190 },
+    visualPeriodDays: 1200, // about 26 times faster than real
+    atmosphere: { color: 0xb4f4f8, thickness: 1.1, strength: 0.9 },
+  },
+  neptune: {
+    radius: 3.1,
+    color: 0x4a6fe0,
+    orbit: { parentId: 'sun', radius: 212 },
+    visualPeriodDays: 1320, // about 46 times faster than real
+    atmosphere: { color: 0x7fa0ff, thickness: 1.1, strength: 0.9 },
+  },
+  // Moons of the outer planets. They unlock with their planet. Real laps range from 1.4 to 17 days, a blur at
+  // game speed, so each is DRAWN with a slowed period (>= 9 days = 3 s a lap). Order of speed around each planet
+  // stays true; a unit test checks it. Sizes keep the true order across ALL bodies (also tested).
+  io: {
+    radius: 0.57,
+    color: 0xd9c36a,
+    orbit: { parentId: 'jupiter', radius: 9.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 9,
+  },
+  europa: {
+    radius: 0.5,
+    color: 0xcfc7b5,
+    orbit: { parentId: 'jupiter', radius: 12.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 14,
+  },
+  ganymede: {
+    radius: 0.9,
+    color: 0x8d8577,
+    orbit: { parentId: 'jupiter', radius: 16 },
+    tidallyLocked: true,
+    visualPeriodDays: 22,
+  },
+  callisto: {
+    radius: 0.6,
+    color: 0x6b6358,
+    orbit: { parentId: 'jupiter', radius: 20 },
+    tidallyLocked: true,
+    visualPeriodDays: 33,
+  },
+  // Saturn's rings reach 2.3 planet radii (about 11 units), so its moons orbit beyond them.
+  enceladus: {
+    radius: 0.2,
+    color: 0xf2f6f8,
+    orbit: { parentId: 'saturn', radius: 14 },
+    tidallyLocked: true,
+    visualPeriodDays: 10,
+  },
+  titan: {
+    atmosphere: { color: 0xe9a850, thickness: 1.22, strength: 1.0 }, // thick orange haze
+    radius: 0.85,
+    color: 0xd9a05b,
+    orbit: { parentId: 'saturn', radius: 23 },
+    tidallyLocked: true,
+    visualPeriodDays: 27,
+  },
+  triton: {
+    radius: 0.45,
+    color: 0xc9b8b0,
+    orbit: { parentId: 'neptune', radius: 7.5 },
+    tidallyLocked: true,
+    retrograde: true, // Triton circles Neptune backwards
+    visualPeriodDays: 15,
+  },
+  // More moons (outer region). Saturn's mid-sized moons orbit beyond its rings (about 11 units); Uranus gets its five big ones.
+  mimas: {
+    radius: 0.19,
+    color: 0xc9c9c9,
+    orbit: { parentId: 'saturn', radius: 12.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 9,
+  },
+  tethys: {
+    radius: 0.36,
+    color: 0xe6e6e6,
+    orbit: { parentId: 'saturn', radius: 16.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 11.5,
+  },
+  dione: {
+    radius: 0.37,
+    color: 0xd9d9d9,
+    orbit: { parentId: 'saturn', radius: 18.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 13.5,
+  },
+  rhea: {
+    radius: 0.415,
+    color: 0xcfcfcf,
+    orbit: { parentId: 'saturn', radius: 20.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 16.5,
+  },
+  iapetus: {
+    radius: 0.4,
+    color: 0xa89f8a,
+    orbit: { parentId: 'saturn', radius: 28 },
+    tidallyLocked: true,
+  },
+  miranda: {
+    radius: 0.195,
+    color: 0xb0b0b8,
+    orbit: { parentId: 'uranus', radius: 6.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 9,
+  },
+  ariel: {
+    radius: 0.375,
+    color: 0xc7c7cf,
+    orbit: { parentId: 'uranus', radius: 8 },
+    tidallyLocked: true,
+    visualPeriodDays: 12,
+  },
+  umbriel: {
+    radius: 0.38,
+    color: 0x6e6e74,
+    orbit: { parentId: 'uranus', radius: 9.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 16,
+  },
+  titania: {
+    radius: 0.42,
+    color: 0xa09c9a,
+    orbit: { parentId: 'uranus', radius: 11.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 24,
+  },
+  oberon: {
+    radius: 0.41,
+    color: 0x8d8480,
+    orbit: { parentId: 'uranus', radius: 13.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 33,
+  },
 };
 
 /**

@@ -90,7 +90,17 @@ export function createSettingsPanel(
   reduced.checked = s.reducedMotion;
   reduced.addEventListener('change', () => store.update({ reducedMotion: reduced.checked }));
 
+  const practice = el('input');
+  practice.type = 'checkbox';
+  practice.checked = s.practiceMode;
+  practice.addEventListener('change', () => store.update({ practiceMode: practice.checked }));
+
   form.append(
+    row(
+      'Practice mode',
+      practice,
+      'Explore everything with no XP needed: all regions unlocked and every scan level available. Practice scans give no XP and never change your saved progress.',
+    ),
     row(
       'Graphics quality',
       profile,
@@ -125,6 +135,7 @@ export function createSettingsPanel(
     rotate.value = String(now.rotateSensitivity);
     zoom.value = String(now.zoomSensitivity);
     reduced.checked = now.reducedMotion;
+    practice.checked = now.practiceMode;
     if (!dialog.open) dialog.showModal();
   });
 

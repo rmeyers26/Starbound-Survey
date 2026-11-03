@@ -21,6 +21,8 @@ export interface ScanControllerDeps {
   getSelectedId(): string | null;
   getDistance(id: string): number | null;
   getSettings(): Settings;
+  /** True in practice mode: scans reveal data but award no XP. */
+  isPractice?(): boolean;
   scanSeconds?: number;
   now?: () => number;
   requestFrame?: (callback: () => void) => number;
@@ -115,7 +117,7 @@ export function createScanController(deps: ScanControllerDeps): ScanController {
     let outcome: ReturnType<typeof applyScan> | null = null;
     deps
       .commit((record) => {
-        outcome = applyScan(record, id, tier);
+        outcome = applyScan(record, id, tier, !deps.isPractice?.());
         return outcome.record;
       })
       .catch((error) => log('Saving the scan failed', error));
