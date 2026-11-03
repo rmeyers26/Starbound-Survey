@@ -70,6 +70,7 @@ engine, then run with `PW_WEBKIT=1 npm run test:e2e`). Regenerate app icons with
 
 - `?renderer=canvas2d` forces the simplified 2D chart, as if WebGL were unavailable.
 - `?scanSeconds=0.5` changes how long a scan takes (0.2 to 10 seconds; default 3). Used by the automated tests.
+- `?effects=off` turns off the glow, atmosphere haze and warp streaks whatever the graphics level. The automated tests use it so the software-rendered 3D stays fast; the effect tests themselves use `?effects=on` (which changes nothing).
 
 In **Settings** you can choose the graphics quality, turn on a frame-rate readout, change control
 speeds and Reduce motion, and export or import a backup of your progress.

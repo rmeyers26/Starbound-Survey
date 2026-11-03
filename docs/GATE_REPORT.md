@@ -32,7 +32,7 @@ Date of this report: 2026-11-02.
 
 ## What was verified, and how
 
-- 242 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
+- 277 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
 - 91 browser tests (Playwright) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
   bottom-sheet handle only exists on phone-width screens).
 - Lint, type-check and production build pass. Production dependencies: 0 known vulnerabilities.
@@ -79,6 +79,13 @@ Date of this report: 2026-11-02.
     and the Logbook counts only what you can reach. A unit test also checks that the inner region alone is enough XP
     to reach Navigator, so the game can never dead-end.
 
+15. **Turning on bloom made the whole browser-test suite three times slower** (11 minutes instead of 3.6) and one
+    unrelated scanning test failed under the load, because every desktop test was suddenly software-rendering heavy
+    effects. Tests now load the game with `?effects=off`; only the effect tests turn them on. (A real GPU does not have
+    this problem, but it is a reminder that bloom is the first thing to trim if a phone is slow.)
+16. **A "should never happen" bad number (NaN) could have broken the warp streaks.** A test of silly inputs found it
+    before any player could.
+
 ## Open problems and trade-offs
 
 1. **WebGPU is not implemented.** The spec asks for WebGPU first. Three.js's WebGPU API is still moving
@@ -110,7 +117,8 @@ Date of this report: 2026-11-02.
    not handled.
 10. **Bundle size.** 587 KB of JavaScript (150 KB compressed), mostly Three.js. Fine for the 5 MB target;
     code-splitting is a later optimisation.
-11. **Visuals are mostly placeholders.** The Moon and Mars now have real surface pictures (JPEG, size chosen by graphics
+11. **Visuals are partly placeholders.** (Bloom, atmosphere haze and warp streaks now exist, are decorative, and
+    their cost on a real phone is unmeasured.) The Moon and Mars now have real surface pictures (JPEG, size chosen by graphics
     profile; see `TEXTURES.md`). Its **credit and licence are not yet confirmed** (the supplied file has no credit
     inside and NASA's page could not be opened), so no in-game credit is shown. The other bodies are flat colours.
     KTX2 is still not used, and texture memory and frame rate on a real phone are untested.

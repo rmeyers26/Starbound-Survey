@@ -12,7 +12,11 @@ export function trackErrors(page: Page): string[] {
 
 /** Opens the game and waits until the canvas and object buttons exist. */
 export async function openGame(page: Page, query = ''): Promise<void> {
-  await page.goto(`/${query}`);
+  // Visual effects (bloom, haze, warp) make the software-rendered 3D several times slower, and almost no test
+  // cares about them, so they are off unless a test asks for them with `?effects=on`.
+  const withEffects = /[?&]effects=/.test(query);
+  const full = withEffects ? query : `${query}${query.includes('?') ? '&' : '?'}effects=off`;
+  await page.goto(`/${full}`);
   await expect(page.locator('canvas.game-canvas')).toBeVisible();
   await expect(page.locator('.hud-objects button')).toHaveCount(21);
 }

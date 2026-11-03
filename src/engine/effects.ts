@@ -105,3 +105,21 @@ export function bloomPlan(
     msaaSamples: Math.max(0, Math.min(settings.msaaSamples, gpu.maxSamples)),
   };
 }
+
+// ---- Testing override: ?effects=off --------------------------------------------------------------------
+
+/**
+ * Reads the `?effects=` testing override from a URL query. Only "off" does anything. Automated tests use it so
+ * the (software-rendered) 3D stays fast; players never need it. Anything else, including a missing value,
+ * leaves the effects to the graphics profile.
+ */
+export function readEffectsOverride(search: string): 'off' | null {
+  return new URLSearchParams(search).get('effects') === 'off' ? 'off' : null;
+}
+
+/** The same quality settings with every visual effect switched off (all other settings untouched). */
+export function withoutEffects<Q extends { bloom: BloomLevel; atmosphere: boolean; warp: boolean }>(
+  quality: Q,
+): Q {
+  return { ...quality, bloom: 'off', atmosphere: false, warp: false };
+}

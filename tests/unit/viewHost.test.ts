@@ -1,14 +1,14 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ViewHost, readRendererOverride, type ViewFactories } from '../../src/engine/viewHost';
-import type { View, ViewKind, ViewOptions, ViewState } from '../../src/engine/view';
+import type { View, ViewKind, ViewOptions, ViewQuality, ViewState } from '../../src/engine/view';
 import { EventBus, type GameEvents } from '../../src/game/events';
 
-const quality = {
+const quality: ViewQuality = {
   pixelRatioCap: 2,
   resolutionScale: 1,
   starCount: 100,
-  textureSize: 1024 as const,
-  bloom: 'off' as const,
+  textureSize: 1024,
+  bloom: 'off',
   atmosphere: false,
   warp: false,
 };
@@ -35,7 +35,14 @@ function fakeView(kind: ViewKind, options: ViewOptions) {
 }
 type Fake = ReturnType<typeof fakeView>;
 
-function setup(opts: { webglThrows?: boolean; forceCanvas?: boolean } = {}) {
+function setup(
+  opts: {
+    webglThrows?: boolean;
+    forceCanvas?: boolean;
+    effectsOff?: boolean;
+    startQuality?: ViewQuality;
+  } = {},
+) {
   const views: Fake[] = [];
   const unlocked = ['inner'];
   const factories: ViewFactories = {
@@ -56,10 +63,11 @@ function setup(opts: { webglThrows?: boolean; forceCanvas?: boolean } = {}) {
     host: {} as HTMLElement,
     objects: [],
     bus: new EventBus<GameEvents>(),
-    getQuality: () => quality,
+    getQuality: () => opts.startQuality ?? quality,
     getUnlockedRegions: () => unlocked,
     onRendererChanged: (kind, reason) => changes.push([kind, reason]),
     forceCanvas: opts.forceCanvas,
+    effectsOff: opts.effectsOff,
     factories,
   });
   return { host, views, changes };
@@ -151,5 +159,27 @@ describe('ViewHost and unlocked regions', () => {
     ).options.getUnlockedRegions = () => ['inner', 'outer'];
     (views[0].options.onContextLost as () => void)();
     expect(views[1].options.unlockedRegions).toEqual(['inner', 'outer']);
+  });
+});
+
+describe('ViewHost with the ?effects=off testing override', () => {
+  const effectsOn: ViewQuality = { ...quality, bloom: 'full', atmosphere: true, warp: true };
+
+  it('gives views no effects, whatever the quality asks for', () => {
+    const { host, views } = setup({ effectsOff: true, startQuality: effectsOn });
+    // A view built while the override is on never sees the effects, even though the profile asked for them.
+    expect(views[0].options.quality).toEqual(
+      expect.objectContaining({ bloom: 'off', atmosphere: false, warp: false }),
+    );
+    host.setQuality(effectsOn);
+    expect(views[0].setQuality).toHaveBeenCalledWith(
+      expect.objectContaining({ bloom: 'off', atmosphere: false, warp: false }),
+    );
+  });
+
+  it('leaves the effects alone when the override is not used', () => {
+    const { host, views } = setup();
+    host.setQuality(effectsOn);
+    expect(views[0].setQuality).toHaveBeenCalledWith(effectsOn);
   });
 });

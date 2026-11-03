@@ -9,6 +9,7 @@
 import { Canvas2DView } from '../fallback/canvasView';
 import type { EventBus, GameEvents } from '../game/events';
 import type { CelestialObject } from '../game/types';
+import { withoutEffects } from './effects';
 import { log } from './log';
 import type { ControlSettings, View, ViewKind, ViewOptions, ViewQuality, ViewState } from './view';
 import { WebGLView } from './webglView';
@@ -38,6 +39,8 @@ export interface ViewHostOptions {
   onRendererChanged?: (kind: ViewKind, reason: RendererReason) => void;
   /** True when the URL says `?renderer=canvas2d` (a testing override). */
   forceCanvas?: boolean;
+  /** True when the URL says `?effects=off` (a testing override): no bloom, haze or warp whatever the profile. */
+  effectsOff?: boolean;
   factories?: ViewFactories;
 }
 
@@ -81,7 +84,12 @@ export class ViewHost implements View {
   }
 
   setQuality(quality: ViewQuality): void {
-    this.current.setQuality(quality);
+    this.current.setQuality(this.adjust(quality));
+  }
+
+  /** Applies the `?effects=off` testing override, if any. */
+  private adjust(quality: ViewQuality): ViewQuality {
+    return this.options.effectsOff ? withoutEffects(quality) : quality;
   }
 
   setUnlockedRegions(regions: string[]): void {
@@ -107,7 +115,7 @@ export class ViewHost implements View {
       host: this.options.host,
       objects: this.options.objects,
       bus: this.options.bus,
-      quality: this.options.getQuality(),
+      quality: this.adjust(this.options.getQuality()),
       onFrame: this.options.onFrame,
       onContextLost: () => this.handleContextLost(),
       initialState: state,

@@ -4,9 +4,11 @@ import {
   WARP_MIN_TRAVEL,
   bloomPlan,
   bloomSettings,
+  readEffectsOverride,
   sunBrightness,
   warpStreakCount,
   warpStrength,
+  withoutEffects,
 } from '../../src/engine/effects';
 import { LADDER, PROFILES, PROFILE_NAMES, toViewQuality } from '../../src/engine/profiles';
 
@@ -116,5 +118,28 @@ describe('bloomPlan (can this device do bloom?)', () => {
   it('never asks for more edge-smoothing than the card supports', () => {
     expect(bloomPlan('full', { canRenderToFloat: true, maxSamples: 2 })!.msaaSamples).toBe(2);
     expect(bloomPlan('full', { canRenderToFloat: true, maxSamples: 0 })!.msaaSamples).toBe(0);
+  });
+});
+
+describe('the ?effects=off testing override', () => {
+  it('only the exact word "off" turns effects off', () => {
+    expect(readEffectsOverride('?effects=off')).toBe('off');
+    expect(readEffectsOverride('?scanSeconds=0.3&effects=off')).toBe('off');
+    expect(readEffectsOverride('')).toBeNull();
+    expect(readEffectsOverride('?effects=on')).toBeNull();
+    expect(readEffectsOverride('?effects=OFF')).toBeNull();
+    expect(readEffectsOverride('?effects=')).toBeNull();
+  });
+
+  it('switches every effect off and changes nothing else', () => {
+    const quality = { ...toViewQuality(LADDER[0]) };
+    const stripped = withoutEffects(quality);
+    expect(stripped.bloom).toBe('off');
+    expect(stripped.atmosphere).toBe(false);
+    expect(stripped.warp).toBe(false);
+    expect(stripped.starCount).toBe(quality.starCount);
+    expect(stripped.pixelRatioCap).toBe(quality.pixelRatioCap);
+    expect(stripped.textureSize).toBe(quality.textureSize);
+    expect(quality.bloom).toBe('full'); // the original is not modified
   });
 });

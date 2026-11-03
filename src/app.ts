@@ -1,5 +1,6 @@
 // Puts the game together once the data has loaded: settings, renderer, quality, and UI.
 import { createQualityController } from './engine/qualityController';
+import { readEffectsOverride } from './engine/effects';
 import { ViewHost, readRendererOverride } from './engine/viewHost';
 import { EventBus, type GameEvents } from './game/events';
 import { recordInspection } from './game/progress';
@@ -88,6 +89,7 @@ export async function startApp(
     getUnlockedRegions: () => save.current.unlockedRegions,
     onFrame: quality.onFrame,
     forceCanvas: readRendererOverride(window.location.search) === 'canvas2d',
+    effectsOff: readEffectsOverride(window.location.search) === 'off',
     onRendererChanged: (kind, reason) => {
       bus.emit('renderer:changed', { kind, reason });
       // Tell the player when something went wrong, but stay quiet on a normal start.

@@ -87,7 +87,7 @@ test.describe('bloom (glow around the Sun)', () => {
   test('is strongest on High, weaker on Balanced, and gone on Performance (and comes back)', async ({
     page,
   }) => {
-    await openGame(page);
+    await openGame(page, '?effects=on');
     await chooseQuality(page, 'high');
     const high = await ringBrightnessAroundSun(page);
     await chooseQuality(page, 'balanced');
@@ -114,7 +114,7 @@ test.describe('warp streaks (long flights)', () => {
   });
 
   test('rush past mid-flight on a long trip, and are gone once you arrive', async ({ page }) => {
-    await openGame(page);
+    await openGame(page, '?effects=on');
     await chooseQuality(page, 'high');
     await page.locator('button[data-object-id="ceres"]').click(); // the Sun to Ceres: a long trip
     await page.waitForTimeout(1100); // about half way through the 2.5 second flight
@@ -126,7 +126,7 @@ test.describe('warp streaks (long flights)', () => {
 
   test('do not appear with Reduce motion on (the flight is instant)', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await openGame(page);
+    await openGame(page, '?effects=on');
     await chooseQuality(page, 'high');
     await page.locator('button[data-object-id="ceres"]').click();
     await page.waitForTimeout(1100);
@@ -137,7 +137,7 @@ test.describe('warp streaks (long flights)', () => {
   });
 
   test('do not appear on the Performance profile', async ({ page }) => {
-    await openGame(page);
+    await openGame(page, '?effects=on');
     await chooseQuality(page, 'performance');
     await page.locator('button[data-object-id="ceres"]').click();
     await page.waitForTimeout(1100);
@@ -149,7 +149,7 @@ test.describe('effects and the download', () => {
   test('High and Balanced download the bloom code and run without errors', async ({ page }) => {
     const errors = trackErrors(page);
     const download = page.waitForResponse((r) => BLOOM_CHUNK.test(r.url()) && r.status() === 200);
-    await openGame(page); // desktops start on High, phones on Balanced: both use bloom
+    await openGame(page, '?effects=on'); // desktops start on High, phones on Balanced: both use bloom
     await download;
     await page.locator('button[data-object-id="ceres"]').click(); // a warp flight
     await page.waitForTimeout(1500);
@@ -159,14 +159,14 @@ test.describe('effects and the download', () => {
   });
 
   test('Performance never downloads the bloom code', async ({ page }) => {
-    await openGame(page);
+    await openGame(page, '?effects=on');
     await chooseQuality(page, 'performance'); // the choice is saved on this device
     const requested: string[] = [];
     page.on('request', (r) => {
       if (BLOOM_CHUNK.test(r.url())) requested.push(r.url());
     });
     await page.reload();
-    await openGame(page);
+    await openGame(page, '?effects=on');
     await page.waitForTimeout(1500);
     expect(requested).toEqual([]);
   });
