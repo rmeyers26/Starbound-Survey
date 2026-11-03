@@ -103,10 +103,37 @@ test('no on-screen button is ever covered by the info panel', async ({ page }) =
       .filter((b) => {
         const r = b.getBoundingClientRect();
         if (r.width === 0 || r.height === 0) return false; // hidden on purpose
-        const top = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+        // The row of object buttons scrolls sideways, so some sit outside the screen on purpose.
+        const cx = r.x + r.width / 2;
+        const cy = r.y + r.height / 2;
+        if (cx < 0 || cx > window.innerWidth || cy < 0 || cy > window.innerHeight) return false;
+        // Likewise a button scrolled out of the row's visible part (the row is clipped at its edges).
+        const row = b.closest('.hud-objects')?.getBoundingClientRect();
+        if (row && (cx < row.left || cx > row.right)) return false;
+        const top = document.elementFromPoint(cx, cy);
         return !(top === b || b.contains(top));
       })
       .map((b) => b.textContent?.trim() || b.getAttribute('aria-label')),
   );
   expect(covered).toEqual([]);
+});
+
+test('tapping the last object button never shifts the controls sideways', async ({ page }) => {
+  await openGame(page);
+  // Ceres is the last of ten buttons, so it starts scrolled out of view. Bringing it into view used to nudge
+  // the whole game sideways and push "The Sun" and the camera buttons off the left edge.
+  await chip(page, 'ceres').click();
+  await expect(page.locator('.info-panel')).toBeVisible();
+  const pushedOffScreen = await page
+    .locator('.hud-top, .hud-controls button')
+    .evaluateAll((els) =>
+      els
+        .filter((el) => el.getBoundingClientRect().x < 0)
+        .map((el) => el.className || el.textContent),
+    );
+  expect(pushedOffScreen).toEqual([]);
+  const hudTopWidth = await page
+    .locator('.hud-top')
+    .evaluate((el) => el.getBoundingClientRect().width);
+  expect(hudTopWidth).toBeLessThanOrEqual(page.viewportSize()!.width);
 });

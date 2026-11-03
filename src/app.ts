@@ -3,6 +3,7 @@ import { createQualityController } from './engine/qualityController';
 import { ViewHost, readRendererOverride } from './engine/viewHost';
 import { EventBus, type GameEvents } from './game/events';
 import { recordInspection } from './game/progress';
+import { isObjectUnlocked, rankThatUnlocks } from './game/regions';
 import { regionName } from './ui/format';
 import { createScanController } from './game/scanController';
 import { readScanSeconds } from './game/scanner';
@@ -84,6 +85,7 @@ export async function startApp(
     objects,
     bus,
     getQuality: quality.currentQuality,
+    getUnlockedRegions: () => save.current.unlockedRegions,
     onFrame: quality.onFrame,
     forceCanvas: readRendererOverride(window.location.search) === 'canvas2d',
     onRendererChanged: (kind, reason) => {
@@ -131,6 +133,28 @@ export async function startApp(
     getSettings: () => settings.get(),
     scanSeconds: readScanSeconds(window.location.search),
   });
+  // Show or hide bodies whenever progress could have changed which regions are unlocked (a rank-up, or a
+  // backup being imported). If the selected object just became locked, clear the selection.
+  const syncRegions = (): void => {
+    view?.setUnlockedRegions(save.current.unlockedRegions);
+    const current = objects.find((o) => o.id === selectedId);
+    if (current && !isObjectUnlocked(current, save.current)) {
+      bus.emit('object:selected', { id: null });
+      bus.emit('camera:focus', { id: null });
+    }
+  };
+  const offRegionsA = bus.on('rank:up', syncRegions);
+  const offRegionsB = bus.on('progress:changed', syncRegions);
+  // Tapping a locked object's button explains how to unlock it.
+  const offLocked = bus.on('object:locked', ({ id }) => {
+    const object = objects.find((o) => o.id === id);
+    if (!object) return;
+    const rank = rankThatUnlocks(object.region);
+    toaster.show(
+      `${object.name} is in the ${regionName(object.region)}.` +
+        (rank ? ` Reach ${rank.name} to unlock it.` : ' It is not unlocked yet.'),
+    );
+  });
   const offRankUp = bus.on('rank:up', ({ rank, newRegions }) => {
     const regions = newRegions.map(regionName).join(', ');
     toaster.show(
@@ -142,13 +166,16 @@ export async function startApp(
   });
 
   const cleanups = [
-    createHud(container, objects, bus, machine),
+    createHud(container, objects, bus, machine, () => save.current),
     createXpBar(container, bus, () => save.current),
     createScanHud(container, bus, objects, () => settings.get()),
     createLogbook(container, objects, bus, machine, () => save.current),
     createInfoPanel(container, objects, bus, () => save.current),
     scan.dispose,
     offRankUp,
+    offRegionsA,
+    offRegionsB,
+    offLocked,
     createFpsReadout(container, bus, settings.get().showFps),
     createSettingsPanel(container, settings, bus, [saveSection.element]),
     saveSection.dispose,

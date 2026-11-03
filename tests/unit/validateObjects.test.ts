@@ -56,9 +56,24 @@ describe('data/objects.json (the real game data)', () => {
   it('passes validation', () => {
     expect(problemsFor(realData)).toEqual([]);
   });
-  it('contains the prototype objects', () => {
+  it('contains the inner Solar System objects, ordered outward from the Sun', () => {
     const ids = validateObjects(realData).map((o) => o.id);
-    expect(ids).toEqual(['sun', 'earth', 'moon']);
+    expect(ids).toEqual([
+      'sun',
+      'mercury',
+      'venus',
+      'earth',
+      'moon',
+      'mars',
+      'phobos',
+      'deimos',
+      'vesta',
+      'ceres',
+      'jupiter',
+      'saturn',
+      'uranus',
+      'neptune',
+    ]);
   });
 });
 

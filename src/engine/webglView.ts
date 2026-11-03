@@ -1,13 +1,23 @@
-// The 3D renderer: draws the Sun, Earth, Moon and a star field with Three.js (WebGL2).
+// The 3D renderer: draws the Sun, planets, Moon and a star field with Three.js (WebGL2).
 import * as THREE from 'three';
 import type { GameEvents } from '../game/events';
-import { CameraRig, OVERVIEW_DISTANCE, OVERVIEW_MIN_DISTANCE } from './cameraRig';
+import { CameraRig, OVERVIEW_MIN_DISTANCE } from './cameraRig';
 import { attachInput } from './inputController';
 import { log } from './log';
 import { hitRadius, pickObject, type PickCandidate } from './picking';
+import { bearing, coRotationYawDelta, faceTowards } from './orientation';
 import { mulberry32 } from './random';
-import { SIM_DAYS_PER_SECOND, VISUALS, closestDistance, focusDistance } from './scale';
+import { visibleBodyIds } from '../game/regions';
+import {
+  SIM_DAYS_PER_SECOND,
+  VISUALS,
+  closestDistance,
+  focusDistance,
+  overviewDistanceFor,
+  reachFromSun,
+} from './scale';
 import { computePositions } from './solarSystem';
+import { loadTexture, textureUrlFor } from './textures';
 import type { ControlSettings, View, ViewOptions, ViewQuality, ViewState } from './view';
 
 /** Radius of the sphere the stars sit on (far beyond the planets). */
@@ -23,6 +33,12 @@ export class WebGLView implements View {
   private readonly camera = new THREE.PerspectiveCamera(50, 1, 0.1, 4000);
   private readonly rig = new CameraRig();
   private readonly meshes = new Map<string, THREE.Mesh>();
+  /** One orbit ring per body that circles the Sun, so a ring can be hidden with its body. */
+  private readonly orbitLines = new Map<string, THREE.LineLoop>();
+  /** Bodies the player may see right now (their region is unlocked). */
+  private visibleIds = new Set<string>();
+  /** Camera distance that frames everything currently visible. */
+  private overviewDistance = overviewDistanceFor(0);
   private readonly stars: THREE.Points;
   private readonly selectionRing: THREE.Mesh;
   private readonly raycaster = new THREE.Raycaster();
@@ -35,10 +51,14 @@ export class WebGLView implements View {
   private running = false;
   private selectedId: string | null = null;
   private focusId: string | null = null;
+  /** Last frame's bearing from the focused body to the body it orbits (null = not tracking). */
+  private lockBearing: number | null = null;
 
   constructor(options: ViewOptions) {
     this.options = options;
     this.quality = options.quality;
+    this.visibleIds = visibleBodyIds(options.objects, options.unlockedRegions);
+    this.overviewDistance = overviewDistanceFor(reachFromSun(this.visibleIds));
 
     // Creating the renderer throws if WebGL2 is unavailable. The caller (step 7) handles that.
     this.renderer = new THREE.WebGLRenderer({
@@ -51,7 +71,7 @@ export class WebGLView implements View {
     canvas.setAttribute('role', 'application');
     canvas.setAttribute(
       'aria-label',
-      '3D view of the Sun, Earth and Moon. Arrow keys rotate, plus and minus zoom, Enter focuses the selected object, Escape returns to the overview.',
+      '3D view of the Solar System. Arrow keys rotate, plus and minus zoom, Enter focuses the selected object, Escape returns to the overview.',
     );
     options.host.append(canvas);
     // If the GPU resets (common on phones when the app is backgrounded), tell the ViewHost so it
@@ -75,6 +95,7 @@ export class WebGLView implements View {
     this.resizeObserver.observe(options.host);
     document.addEventListener('visibilitychange', this.onVisibilityChange);
     this.setQuality(this.quality);
+    void this.loadSurfaceTextures();
   }
 
   private disposed = false;
@@ -110,7 +131,11 @@ export class WebGLView implements View {
       ) {
         node.geometry.dispose();
         const materials = Array.isArray(node.material) ? node.material : [node.material];
-        materials.forEach((m) => m.dispose());
+        materials.forEach((m) => {
+          // A material's picture (texture) lives on the GPU separately and must be freed too.
+          if ('map' in m && m.map instanceof THREE.Texture) m.map.dispose();
+          m.dispose();
+        });
       }
     });
     this.renderer.dispose();
@@ -161,15 +186,67 @@ export class WebGLView implements View {
       // The Sun glows by itself (Basic material ignores lights); planets are lit by the Sun.
       const material = isSun
         ? new THREE.MeshBasicMaterial({ color: spec.color })
-        : new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.9 });
+        : new THREE.MeshStandardMaterial({ color: spec.color, roughness: 1, metalness: 0 }); // matte, like real rock and dust
       const mesh = new THREE.Mesh(geometry, material);
       mesh.userData.objectId = id;
+      if (spec.rings) mesh.add(this.buildRings(spec.radius, spec.rings));
+      if (spec.startLongitudeDeg !== undefined) {
+        // The centre of a sphere's picture faces +X and longitude grows toward -Z, so turning by
+        // (-90 degrees - longitude) brings that longitude round to face +Z, where the camera starts.
+        mesh.rotation.y = -Math.PI / 2 - (spec.startLongitudeDeg * Math.PI) / 180;
+      }
       this.meshes.set(id, mesh);
       this.scene.add(mesh);
     }
     this.scene.add(this.buildGlow(VISUALS.sun.radius * 1.5));
-    this.scene.add(this.buildOrbitLine(VISUALS.earth.orbit!.radius));
+    // One ring for every body that circles the Sun. (Moons are skipped: a ring around a moving
+    // planet would have to move with it.)
+    for (const [id, spec] of Object.entries(VISUALS)) {
+      if (spec.orbit?.parentId !== 'sun') continue;
+      const line = this.buildOrbitLine(spec.orbit.radius);
+      this.orbitLines.set(id, line);
+      this.scene.add(line);
+    }
+    this.applyVisibility();
     this.updatePositions();
+  }
+
+  /** Flat rings around a planet (Saturn). Decorative, drawn as a see-through disc with a hole. */
+  private buildRings(
+    planetRadius: number,
+    rings: NonNullable<(typeof VISUALS)[string]['rings']>,
+  ): THREE.Mesh {
+    const geometry = new THREE.RingGeometry(
+      planetRadius * rings.inner,
+      planetRadius * rings.outer,
+      96,
+    );
+    const material = new THREE.MeshStandardMaterial({
+      color: rings.color,
+      side: THREE.DoubleSide, // visible from above and below
+      transparent: true,
+      opacity: rings.opacity,
+      roughness: 1,
+      depthWrite: false, // see-through parts must not hide what is behind them
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    // A RingGeometry stands upright by default: lay it flat, then tilt it like the real planet's axis.
+    mesh.rotation.x = -Math.PI / 2 + (rings.tiltDeg * Math.PI) / 180;
+    return mesh;
+  }
+
+  /** Shows only the bodies (and their orbit rings) whose region the player has unlocked. */
+  private applyVisibility(): void {
+    for (const [id, mesh] of this.meshes) mesh.visible = this.visibleIds.has(id);
+    for (const [id, line] of this.orbitLines) line.visible = this.visibleIds.has(id);
+  }
+
+  setUnlockedRegions(regions: string[]): void {
+    this.visibleIds = visibleBodyIds(this.options.objects, regions);
+    this.applyVisibility();
+    this.overviewDistance = overviewDistanceFor(reachFromSun(this.visibleIds));
+    // If you are looking at the whole system, widen the view to take in the newly unlocked planets.
+    if (this.focusId === null) this.rig.flyTo(this.overviewDistance, OVERVIEW_MIN_DISTANCE);
   }
 
   /** A soft halo around the Sun. Purely decorative (labelled as such in the spec). */
@@ -233,6 +310,37 @@ export class WebGLView implements View {
     return ring;
   }
 
+  /**
+   * Loads surface pictures (e.g. NASA's Moon map) in the background. The game is already running with
+   * flat colours; each body switches to its picture the moment the picture arrives. If there is no
+   * picture, or it fails to load, nothing changes.
+   */
+  private async loadSurfaceTextures(): Promise<void> {
+    const maxAnisotropy = this.renderer.capabilities.getMaxAnisotropy();
+    for (const [id, spec] of Object.entries(VISUALS)) {
+      if (!spec.texture) continue;
+      const url = textureUrlFor(spec.texture, this.quality.textureSize);
+      if (!url) continue;
+      const texture = await loadTexture(url, maxAnisotropy);
+      const mesh = this.meshes.get(id);
+      if (this.disposed || !texture || !mesh) {
+        texture?.dispose(); // the view was closed while the picture downloaded
+        continue;
+      }
+      const material = mesh.material as THREE.MeshStandardMaterial;
+      material.map = texture;
+      material.color.set(0xffffff); // colour multiplies the picture, so white leaves it unchanged
+      if (spec.nightGlow) {
+        // Reuse the same picture as a very dim self-light so the night side is not pure black.
+        material.emissive.set(0xffffff);
+        material.emissiveMap = texture;
+        material.emissiveIntensity = spec.nightGlow;
+      }
+      material.needsUpdate = true; // tell Three.js to rebuild the shader to use the new picture
+      log('Texture applied to', id);
+    }
+  }
+
   // ---- input and events ---------------------------------------------------------------
 
   private connectInput(canvas: HTMLElement): void {
@@ -288,19 +396,22 @@ export class WebGLView implements View {
   }
 
   private pickCandidates(): PickCandidate[] {
-    return [...this.meshes.entries()].map(([id, mesh]) => ({
-      id,
-      center: mesh.position,
-      radius: VISUALS[id].radius,
-    }));
+    return [...this.meshes.entries()]
+      .filter(([id]) => this.visibleIds.has(id)) // a locked body cannot be tapped
+      .map(([id, mesh]) => ({
+        id,
+        center: mesh.position,
+        radius: VISUALS[id].radius,
+      }));
   }
 
   /** Fly the camera to an object (or back to the overview when id is null). */
   private focusOn(id: string | null): void {
     if (id !== null && !this.meshes.has(id)) return;
     this.focusId = id;
+    this.lockBearing = null; // start tracking afresh, so switching focus never makes the camera jump
     if (id === null) {
-      this.rig.flyTo(OVERVIEW_DISTANCE, OVERVIEW_MIN_DISTANCE);
+      this.rig.flyTo(this.overviewDistance, OVERVIEW_MIN_DISTANCE);
     } else {
       const radius = VISUALS[id].radius;
       this.rig.flyTo(focusDistance(radius), closestDistance(radius));
@@ -310,7 +421,7 @@ export class WebGLView implements View {
   /** Puts a rebuilt view back exactly where the old one was. */
   private restoreState(state: ViewState | undefined): void {
     if (!state) {
-      this.rig.setState({ yaw: 0, pitch: 0.4, distance: OVERVIEW_DISTANCE });
+      this.rig.setState({ yaw: 0, pitch: 0.4, distance: this.overviewDistance });
       this.rig.target.set(0, 0, 0);
       return;
     }
@@ -333,8 +444,36 @@ export class WebGLView implements View {
 
   private updatePositions(): void {
     for (const [id, p] of computePositions(this.options.objects, this.simDays)) {
-      this.meshes.get(id)?.position.set(p.x, 0, p.z);
+      const mesh = this.meshes.get(id);
+      if (!mesh) continue;
+      mesh.position.set(p.x, 0, p.z);
+      // The Moon keeps its near side toward Earth, just as the real Moon does.
+      const orbit = VISUALS[id].orbit;
+      if (VISUALS[id].tidallyLocked && orbit) {
+        const parent = this.meshes.get(orbit.parentId);
+        if (parent) mesh.rotation.y = faceTowards(mesh.position, parent.position);
+      }
     }
+  }
+
+  /**
+   * While focused on a body that orbits something (a planet around the Sun, the Moon around Earth), turn the
+   * camera along with its orbit. Without this, a camera that follows a planet but never turns sees the
+   * Sun swing all the way round it, and sees the Moon spin once per orbit. With it, the thing being
+   * orbited stays put on screen, the lit side of the body stays the same, and only the stars drift.
+   * See `coRotationYawDelta`. Focusing the Sun (which orbits nothing) leaves the camera alone.
+   */
+  private coRotateCameraWithOrbit(): void {
+    const spec = this.focusId ? VISUALS[this.focusId] : undefined;
+    const body = this.focusId ? this.meshes.get(this.focusId) : undefined;
+    const parent = spec?.orbit ? this.meshes.get(spec.orbit.parentId) : undefined;
+    if (!body || !parent) {
+      this.lockBearing = null;
+      return;
+    }
+    const now = bearing(body.position, parent.position);
+    if (this.lockBearing !== null) this.rig.yaw += coRotationYawDelta(this.lockBearing, now);
+    this.lockBearing = now;
   }
 
   private updateSelectionRing(): void {
@@ -357,6 +496,7 @@ export class WebGLView implements View {
     const dt = Math.min(frameMs / 1000, 0.1);
     this.simDays += dt * SIM_DAYS_PER_SECOND;
     this.updatePositions();
+    this.coRotateCameraWithOrbit();
     this.rig.update(dt, this.followedPosition());
     this.rig.applyTo(this.camera);
     this.updateSelectionRing();

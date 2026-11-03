@@ -32,8 +32,8 @@ Date of this report: 2026-11-02.
 
 ## What was verified, and how
 
-- 137 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
-- 55 browser tests (Playwright) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
+- 242 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
+- 91 browser tests (Playwright) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
   bottom-sheet handle only exists on phone-width screens).
 - Lint, type-check and production build pass. Production dependencies: 0 known vulnerabilities.
 - Lighthouse on the production build: accessibility 100, best practices 100, SEO 91.
@@ -58,6 +58,27 @@ Date of this report: 2026-11-02.
 9. (Found by CI in WebKit) The accessibility test scanned while the info panel was still fading in and saw
    washed-out colours: a test race, not a real contrast problem. The scan now waits for animations to end.
 
+10. **Every orbit ran clockwise** (seen from above the north pole), the opposite of the real Solar System.
+    Found by the owner, then confirmed by measuring Earth's motion on screen. Fixed in `orbits.ts` (`z = -sin`)
+    and locked in by unit tests plus an on-screen check of both the 3D view and the 2D chart.
+11. **The Moon went round Earth in 2.7 s**, which looked frantic because it also turns once per orbit to keep
+    its near side toward Earth. The clock now runs at 3 days per second (Moon about 9 s, Earth's year about 2 min).
+12. **The Sun circled any planet you focused on**, and the Moon looked like it spun. The camera followed the body
+    but never turned with its orbit. It now turns along with the orbit while you are focused on anything that
+    orbits something, so the Sun stays on one side of a planet and the Moon keeps its face still (its phases
+    still change). Measured: Mercury's lit side moved 160 degrees in 10 s before and under 1 degree after.
+13. **Ten object buttons made the phone layout too tall, and the first fix nudged the whole game sideways.**
+    The buttons are now one row that scrolls. A first version let that row grow to 900 px on a 412 px phone, so
+    tapping the last button scrolled the "hidden" game container and pushed "The Sun" and the camera buttons
+    off the left edge. Fixed by clipping the container and stretching the row to the screen, with a test that
+    was checked to fail without the fix.
+
+14. **Regions were saved but never enforced.** Rank-ups recorded the unlocked regions, but nothing read them, so adding the
+    outer planets would have let a brand-new player scan Jupiter and made the Navigator rank-up meaningless. Regions are
+    now enforced: locked bodies are not drawn or tappable, their buttons explain themselves, scanning refuses them,
+    and the Logbook counts only what you can reach. A unit test also checks that the inner region alone is enough XP
+    to reach Navigator, so the game can never dead-end.
+
 ## Open problems and trade-offs
 
 1. **WebGPU is not implemented.** The spec asks for WebGPU first. Three.js's WebGPU API is still moving
@@ -72,7 +93,7 @@ Date of this report: 2026-11-02.
 4. **Minimum iPhone version is unverified.** Vite's default build target is modern browsers, which probably
    excludes iOS 15 (the spec says WebGL2 works on iOS 15+). Test on an older iPhone. If iOS 15 matters,
    set `build.target` lower and re-test, at some cost in size.
-5. **Data needs your spot-check.** The container could not reach NASA's pages (blocked by network policy),
+5. **Data needs your spot-check** (Mercury, Venus and Mars are listed in `DATA_CHECK.md`). The container could not reach NASA's pages (blocked by network policy),
    so values were entered from knowledge, then cross-checked only against my own recollection. One error was
    already found (problem 6 above). Please compare every number with the cited fact sheet before it ships.
 6. **Settings live in `localStorage`, not in the save record.** The spec's example save contains settings,
@@ -81,15 +102,18 @@ Date of this report: 2026-11-02.
    you prefer settings to travel with the backup.
 7. **Android install prompt is not built.** Only the iPhone "Add to Home Screen" hint exists. Chrome on
    Android offers its own Install option in the menu.
-8. **Hosting is not chosen.** The manifest assumes the game is served from the site root (`/`), which fits
-   Cloudflare Pages. A sub-folder host such as GitHub Pages needs `base` set in `vite.config.ts`.
+8. **Hosting: Netlify (development).** The game is deployed on Netlify, which serves from the site root over
+   HTTPS and fits the manifest. `netlify.toml` pins Node 22 and the cache rules. A sub-folder host such as
+   GitHub Pages would need `base` set in `vite.config.ts`.
 9. **Cache recovery is partial.** A missing cached file falls back to the network, and a failed data load
    shows the Retry screen. A corrupted cached _script_ is not detected and could show a blank page. Rare, but
    not handled.
 10. **Bundle size.** 587 KB of JavaScript (150 KB compressed), mostly Three.js. Fine for the 5 MB target;
     code-splitting is a later optimisation.
-11. **Visuals are placeholders.** Flat-colour spheres: no textures, so the KTX2 texture pipeline and its
-    memory behaviour are untested.
+11. **Visuals are mostly placeholders.** The Moon and Mars now have real surface pictures (JPEG, size chosen by graphics
+    profile; see `TEXTURES.md`). Its **credit and licence are not yet confirmed** (the supplied file has no credit
+    inside and NASA's page could not be opened), so no in-game credit is shown. The other bodies are flat colours.
+    KTX2 is still not used, and texture memory and frame rate on a real phone are untested.
 12. **Cosmetic:** the "Ready to play offline" message can overlap the bottom sheet for a few seconds on phones.
 13. **Tooling pins:** TypeScript is pinned to 6.0 because `typescript-eslint` does not support 7 yet.
     `npm audit` lists moderate advisories in `workbox-build`, a build-time tool that is not shipped to players

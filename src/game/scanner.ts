@@ -1,6 +1,7 @@
 // The scan mechanic's rules (spec: "Scan mechanic"), kept free of DOM and timers so they can be
 // unit tested exactly. The glue that runs it live is in scanController.ts.
 import type { SaveRecord } from '../save/schema';
+import { isObjectUnlocked } from './regions';
 import { nextScanTier, scannerTierFor } from './scoring';
 import type { GameState } from './stateMachine';
 import { objectMaxTier } from './tiers';
@@ -47,11 +48,12 @@ export class ScanSession {
 }
 
 /** Why a scan cannot start (shown to the player as a short message). */
-export type ScanBlock = 'not-exploring' | 'no-selection' | 'too-far' | 'complete';
+export type ScanBlock = 'not-exploring' | 'no-selection' | 'locked' | 'too-far' | 'complete';
 
 export const SCAN_BLOCK_MESSAGE: Record<ScanBlock, string> = {
   'not-exploring': 'Close the open screen before scanning.',
   'no-selection': 'Select an object to scan.',
+  locked: 'That region is still locked. Rank up to unlock it.',
   'too-far': 'Move closer to scan.',
   complete: 'Nothing new to learn here yet. Rank up to unlock a deeper scan.',
 };
@@ -72,6 +74,7 @@ export interface ScanCheckInput {
 export function checkScan(input: ScanCheckInput): ScanCheck {
   if (input.state !== 'EXPLORE') return { ok: false, reason: 'not-exploring' };
   if (!input.object) return { ok: false, reason: 'no-selection' };
+  if (!isObjectUnlocked(input.object, input.record)) return { ok: false, reason: 'locked' };
   if (input.distance === null || input.distance > input.range)
     return { ok: false, reason: 'too-far' };
   const reached = input.record.scannedObjects[input.object.id] ?? 0;

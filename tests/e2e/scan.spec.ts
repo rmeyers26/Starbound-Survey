@@ -104,7 +104,71 @@ test.describe('scanning', () => {
     await openGame(page);
     await expect(xpText(page)).toHaveText('40 / 200 XP');
     await page.getByRole('button', { name: /Open the Logbook/ }).click();
-    await expect(page.locator('.logbook-summary')).toHaveText('Discovered 2 of 3 objects.');
+    await expect(page.locator('.logbook-summary')).toContainText('Discovered 2 of 10 objects.');
+  });
+});
+
+test.describe('regions', () => {
+  test('the outer planets are locked for a new player, and say how to unlock them', async ({
+    page,
+  }) => {
+    await openGame(page);
+    const jupiter = chip(page, 'jupiter');
+    await expect(jupiter).toHaveAttribute('aria-disabled', 'true');
+    await expect(jupiter).toContainText('(locked)'); // spoken by screen readers
+    // A real finger can still tap it; it just explains itself. (force: true skips Playwright's
+    // "is it enabled?" check, which refuses to click anything marked aria-disabled.)
+    await jupiter.click({ force: true });
+    await expect(
+      page.getByText('Jupiter is in the Outer Solar System. Reach Navigator to unlock it.'),
+    ).toBeVisible();
+    await expect(page.locator('.info-panel')).toBeHidden(); // nothing was selected
+    // Inner objects are not affected.
+    await expect(chip(page, 'mars')).toHaveAttribute('aria-disabled', 'false');
+  });
+
+  test('the Logbook only counts objects you can reach', async ({ page }) => {
+    await openGame(page);
+    await page.getByRole('button', { name: /Open the Logbook/ }).click();
+    const dialog = page.locator('dialog.logbook-dialog');
+    await expect(dialog.getByText('Discovered 0 of 10 objects.')).toBeVisible();
+    await expect(dialog.getByText('More objects unlock as you rank up.')).toBeVisible();
+    await expect(dialog.getByText('Jupiter')).toHaveCount(0);
+  });
+});
+
+test.describe('ranks', () => {
+  test('scanning all ten objects earns the first rank-up (Navigator)', async ({ page }) => {
+    test.setTimeout(180_000); // ten scans, each with a flight and a short hold
+    await openForScanning(page);
+    const everyObject = [
+      'sun',
+      'mercury',
+      'venus',
+      'earth',
+      'moon',
+      'mars',
+      'phobos',
+      'deimos',
+      'vesta',
+      'ceres',
+    ];
+    for (const id of everyObject) await scanObject(page, id);
+    // 10 first scans x 20 XP = exactly the 200 XP Navigator needs.
+    await expect(
+      page.getByText('Rank up! You are now a Navigator.', { exact: false }),
+    ).toBeVisible();
+    await expect(xpText(page)).toContainText('200');
+    await expect(xpText(page)).toContainText('600'); // the next goal is Surveyor
+
+    // The rank-up unlocked the outer planets: Jupiter can now be selected and scanned for 20 more XP.
+    await expect(chip(page, 'jupiter')).toHaveAttribute('aria-disabled', 'false');
+    await scanObject(page, 'jupiter');
+    await expect(xpText(page)).toContainText('220');
+    await page.getByRole('button', { name: /Open the Logbook/ }).click();
+    await expect(
+      page.locator('dialog.logbook-dialog').getByText('Discovered 11 of 14 objects.'),
+    ).toBeVisible();
   });
 });
 
@@ -117,8 +181,8 @@ test.describe('Logbook', () => {
     await page.getByRole('button', { name: /Open the Logbook/ }).click();
     const dialog = page.locator('dialog.logbook-dialog');
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByText('Discovered 1 of 3 objects.')).toBeVisible();
-    await expect(dialog.getByText('Not scanned yet')).toHaveCount(2);
+    await expect(dialog.getByText('Discovered 1 of 10 objects.')).toBeVisible();
+    await expect(dialog.getByText('Not scanned yet')).toHaveCount(9);
     await expect(dialog.getByText('Basic scan')).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden();

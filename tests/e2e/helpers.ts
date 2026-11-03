@@ -14,11 +14,10 @@ export function trackErrors(page: Page): string[] {
 export async function openGame(page: Page, query = ''): Promise<void> {
   await page.goto(`/${query}`);
   await expect(page.locator('canvas.game-canvas')).toBeVisible();
-  await expect(page.locator('.hud-objects button')).toHaveCount(3);
+  await expect(page.locator('.hud-objects button')).toHaveCount(14);
 }
 
-export const chip = (page: Page, id: 'sun' | 'earth' | 'moon') =>
-  page.locator(`button[data-object-id="${id}"]`);
+export const chip = (page: Page, id: string) => page.locator(`button[data-object-id="${id}"]`);
 
 export const openSettings = async (page: Page): Promise<void> => {
   await page.getByRole('button', { name: 'Open settings' }).click();
@@ -50,7 +49,7 @@ export async function holdScan(page: Page, ms: number): Promise<void> {
 }
 
 /** Flies to an object and scans it. Retries briefly because the first frame after a flight may still be "too far". */
-export async function scanObject(page: Page, id: 'sun' | 'earth' | 'moon'): Promise<void> {
+export async function scanObject(page: Page, id: string): Promise<void> {
   await chip(page, id).click();
   for (let attempt = 0; attempt < 8; attempt++) {
     await holdScan(page, 900);

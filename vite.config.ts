@@ -44,7 +44,8 @@ export default defineConfig({
       workbox: {
         // Cache the whole game shell up front: code, styles, HTML, the JSON data and the icons.
         // File names contain a content hash, so a new release = new names = a clean update.
-        globPatterns: ['**/*.{js,css,html,json,png,svg,webmanifest}'],
+        // jpg/webp are the surface textures (e.g. the Moon). Keep each under 2 MB or Workbox skips it.
+        globPatterns: ['**/*.{js,css,html,json,png,jpg,webp,svg,webmanifest}'],
         // Delete caches left behind by older releases when the new service worker activates.
         cleanupOutdatedCaches: true,
         // Let a newly activated service worker take control of already-open pages. Without this, a

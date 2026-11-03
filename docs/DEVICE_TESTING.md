@@ -14,8 +14,10 @@ npm run dev -- --host
 Open the "Network" address it prints (for example `http://192.168.1.20:5173`) in Safari or Chrome on the
 phone. Note: the dev server does not register the service worker, so it cannot test install or offline.
 
-**Option B, needed for install and offline tests:** deploy the production build to a real HTTPS address
-(for example Cloudflare Pages, as in the spec). Browsers only allow installing and offline play on HTTPS.
+**Option B, needed for install and offline tests:** deploy the production build to a real HTTPS address.
+This project is set up for **Netlify** (`netlify.toml` holds the build settings). Netlify's deploy previews give
+each branch its own address, so you can test a change on your phone before merging it. Browsers only allow
+installing and offline play on HTTPS.
 
 ## 2. Turn on the frame-rate readout
 
@@ -43,6 +45,40 @@ Tick each one and note anything odd.
 - [ ] Info panel appears as a sheet from the bottom; swiping its handle up shows more.
 - [ ] No buttons hidden behind the notch or the home bar. Try both portrait and landscape.
 - [ ] No button feels too small to tap.
+
+**Motion**
+
+- [ ] The row of object buttons scrolls sideways with one finger (ten buttons, one line) and tapping one scrolls it into view.
+- [ ] Phobos and Deimos are visible circling Mars (Phobos faster); neither is a blur.
+- [ ] Seen from above, every planet circles the Sun **counter-clockwise**, and the Moon circles Earth the same way.
+- [ ] The Moon takes about 9 seconds to go once round Earth and always shows the same face to Earth.
+- [ ] Nothing looks frantic or frozen.
+- [ ] Tap a planet: the Sun stays on the same side of it (it does not swing round), and only the stars drift.
+- [ ] Tap the Moon: its surface stays still on screen while its lit part changes through the phases.
+
+**Regions**
+
+- [ ] On a new save the Jupiter, Saturn, Uranus and Neptune buttons are dim with dashed borders and the outer planets are not drawn.
+- [ ] Tapping a locked button shows "... Reach Navigator to unlock it." and selects nothing.
+- [ ] After the rank-up the planets appear, the camera pulls back, Saturn's rings are visible, and you can scan Jupiter.
+
+**Scanning (press and hold)**
+
+- [ ] Fly to the Moon (tap its name), then press and hold SCAN for 3 seconds: the ring fills and you earn 20 XP.
+- [ ] Holding the button does **not** pop up a text-selection or copy/share menu.
+- [ ] The page does not scroll or zoom while you hold.
+- [ ] Letting go early cancels the scan with no reward.
+- [ ] Settings > "Tap once to scan" works with a single tap.
+- [ ] The SCAN button is not covered by the notch, the home bar, or a message, in portrait and landscape.
+- [ ] Close and reopen the browser: the XP is still there.
+
+**Surface images** (only once `assets/textures/` has files; see `docs/TEXTURES.md`)
+
+- [ ] The Moon shows a real surface (grey with darker patches), not a plain grey ball.
+- [ ] Mars shows a real surface (rusty, with dark patches and a bright basin), not a plain orange ball.
+- [ ] The same face of the Moon always points at Earth as it orbits.
+- [ ] The frame rate with the image is still near 60 (note it before and after if you can).
+- [ ] Settings > Graphics quality > Performance still looks acceptable.
 
 **Saving**
 

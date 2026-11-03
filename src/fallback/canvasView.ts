@@ -6,7 +6,8 @@ import { clamp } from '../engine/easing';
 import { attachInput } from '../engine/inputController';
 import { log } from '../engine/log';
 import { mulberry32 } from '../engine/random';
-import { SIM_DAYS_PER_SECOND, VISUALS, focusDistance } from '../engine/scale';
+import { SIM_DAYS_PER_SECOND, VISUALS, focusDistance, reachFromSun } from '../engine/scale';
+import { visibleBodyIds } from '../game/regions';
 import { computePositions, type BodyPosition } from '../engine/solarSystem';
 import type { ControlSettings, View, ViewOptions, ViewQuality, ViewState } from '../engine/view';
 
@@ -15,10 +16,10 @@ const MIN_ZOOM = 0.6;
 const MAX_ZOOM = 40;
 const MIN_HIT_PX = 22; // finger-sized tap target (about 44 px across)
 
-/** Pixels per scene unit at zoom 1, chosen so Earth's whole orbit fits on screen. */
-function baseScale(width: number, height: number): number {
-  const reach = VISUALS.earth.orbit!.radius + VISUALS.moon.orbit!.radius + 2;
-  return (Math.min(width, height) / 2 - 24) / reach;
+/** Pixels per scene unit at zoom 1, chosen so the outermost VISIBLE orbit fits on screen. */
+function baseScale(width: number, height: number, reach: number): number {
+  // 60 px of margin keeps the outermost ring clear of the button row.
+  return (Math.min(width, height) / 2 - 60) / (reach + 2);
 }
 
 export class Canvas2DView implements View {
@@ -38,6 +39,9 @@ export class Canvas2DView implements View {
     reducedMotion: false,
   };
   private positions = new Map<string, BodyPosition>();
+  /** Bodies the player may see (their region is unlocked), and how far out they reach. */
+  private visibleIds: Set<string>;
+  private reach: number;
   private simDays = 0;
   private lastTime = 0;
   private rafId = 0;
@@ -53,6 +57,8 @@ export class Canvas2DView implements View {
   constructor(options: ViewOptions) {
     this.options = options;
     this.quality = options.quality;
+    this.visibleIds = visibleBodyIds(options.objects, options.unlockedRegions);
+    this.reach = reachFromSun(this.visibleIds);
     const ctx = this.canvas.getContext('2d');
     if (!ctx) throw new Error('Canvas 2D is not available');
     this.ctx = ctx;
@@ -62,7 +68,7 @@ export class Canvas2DView implements View {
     this.canvas.setAttribute('role', 'application');
     this.canvas.setAttribute(
       'aria-label',
-      'Simplified 2D star chart of the Sun, Earth and Moon. Arrow keys move the chart, plus and minus zoom, Enter focuses the selected object, Escape returns to the overview.',
+      'Simplified 2D star chart of the Solar System. Arrow keys move the chart, plus and minus zoom, Enter focuses the selected object, Escape returns to the overview.',
     );
     options.host.append(this.canvas);
 
@@ -129,7 +135,7 @@ export class Canvas2DView implements View {
     const settled = Math.abs(Math.log(this.zoom) - Math.log(this.zoomTarget)) < 0.1;
     if (!settled) return null;
     const { width, height } = this.cssSize();
-    const focusZoom = clamp(20 / (spec.radius * baseScale(width, height)), 1, MAX_ZOOM);
+    const focusZoom = clamp(20 / (spec.radius * baseScale(width, height, this.reach)), 1, MAX_ZOOM);
     return focusDistance(spec.radius) * (focusZoom / this.zoomTarget);
   }
 
@@ -187,6 +193,18 @@ export class Canvas2DView implements View {
     this.pan.z -= dyPixels * k;
   }
 
+  setUnlockedRegions(regions: string[]): void {
+    this.visibleIds = visibleBodyIds(this.options.objects, regions);
+    this.reach = reachFromSun(this.visibleIds);
+    this.positions = this.visiblePositions();
+  }
+
+  /** Where every VISIBLE body is right now (locked bodies are left out, so they are never drawn or tapped). */
+  private visiblePositions(): Map<string, BodyPosition> {
+    const all = computePositions(this.options.objects, this.simDays);
+    return new Map([...all].filter(([id]) => this.visibleIds.has(id)));
+  }
+
   private focusOn(id: string | null): void {
     if (id !== null && !VISUALS[id]) return;
     this.focusId = id;
@@ -194,12 +212,14 @@ export class Canvas2DView implements View {
     const w = this.cssSize().width;
     const h = this.cssSize().height;
     // Pick a zoom that makes the focused body roughly 40 px across (radius 20 px).
-    this.zoomTarget = id ? clamp(20 / (VISUALS[id].radius * baseScale(w, h)), 1, MAX_ZOOM) : 1;
+    this.zoomTarget = id
+      ? clamp(20 / (VISUALS[id].radius * baseScale(w, h, this.reach)), 1, MAX_ZOOM)
+      : 1;
     if (this.controls.reducedMotion) this.snapToFocus();
   }
 
   private snapToFocus(): void {
-    this.positions = computePositions(this.options.objects, this.simDays);
+    this.positions = this.visiblePositions();
     const target = this.focusId ? this.positions.get(this.focusId) : undefined;
     this.center = { x: target?.x ?? 0, z: target?.z ?? 0 };
     this.zoom = this.zoomTarget;
@@ -230,7 +250,7 @@ export class Canvas2DView implements View {
 
   private scale(): number {
     const { width, height } = this.cssSize();
-    return baseScale(width, height) * this.zoom;
+    return baseScale(width, height, this.reach) * this.zoom;
   }
 
   private resize(): void {
@@ -254,7 +274,7 @@ export class Canvas2DView implements View {
     const dt = Math.min(frameMs / 1000, 0.1);
 
     this.simDays += dt * SIM_DAYS_PER_SECOND;
-    this.positions = computePositions(this.options.objects, this.simDays);
+    this.positions = this.visiblePositions();
     this.glideCamera(dt);
     this.draw();
     this.rafId = requestAnimationFrame(this.frame);
@@ -295,21 +315,15 @@ export class Canvas2DView implements View {
       ctx.fillRect(this.stars[i * 2] * width, this.stars[i * 2 + 1] * height, 1.5, 1.5);
     }
 
-    // Orbit rings: Earth around the Sun, the Moon around Earth.
+    // Orbit rings: one circle per body, centred on the body it circles (planets: the Sun; the Moon: Earth).
     ctx.strokeStyle = '#3a4a78';
     ctx.lineWidth = 1;
-    const sun = this.positions.get('sun');
-    const earth = this.positions.get('earth');
-    if (sun) {
-      const [sx, sy] = toScreen(sun);
+    for (const [id, spec] of Object.entries(VISUALS)) {
+      const parent = spec.orbit ? this.positions.get(spec.orbit.parentId) : undefined;
+      if (!spec.orbit || !parent || !this.positions.has(id)) continue; // no ring for a locked body
+      const [cx, cy] = toScreen(parent);
       ctx.beginPath();
-      ctx.arc(sx, sy, VISUALS.earth.orbit!.radius * s, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-    if (earth) {
-      const [ex, ey] = toScreen(earth);
-      ctx.beginPath();
-      ctx.arc(ex, ey, VISUALS.moon.orbit!.radius * s, 0, Math.PI * 2);
+      ctx.arc(cx, cy, spec.orbit.radius * s, 0, Math.PI * 2);
       ctx.stroke();
     }
 

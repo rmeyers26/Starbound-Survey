@@ -1,5 +1,10 @@
 // Pure orbit maths (no Three.js, no DOM), so it is easy to unit test.
 // All orbits are circles in the horizontal X/Z plane, which keeps the prototype simple.
+//
+// DIRECTION: in the game's coordinates Y points up (toward celestial north). Every planet and moon in
+// the Solar System circles the Sun (or its planet) COUNTER-CLOCKWISE when seen from above the north
+// pole. Because Z points toward the viewer in this right-handed system, counter-clockwise means the
+// angle must carry us from +X toward -Z. That is why z is MINUS sin(angle) below.
 
 const TWO_PI = Math.PI * 2;
 
@@ -18,5 +23,5 @@ export function orbitPosition(
   simDays: number,
 ): { x: number; z: number } {
   const angle = orbitAngle(periodDays, simDays);
-  return { x: Math.cos(angle) * radius, z: Math.sin(angle) * radius };
+  return { x: Math.cos(angle) * radius, z: -Math.sin(angle) * radius };
 }

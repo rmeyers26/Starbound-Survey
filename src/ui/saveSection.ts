@@ -1,6 +1,7 @@
 // The "Your progress" block inside Settings: progress summary, storage status, export / import.
 import type { EventBus, GameEvents } from '../game/events';
 import { countInspected } from '../game/progress';
+import { unlockedObjects } from '../game/regions';
 import type { CelestialObject } from '../game/types';
 import type { SaveService } from '../save/saveService';
 import { SaveError } from '../save/schema';
@@ -47,11 +48,11 @@ export function createSaveSection(
   buttons.append(exportButton, importButton, fileInput);
   section.append(summary, storage, buttons);
 
-  const ids = objects.map((o) => o.id);
   const nameOf = new Map(objects.map((o) => [o.id, o.name]));
 
   function refresh(): void {
     const record = service.current;
+    const ids = unlockedObjects(objects, record).map((o) => o.id); // locked objects are not counted
     const seen = ids.filter((id) => (record.inspectedObjects[id] ?? 0) > 0);
     summary.textContent =
       `Objects inspected: ${countInspected(record, ids)} of ${ids.length}` +

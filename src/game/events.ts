@@ -14,6 +14,8 @@ import type { GameState } from './stateMachine';
 export interface GameEvents {
   /** An object was selected (or `null` = selection cleared). */
   'object:selected': { id: string | null };
+  /** The player tried to select an object in a region they have not unlocked yet. */
+  'object:locked': { id: string };
   /** Move the camera to look at an object (`null` = back to the whole-system overview). */
   'camera:focus': { id: string | null };
   /** Zoom the camera: factor < 1 moves closer, > 1 moves away. */

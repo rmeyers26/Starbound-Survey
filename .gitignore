@@ -33,3 +33,6 @@ dist
 coverage
 test-results
 playwright-report
+
+# Python tool environment for scripts/cubenet_to_equirect.py
+.venv-tools

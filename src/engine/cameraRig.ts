@@ -10,9 +10,9 @@ export interface CameraState {
   distance: number; // how far the camera is from the target
 }
 
-export const OVERVIEW_DISTANCE = 150;
+export const OVERVIEW_DISTANCE = 240; // far enough to frame the asteroid belt (Ceres)
 export const OVERVIEW_MIN_DISTANCE = 12;
-export const MAX_DISTANCE = 400;
+export const MAX_DISTANCE = 700; // must exceed the overview distance once Neptune is unlocked
 export const FLY_DURATION_S = 2.5; // spec: 2 to 4 seconds
 const MAX_PITCH = Math.PI / 2 - 0.05; // stop just short of straight up/down (avoids a flip)
 const ROTATE_RADIANS_PER_PIXEL = 0.005;

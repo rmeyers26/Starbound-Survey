@@ -14,6 +14,8 @@ export interface ViewQuality {
   resolutionScale: number;
   /** How many background stars to draw. */
   starCount: number;
+  /** Width in pixels of the surface images to load (smaller on weaker devices to save memory). */
+  textureSize: 1024 | 2048;
 }
 
 /** Player-adjustable control settings (Settings screen). */
@@ -43,6 +45,8 @@ export interface ViewOptions {
   onContextLost?: () => void;
   /** Present when rebuilding after a failure. */
   initialState?: ViewState;
+  /** Regions the player has unlocked right now; bodies elsewhere are neither drawn nor pickable. */
+  unlockedRegions: string[];
 }
 
 export interface View {
@@ -51,6 +55,8 @@ export interface View {
   dispose(): void;
   setQuality(quality: ViewQuality): void;
   setControlSettings(settings: ControlSettings): void;
+  /** The player unlocked (or lost) regions: show or hide bodies and re-frame the overview. */
+  setUnlockedRegions(regions: string[]): void;
   getState(): ViewState;
   /**
    * Distance from the ship (camera) to an object in scene units, or null when it cannot be known.

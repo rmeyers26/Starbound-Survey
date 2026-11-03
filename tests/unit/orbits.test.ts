@@ -35,3 +35,29 @@ describe('orbitPosition', () => {
     }
   });
 });
+
+describe('orbit direction', () => {
+  // Angular momentum (the "spin direction" of a motion) is r x v. In this game Y is up (north), and
+  // the right-handed cross product's Y part is z*vx - x*vz. Counter-clockwise seen from ABOVE the north
+  // pole means that part is positive.
+  const spinAboutNorth = (radius: number, period: number, days: number): number => {
+    const step = 0.001;
+    const a = orbitPosition(radius, period, days);
+    const b = orbitPosition(radius, period, days + step);
+    const vx = (b.x - a.x) / step;
+    const vz = (b.z - a.z) / step;
+    return a.z * vx - a.x * vz;
+  };
+
+  it('goes counter-clockwise seen from above the north pole, like every real planet', () => {
+    for (const days of [0, 10, 50, 90, 200, 300]) {
+      expect(spinAboutNorth(60, 365.256, days)).toBeGreaterThan(0);
+    }
+  });
+
+  it('moves from +X toward -Z (right, then away from the camera) at the start', () => {
+    const later = orbitPosition(60, 365.256, 10);
+    expect(later.x).toBeGreaterThan(0);
+    expect(later.z).toBeLessThan(0);
+  });
+});

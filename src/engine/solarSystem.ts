@@ -33,7 +33,9 @@ export function computePositions(
       position = { x: 0, z: 0 }; // the Sun sits at the centre
     } else {
       const parent = resolve(orbit.parentId); // a body's position is its parent's + its orbit offset
-      const offset = orbitPosition(orbit.radius, periodDaysOf(objects, id), simDays);
+      // Fast moons use a slowed display period so they can be seen (see VisualSpec.visualPeriodDays).
+      const period = VISUALS[id].visualPeriodDays ?? periodDaysOf(objects, id);
+      const offset = orbitPosition(orbit.radius, period, simDays);
       position = { x: parent.x + offset.x, z: parent.z + offset.z };
     }
     positions.set(id, position);
