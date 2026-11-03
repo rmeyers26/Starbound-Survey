@@ -281,4 +281,8 @@ which would make the orbit open and never return; the game draws the JPL value, 
 - **The tail is decorative.** It always points away from the Sun and is longest at the closest point, but its real
   length and brightness depend on how active the comet is, which the game does not know. Seen from far away, the glow
   and tail are drawn a little bigger so the comet can be found.
-- **The nucleus is a small dark dot** (real nuclei are dark); its size is unknown, so the dot's size means nothing.
+- **The nucleus is a lumpy, faceted "dirty snowball"** (dark crust with patches of bright ice, stretched like a peanut,
+  as real comet nuclei are). Its size and shape are NOT known, so the size and shape mean nothing.
+- **The broken rocks and ice** (about 140 pieces circling the nucleus and streaming into the tail) are decorative.
+- **The tail is drawn for the whole replay**, longer nearer the Sun, because many real comets are already active well
+  beyond 3 AU.

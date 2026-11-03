@@ -131,12 +131,17 @@ Tick each one and note anything odd.
 **Comet C/2026 A2 (Bok)**
 
 - [ ] The comet button sits right after Ceres. Tap it: the camera flies to a small dark dot with a soft glow.
-- [ ] Wait about 30 seconds: a blue tail and a paler tan tail grow, pointing away from the Sun, and shrink again as it leaves.
+- [ ] The nucleus looks like a lumpy, dark rock with bright ice on it (not a smooth round moon), with small pieces of rock and ice circling it and trailing behind.
+- [ ] The tails (a blue one and a paler tan one) are there from the moment it fades in, point away from the Sun, and get longer as it nears the Sun.
 - [ ] In the whole-system overview you can find the comet, its glow and its long path coming up from far below the planets.
 - [ ] The info panel's Advanced data says "Not yet checked" for the missing values and lists where the numbers came from.
 - [ ] Pilot ship, then tap the comet button: the autopilot catches it even though it moves, and you can scan it.
 - [ ] The comet fades in and out at the ends of each loop (about every 85 seconds), with no jump you can see.
 - [ ] Frame rate with the comet and its tails on screen is still near 60.
+
+**Settings**
+
+- [ ] The Settings window has a Close button at the top. Scroll the settings right down: the Close button stays at the top, in reach of your thumb.
 
 **Saving**
 

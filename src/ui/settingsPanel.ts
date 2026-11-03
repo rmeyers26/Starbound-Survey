@@ -38,8 +38,17 @@ export function createSettingsPanel(
   const dialog = el('dialog', 'app-dialog settings-dialog');
   dialog.setAttribute('aria-labelledby', 'settings-title');
   const form = el('div', 'settings-body');
-  form.append(el('h2', 'settings-title', 'Settings'));
-  form.querySelector('h2')!.id = 'settings-title';
+  // The title and a Close button sit in a header that stays at the top while the (long) list scrolls, so you never
+  // have to scroll all the way down to get out. The Close button at the bottom stays too.
+  const header = el('div', 'settings-header');
+  const title = el('h2', 'settings-title', 'Settings');
+  title.id = 'settings-title';
+  const closeTop = el('button', 'hud-button settings-close-top', 'Close');
+  closeTop.type = 'button';
+  closeTop.setAttribute('aria-label', 'Close settings');
+  closeTop.addEventListener('click', () => dialog.close());
+  header.append(title, closeTop);
+  form.append(header);
 
   const s = store.get();
 
