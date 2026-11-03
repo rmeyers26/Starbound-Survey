@@ -241,3 +241,44 @@ than the picture shows, so they are drawn thicker on purpose (the caption says s
 outside), the convection and radiative zones by a detailed scan (Navigator), and the core by a spectral scan (Surveyor).
 Practice mode reveals them all. Only the Sun has layers so far; Earth (crust, mantle, core) and the gas giants could use the
 same Layers tab later.
+
+## Comet C/2026 A2 (Bok)
+
+**Status: PARTLY CHECKED. The numbers below came from two secondary web pages, not from NASA/JPL itself, and most
+values are missing.** The development container could not reach `ssd-api.jpl.nasa.gov`, `theskylive.com` or
+`lesia.obspm.fr` (the network blocked them), so the orbit could only be read from a web search's summary of two
+pages. The game says so in the info panel's source line. Please compare each number with JPL's own page and tick it off.
+
+How to check: open
+https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=C%2F2026%20A2 (JPL Small-Body Database) and compare.
+
+| Value (as entered)                         | Entered as                     | Where it came from                                                                                                      | Checked? |
+| ------------------------------------------ | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------- | -------- |
+| Perihelion distance (closest to the Sun)   | 1.94 AU                        | LESIA comet database, record 31828                                                                                      | [ ]      |
+| Inclination (orbit tilt)                   | 82 degrees                     | LESIA comet database, record 31828                                                                                      | [ ]      |
+| Eccentricity (orbit shape)                 | 0.99761492 (epoch 2026 May 26) | JPL orbit data, as quoted by TheSkyLive                                                                                 | [ ]      |
+| Orbital period                             | "about 23,000 years"           | **Calculated by the game**: a = q / (1 - e), period = a^1.5 years. Not published; very uncertain for an orbit like this | [ ]      |
+| Date of closest approach (perihelion date) | **Not yet checked** (missing)  | not found                                                                                                               | [ ]      |
+| Size of the nucleus                        | **Not yet checked** (missing)  | not found                                                                                                               | [ ]      |
+| Longitude of the ascending node            | **Not yet checked** (missing)  | not found; **drawn as 0 degrees**                                                                                       | [ ]      |
+| Argument of perihelion                     | **Not yet checked** (missing)  | not found; **drawn as 0 degrees**                                                                                       | [ ]      |
+
+Also worth checking: the comet's name and discoverer (the page title said "C/2026 A2 (Bok)"; nothing else about the
+discovery was found), and whether its eccentricity is really just under 1 (LESIA listed it as exactly 1, a parabola,
+which would make the orbit open and never return; the game draws the JPL value, a very long closed orbit).
+
+### How it is drawn (honest display choices)
+
+- **The shape is real; the direction is a placeholder.** The perihelion distance, eccentricity and tilt are the entered
+  numbers. The two missing angles say which way the orbit points, so the game draws both as 0 degrees. The comet's
+  real path will point somewhere else: change `nodeDeg` and `argPerihelionDeg` in `src/engine/scale.ts` once checked.
+  The info panel says "Not yet checked (drawn as 0 degrees for now)" next to each.
+- **It is a replay.** A real comet like this passes the Sun once and does not come back for thousands of years, so the
+  game replays the part of the flyby inside 3.5 AU on a loop (about 85 seconds at the game's clock, 3 days a second),
+  fading in and out at the ends. The speeds follow Kepler's laws (fastest at the closest point). The game's clock is not
+  tied to real dates, so this is not "where the comet is today".
+- **Distances are compressed** like the planets' (a comet at Earth's distance is drawn where Earth is).
+- **The tail is decorative.** It always points away from the Sun and is longest at the closest point, but its real
+  length and brightness depend on how active the comet is, which the game does not know. Seen from far away, the glow
+  and tail are drawn a little bigger so the comet can be found.
+- **The nucleus is a small dark dot** (real nuclei are dark); its size is unknown, so the dot's size means nothing.

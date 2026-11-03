@@ -69,6 +69,7 @@ describe('data/objects.json (the real game data)', () => {
       'deimos',
       'vesta',
       'ceres',
+      'c2026a2',
       'jupiter',
       'io',
       'europa',

@@ -352,6 +352,9 @@ export class Canvas2DView implements View {
     ctx.font = '13px system-ui, sans-serif';
     ctx.textBaseline = 'middle';
     for (const [id, p] of this.positions) {
+      const fade = p.fade ?? 1; // a replayed comet fades in and out so its jump back to the start is not seen
+      if (fade < 0.02) continue;
+      ctx.globalAlpha = fade;
       const [x, y] = toScreen(p);
       const radius = Math.max(VISUALS[id].radius * s, id === 'sun' ? 7 : 3.5);
       ctx.fillStyle = `#${VISUALS[id].color.toString(16).padStart(6, '0')}`;
@@ -372,6 +375,7 @@ export class Canvas2DView implements View {
         ctx.lineWidth = 1;
       }
     }
+    ctx.globalAlpha = 1;
   }
 
   private resume(): void {

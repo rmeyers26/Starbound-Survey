@@ -39,7 +39,7 @@ test.describe('practice mode', () => {
     await scanObject(page, 'moon');
     await page.getByRole('button', { name: /Open the Logbook/ }).click();
     const logbook = page.locator('dialog.logbook-dialog');
-    await expect(logbook.getByText('Discovered 1 of 31 objects.')).toBeVisible(); // everything counts in practice
+    await expect(logbook.getByText('Discovered 1 of 32 objects.')).toBeVisible(); // everything counts in practice
     await page.keyboard.press('Escape');
 
     await page.waitForTimeout(300);
@@ -49,13 +49,13 @@ test.describe('practice mode', () => {
     await expect(page.locator('.xp-rank')).toHaveText('Practice');
     // ... but the practice scan was not saved.
     await page.getByRole('button', { name: /Open the Logbook/ }).click();
-    await expect(logbook.getByText('Discovered 0 of 31 objects.')).toBeVisible();
+    await expect(logbook.getByText('Discovered 0 of 32 objects.')).toBeVisible();
     await page.keyboard.press('Escape');
 
     // Turn it off: the real save has no scans and no XP, and "objects inspected" never counted the practice taps.
     await setPractice(page, false);
     await expect(xpText(page)).toHaveText('0 / 200 XP');
     await openSettings(page);
-    await expect(page.locator('#progress-summary')).toHaveText('Objects inspected: 0 of 10');
+    await expect(page.locator('#progress-summary')).toHaveText('Objects inspected: 0 of 11');
   });
 });

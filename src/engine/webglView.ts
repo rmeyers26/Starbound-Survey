@@ -12,6 +12,8 @@ import type { Body } from './flight';
 import { PilotController, isFlightKey } from './pilot';
 import { createShipModel, type ShipModel } from './shipModel';
 import { shotAt } from './cinematic';
+import { TAIL_MAX_LENGTH, cometPath, tailLength } from './comet';
+import { createComa, createTail, setGlowStrength } from './cometGlow';
 import { DEFAULT_FOV, cameraPoseFor, shipModelScale } from './shipViews';
 import type { BloomPipeline } from './bloomPipeline';
 import {
@@ -33,7 +35,7 @@ import {
   reachFromSun,
   scanRange,
 } from './scale';
-import { computePositions } from './solarSystem';
+import { cometElementsOf, cometMoment, computePositions } from './solarSystem';
 import { loadTexture, textureUrlFor } from './textures';
 import type {
   ControlSettings,
@@ -48,6 +50,19 @@ import { WarpStreaks } from './warpEffect';
 /** Radius of the sphere the stars sit on (far beyond the planets). */
 const STAR_SPHERE_RADIUS = 1500;
 const MAX_STARS = 4000;
+
+/** What the 3D view keeps for a comet besides its nucleus. */
+interface CometVisual {
+  coma: THREE.Mesh;
+  /** The coma's size at its normal scale, in scene units. */
+  comaRadius: number;
+  ion: THREE.Mesh;
+  dust: THREE.Mesh;
+  path: THREE.Line;
+  perihelionAu: number;
+  /** Where the nucleus was last frame, to find which way it is moving. */
+  previous: THREE.Vector3 | null;
+}
 
 export class WebGLView implements View {
   readonly kind = 'webgl2' as const;
@@ -99,6 +114,8 @@ export class WebGLView implements View {
   /** True for one frame after the camera view changes, so the camera jumps there instead of gliding. */
   private snapPilotCamera = true;
   private pilotStatusClock = 0;
+  /** The comet's glow, tails and path (the comet itself is an ordinary body in `meshes`). */
+  private readonly comets = new Map<string, CometVisual>();
   /** Seconds spent in the cinematic view, which decides which shot is on (restarts each time you choose it). */
   private cinematicClock = 0;
   /** The last shot number written to the canvas's data-shot attribute. */
@@ -326,6 +343,7 @@ export class WebGLView implements View {
       }
       this.meshes.set(id, mesh);
       this.scene.add(mesh);
+      if (spec.comet) this.comets.set(id, this.buildComet(id, mesh));
     }
     this.scene.add(this.buildGlow(VISUALS.sun.radius * 1.5));
     // One ring for every body that circles the Sun. (Moons are skipped: a ring around a moving
@@ -379,6 +397,101 @@ export class WebGLView implements View {
     if (this.focusId === null) {
       this.warpTravel = 0; // widening the view is not a journey
       this.rig.flyTo(this.overviewDistance, OVERVIEW_MIN_DISTANCE);
+    }
+  }
+
+  /**
+   * The comet's look: a faint glow round the nucleus (the coma), two tails that point AWAY from the Sun (a blue,
+   * straight one of gas and a paler, wider one of dust), and its path drawn as a thin line. All decorative: the real
+   * brightness and tail length depend on how active the comet is, which the game does not know.
+   */
+  private buildComet(id: string, nucleus: THREE.Mesh): CometVisual {
+    (nucleus.material as THREE.MeshStandardMaterial).transparent = true; // it fades in and out as the replay loops
+    const comaRadius = VISUALS[id].radius * 6;
+    const coma = createComa(comaRadius);
+    nucleus.add(coma);
+    const ion = createTail(0x6fb4ff);
+    const dust = createTail(0xffe2b0);
+    nucleus.add(ion, dust);
+
+    const elements = cometElementsOf(this.options.objects, id);
+    const windowAu = VISUALS[id].comet!.windowAu;
+    const path = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(
+        cometPath(elements, windowAu, 160).map((p) => new THREE.Vector3(p.x, p.y, p.z)),
+      ),
+      new THREE.LineBasicMaterial({ color: 0x5f86c8, transparent: true, opacity: 0.55 }),
+    );
+    this.scene.add(path);
+    return {
+      coma,
+      comaRadius,
+      ion,
+      dust,
+      path,
+      perihelionAu: elements.perihelionAu,
+      previous: null,
+    };
+  }
+
+  /** When the canvas's data-comet value was last written (it is only refreshed a few times a second). */
+  private cometLabelAt = 0;
+  private readonly cometAway = new THREE.Vector3();
+  private readonly cometDust = new THREE.Vector3();
+  private readonly cometForward = new THREE.Vector3(0, 0, 1);
+
+  /** Fades the comet with its replay, and points and sizes its tails: away from the Sun, longer when closer to it. */
+  private updateComets(): void {
+    for (const [id, comet] of this.comets) {
+      const nucleus = this.meshes.get(id);
+      if (!nucleus) continue;
+      const moment = cometMoment(this.options.objects, id, this.simDays);
+      const inRegion = this.visibleIds.has(id);
+      nucleus.visible = inRegion && moment.fade > 0.01;
+      comet.path.visible = inRegion;
+      (nucleus.material as THREE.MeshStandardMaterial).opacity = moment.fade;
+
+      // Which way the comet is moving, to bend the dust tail back along its path. (A jump means the replay looped.)
+      const velocity = this.cometDust.set(0, 0, 0);
+      if (comet.previous && comet.previous.distanceTo(nucleus.position) < 5) {
+        velocity.copy(nucleus.position).sub(comet.previous);
+      }
+      comet.previous = (comet.previous ?? new THREE.Vector3()).copy(nucleus.position);
+
+      // A tail points directly away from the Sun, which is at the centre.
+      const away = this.cometAway.copy(nucleus.position);
+      if (away.lengthSq() < 1e-9) away.set(1, 0, 0);
+      away.normalize();
+      const trueLength = tailLength(moment.rAu, comet.perihelionAu) * moment.fade;
+      const warmth = trueLength / TAIL_MAX_LENGTH;
+      // Seen from far away (the whole-system overview) the comet would be a speck, so its glow and tail are drawn a
+      // little bigger the further the camera is, up to a limit. Decorative only.
+      const cameraDistance = this.camera.position.distanceTo(nucleus.position);
+      const length = trueLength * THREE.MathUtils.clamp(cameraDistance / 60, 1, 2.5);
+      comet.coma.scale.setScalar(Math.max(1, (cameraDistance * 0.012) / comet.comaRadius));
+
+      comet.ion.visible = length > 0.05;
+      comet.ion.quaternion.setFromUnitVectors(this.cometForward, away);
+      comet.ion.scale.set(length * 0.08, length * 0.08, length);
+      setGlowStrength(comet.ion, 1.2 * moment.fade);
+
+      // The dust tail trails behind the comet's motion as well as away from the Sun, so it curves.
+      const dustDirection =
+        velocity.lengthSq() > 1e-12 ? velocity.normalize().multiplyScalar(-0.45).add(away) : away;
+      comet.dust.visible = length > 0.05;
+      comet.dust.quaternion.setFromUnitVectors(this.cometForward, dustDirection.normalize());
+      comet.dust.scale.set(length * 0.16, length * 0.16, length * 0.75);
+      setGlowStrength(comet.dust, 0.9 * moment.fade);
+
+      setGlowStrength(comet.coma, 0.55 * moment.fade * (0.25 + 0.75 * warmth));
+
+      // A read-only status for automated tests: "fade height tailLength" (the comet moves every frame, so this is
+      // refreshed only a few times a second). Looking at coloured pixels to find a faint tail is unreliable.
+      const now = performance.now();
+      if (now - this.cometLabelAt > 200) {
+        this.cometLabelAt = now;
+        this.renderer.domElement.dataset.comet = `${moment.fade.toFixed(2)} ${moment.y.toFixed(1)} ${length.toFixed(1)}`;
+      }
     }
   }
 
@@ -876,7 +989,7 @@ export class WebGLView implements View {
     for (const [id, p] of computePositions(this.options.objects, this.simDays)) {
       const mesh = this.meshes.get(id);
       if (!mesh) continue;
-      mesh.position.set(p.x, 0, p.z);
+      mesh.position.set(p.x, p.y ?? 0, p.z); // only a comet has a height
       // The Moon keeps its near side toward Earth, just as the real Moon does.
       const orbit = VISUALS[id].orbit;
       if (VISUALS[id].tidallyLocked && orbit) {
@@ -928,6 +1041,7 @@ export class WebGLView implements View {
     const piloting = this.pilot.active;
     const bodiesBefore = piloting ? this.pilotBodies() : []; // where everything was, so a parked ship can go with it
     this.updatePositions();
+    this.updateComets();
     // The whole belt turns together, the same way the planets go round (counter-clockwise from above).
     this.belt.rotation.y = (this.simDays / BELT_PERIOD_DAYS) * Math.PI * 2;
     if (piloting) {

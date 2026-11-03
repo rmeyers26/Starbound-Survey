@@ -15,12 +15,12 @@ async function progressText(page: Page): Promise<string> {
 
 test('progress survives a reload', async ({ page }) => {
   await openGame(page);
-  expect(await progressText(page)).toBe('Objects inspected: 0 of 10');
+  expect(await progressText(page)).toBe('Objects inspected: 0 of 11');
   await chip(page, 'moon').click();
   await chip(page, 'earth').click();
   await page.reload();
   await openGame(page);
-  expect(await progressText(page)).toBe('Objects inspected: 2 of 10 (Earth, The Moon)');
+  expect(await progressText(page)).toBe('Objects inspected: 2 of 11 (Earth, The Moon)');
 });
 
 test('export, wipe all site data, import: progress is restored', async ({ page }, testInfo) => {
@@ -51,13 +51,13 @@ test('export, wipe all site data, import: progress is restored', async ({ page }
   });
   await page.reload();
   await openGame(page);
-  expect(await progressText(page)).toBe('Objects inspected: 0 of 10');
+  expect(await progressText(page)).toBe('Objects inspected: 0 of 11');
 
   await openSettings(page);
   await page.locator('input[type=file]').setInputFiles(file);
   await expect(page.getByText('Backup restored.')).toBeVisible();
   await expect(page.locator('#progress-summary')).toHaveText(
-    'Objects inspected: 2 of 10 (The Sun, The Moon)',
+    'Objects inspected: 2 of 11 (The Sun, The Moon)',
   );
 });
 
@@ -71,7 +71,7 @@ test('a bad backup file is rejected and current progress is untouched', async ({
     buffer: Buffer.from('{"hello":"world"}'),
   });
   await expect(page.getByText(/Could not restore that file/)).toBeVisible();
-  await expect(page.locator('#progress-summary')).toHaveText('Objects inspected: 1 of 10 (Earth)');
+  await expect(page.locator('#progress-summary')).toHaveText('Objects inspected: 1 of 11 (Earth)');
 });
 
 test('a corrupted save is backed up and the game starts fresh instead of failing', async ({
@@ -96,7 +96,7 @@ test('a corrupted save is backed up and the game starts fresh instead of failing
   await page.reload();
   await openGame(page);
   await expect(page.getByText(/could not be read/)).toBeVisible();
-  expect(await progressText(page)).toBe('Objects inspected: 0 of 10');
+  expect(await progressText(page)).toBe('Objects inspected: 0 of 11');
   // The damaged data was kept as a backup key, not thrown away.
   const keys = await page.evaluate(
     () =>

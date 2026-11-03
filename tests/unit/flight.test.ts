@@ -284,6 +284,18 @@ describe('being carried along with a planet', () => {
     expect(carried.z - after[0].position.z).toBeCloseTo(4);
   });
 
+  it('a body that jumps (a replayed comet starting its loop again) does NOT drag a parked ship with it', () => {
+    const before = [planet('comet', 100, 0, 0.25)];
+    // The ship is parked right beside the comet (2 units away: inside its "carry along" zone).
+    const parked = vec(100, 0, 2);
+    expect(anchorBody(parked, before)).toBe('comet');
+    const after = [planet('comet', -100, 0, 0.25)]; // 200 units in one step: a teleport
+    expect(carryAlong(parked, before, after)).toEqual(parked);
+    // A fast but real move is still followed.
+    const fast = [planet('comet', 103, 0, 0.25)];
+    expect(carryAlong(parked, before, fast).x).toBeCloseTo(103);
+  });
+
   it('a ship in deep space is not carried by anything', () => {
     const before = [planet('mercury', 28, 0, 0.8)];
     const after = [planet('mercury', 30, 0, 0.8)];
