@@ -18,13 +18,13 @@ export function createShipModel(): ShipModel {
     color: 0x9aa7c0,
     metalness: 0.35,
     roughness: 0.55,
-    emissive: 0x141c33,
+    emissive: 0x28345a, // a faint fill, so the side facing away from the Sun still shows its shape
   });
   const accent = new THREE.MeshStandardMaterial({
     color: 0xff7a45,
     metalness: 0.2,
     roughness: 0.6,
-    emissive: 0x401a0c,
+    emissive: 0x57270f,
   });
 
   // Body: a cone turned so its point faces -Z.

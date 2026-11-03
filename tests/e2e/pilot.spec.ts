@@ -43,11 +43,33 @@ async function holdKeyUntil(
   }
 }
 
+/** How many pale (nearly white) pixels are on screen inside `target`: a rough "can I actually see its text?" check. */
+async function palePixelsIn(page: Page, target: ReturnType<Page['locator']>): Promise<number> {
+  const picture = (await target.screenshot()).toString('base64');
+  return page.evaluate(async (base64) => {
+    const image = new Image();
+    image.src = `data:image/png;base64,${base64}`;
+    await image.decode();
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext('2d')!;
+    context.drawImage(image, 0, 0);
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+    let pale = 0;
+    for (let i = 0; i < pixels.length; i += 4) {
+      if (pixels[i] > 170 && pixels[i + 1] > 170 && pixels[i + 2] > 170) pale += 1;
+    }
+    return pale;
+  }, picture);
+}
+
 const NAMED_VIEWS = [
   ['chase', 'Chase'],
   ['cockpit', 'Cockpit'],
   ['orbit', 'Orbit'],
   ['map', 'Map'],
+  ['cinematic', 'Cinematic'],
 ] as const;
 
 test.describe('spacecraft', () => {
@@ -130,7 +152,7 @@ test.describe('spacecraft', () => {
       // Exactly one view is pressed at a time.
       await expect(page.locator('.pilot-view[aria-pressed="true"]')).toHaveCount(1);
     }
-    // From Map, V wraps round to Chase, then goes on to Cockpit.
+    // From the last view (Cinematic), V wraps round to Chase, then goes on to Cockpit.
     await page.keyboard.press('v');
     await expect(canvas(page)).toHaveAttribute('data-pilot', 'chase');
     await page.keyboard.press('v');
@@ -298,6 +320,93 @@ test.describe('spacecraft', () => {
     await expect(canvas(page)).toHaveAttribute('data-pilot', 'off');
   });
 
+  test('the cinematic view: black bars, a camera that cuts between shots, and buttons that still work', async ({
+    page,
+  }) => {
+    test.slow();
+    await openGame(page);
+    await enterShip(page);
+    await page.getByRole('button', { name: 'Cinematic', exact: true }).click();
+    await expect(canvas(page)).toHaveAttribute('data-pilot', 'cinematic');
+    await expect(page.locator('#app')).toHaveClass(/cinematic/);
+
+    // The film bars are black, have a real height, and never catch a tap.
+    const bars = await page.evaluate(() => {
+      const style = getComputedStyle(document.querySelector('#app')!, '::before');
+      return {
+        height: parseFloat(style.height),
+        pointerEvents: style.pointerEvents,
+        color: style.backgroundColor,
+      };
+    });
+    expect(bars.height).toBeGreaterThan(20);
+    expect(bars.pointerEvents).toBe('none');
+    expect(bars.color).toBe('rgb(0, 0, 0)');
+
+    // The camera cuts: wait until at least two different shots have been on screen.
+    const seen = new Set<string>();
+    await expect
+      .poll(
+        async () => {
+          seen.add((await canvas(page).getAttribute('data-shot')) ?? '');
+          seen.delete('');
+          return seen.size;
+        },
+        { timeout: 45_000 },
+      )
+      .toBeGreaterThanOrEqual(2);
+
+    // The object buttons sit in the top bar's area, so the bars must be BEHIND them. The bars let taps through, so a
+    // click cannot tell the difference: an earlier version hid the buttons under solid black and the click still
+    // "worked". So look at the picture: a button's label is pale text, so there must be pale pixels inside it.
+    expect(await palePixelsIn(page, chip(page, 'sun'))).toBeGreaterThan(40);
+    await chip(page, 'earth').click();
+    await expect(root(page)).toHaveAttribute('data-autopilot', 'earth');
+  });
+
+  test('with Reduce motion on, the cinematic view holds one still angle (no cuts, no sweeping)', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await openGame(page);
+    await enterShip(page);
+    await page.getByRole('button', { name: 'Cinematic', exact: true }).click();
+    await expect(canvas(page)).toHaveAttribute('data-shot', '0');
+    await page.waitForTimeout(3000);
+    await expect(canvas(page)).toHaveAttribute('data-shot', '0');
+    await expect(page.locator('#app')).toHaveClass(/cinematic/);
+  });
+
+  test('changing to another view, or leaving the ship, removes the film bars and the shot number', async ({
+    page,
+  }) => {
+    await openGame(page);
+    await enterShip(page);
+    await page.getByRole('button', { name: 'Cinematic', exact: true }).click();
+    await expect(page.locator('#app')).toHaveClass(/cinematic/);
+    await page.getByRole('button', { name: 'Chase', exact: true }).click();
+    await expect(page.locator('#app')).not.toHaveClass(/cinematic/);
+    await expect(canvas(page)).not.toHaveAttribute('data-shot', /.*/);
+
+    await page.getByRole('button', { name: 'Cinematic', exact: true }).click();
+    await expect(page.locator('#app')).toHaveClass(/cinematic/);
+    await page.getByRole('button', { name: 'Leave ship' }).click();
+    await expect(page.locator('#app')).not.toHaveClass(/cinematic/);
+    await expect(canvas(page)).not.toHaveAttribute('data-shot', /.*/);
+  });
+
+  test('the cinematic view has no accessibility violations', async ({ page }) => {
+    await openGame(page);
+    await enterShip(page);
+    await page.getByRole('button', { name: 'Cinematic', exact: true }).click();
+    await expect(page.locator('#app')).toHaveClass(/cinematic/);
+    await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze();
+    expect(results.violations).toEqual([]);
+  });
+
   test('flight keys do nothing while the Settings window is open', async ({ page, isMobile }) => {
     test.skip(isMobile, 'on a phone the Settings button is hidden while piloting');
     await openGame(page);
@@ -379,6 +488,14 @@ test.describe('spacecraft on a phone-sized screen', () => {
       const box = (await page.locator(selector).boundingBox())!;
       expect(box.width, selector).toBeGreaterThanOrEqual(44);
       expect(box.height, selector).toBeGreaterThanOrEqual(44);
+    }
+    for (const button of await page.locator('.pilot-view').all()) {
+      const name = await button.innerText();
+      const box = (await button.boundingBox())!;
+      expect(box.width, name).toBeGreaterThanOrEqual(44);
+      expect(box.height, name).toBeGreaterThanOrEqual(44);
+      // The words fit inside the button (nothing spills out).
+      expect(await button.evaluate((el) => el.scrollWidth <= el.clientWidth + 1), name).toBe(true);
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       390,

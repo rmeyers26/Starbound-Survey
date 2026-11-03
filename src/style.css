@@ -764,6 +764,9 @@ body {
   grid-template-columns: repeat(4, 1fr);
   gap: 4px;
 }
+.pilot-view--wide {
+  grid-column: 1 / -1; /* the long name gets a whole row */
+}
 .pilot-view {
   min-width: 0;
   padding: 0 2px;
@@ -890,4 +893,34 @@ body {
   .piloting .hud-status {
     display: none;
   }
+}
+
+/* ---- cinematic view: black bars top and bottom, like a film (decorative; they never block a tap) ---- */
+.cinematic::before,
+.cinematic::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 0; /* above the 3D picture (which is not positioned), but below the buttons and panels (later in the page) */
+  height: 9%;
+  background: #000;
+  pointer-events: none;
+}
+.cinematic::before {
+  top: 0;
+}
+.cinematic::after {
+  bottom: 0;
+}
+@media (max-width: 700px) {
+  .cinematic::before,
+  .cinematic::after {
+    height: 5%; /* a phone held upright is already tall and narrow */
+  }
+}
+/* While the film camera runs, let the picture show through the steering controls (they still work). */
+.cinematic .pilot-body {
+  border-color: transparent;
+  background: rgba(8, 12, 28, 0.4);
 }

@@ -11,7 +11,8 @@ import { createAtmosphere } from './atmosphere';
 import type { Body } from './flight';
 import { PilotController, isFlightKey } from './pilot';
 import { createShipModel, type ShipModel } from './shipModel';
-import { cameraPoseFor, shipModelScale } from './shipViews';
+import { shotAt } from './cinematic';
+import { DEFAULT_FOV, cameraPoseFor, shipModelScale } from './shipViews';
 import type { BloomPipeline } from './bloomPipeline';
 import {
   bloomPlan,
@@ -98,6 +99,10 @@ export class WebGLView implements View {
   /** True for one frame after the camera view changes, so the camera jumps there instead of gliding. */
   private snapPilotCamera = true;
   private pilotStatusClock = 0;
+  /** Seconds spent in the cinematic view, which decides which shot is on (restarts each time you choose it). */
+  private cinematicClock = 0;
+  /** The last shot number written to the canvas's data-shot attribute. */
+  private shotLabel = '';
   private lastPilotStatus = '';
 
   constructor(options: ViewOptions) {
@@ -658,6 +663,9 @@ export class WebGLView implements View {
       const dist = Math.max(offset.length(), 0.001);
       this.pilot.setActive(false);
       this.camera.up.set(0, 1, 0);
+      this.setFov(DEFAULT_FOV);
+      this.cinematicClock = 0;
+      this.updateShotLabel();
       this.shipModel.group.visible = false;
       this.rig.setMinDistance(OVERVIEW_MIN_DISTANCE);
       this.rig.setState({
@@ -703,12 +711,19 @@ export class WebGLView implements View {
   /** Puts the camera where the chosen view wants it. */
   private applyPilotCamera(dt: number): void {
     const { ship, view, viewScale } = this.pilot;
+    let fov = DEFAULT_FOV;
     if (view === 'orbit') {
       this.camera.up.set(0, 1, 0);
       this.shipRig.update(dt, this.shipPositionVector());
       this.shipRig.applyTo(this.camera);
     } else {
-      const pose = cameraPoseFor(view, ship, viewScale);
+      const pose = cameraPoseFor(
+        view,
+        ship,
+        viewScale,
+        this.cinematicClock,
+        this.pilot.reducedMotion,
+      );
       this.cameraGoal.set(pose.position.x, pose.position.y, pose.position.z);
       // The chase camera trails the ship a little, which gives a feeling of speed. Everything else is exact.
       if (view === 'chase' && !this.snapPilotCamera && !this.pilot.reducedMotion) {
@@ -718,8 +733,30 @@ export class WebGLView implements View {
       }
       this.camera.up.set(pose.up.x, pose.up.y, pose.up.z);
       this.camera.lookAt(pose.lookAt.x, pose.lookAt.y, pose.lookAt.z);
+      fov = pose.fov ?? DEFAULT_FOV;
     }
+    this.setFov(fov);
+    this.updateShotLabel();
     this.snapPilotCamera = false;
+  }
+
+  /** Changes the lens angle (the cinematic view uses a narrower, film-like one). */
+  private setFov(fov: number): void {
+    if (this.camera.fov === fov) return;
+    this.camera.fov = fov;
+    this.camera.updateProjectionMatrix();
+  }
+
+  /** A read-only status for automated tests: which cinematic shot is on (1 to 4; 0 = held still by Reduce motion). */
+  private updateShotLabel(): void {
+    let label = '';
+    if (this.pilot.active && this.pilot.view === 'cinematic') {
+      label = this.pilot.reducedMotion ? '0' : String(shotAt(this.cinematicClock).index + 1);
+    }
+    if (label === this.shotLabel) return;
+    this.shotLabel = label;
+    if (label === '') delete this.renderer.domElement.dataset.shot;
+    else this.renderer.domElement.dataset.shot = label;
   }
 
   /** Moves and turns the 3D ship to match the flight rules. The cockpit view hides it (you are inside). */
@@ -901,6 +938,7 @@ export class WebGLView implements View {
         this.options.bus.emit('pilot:arrived', { id: outcome.arrivedId });
         this.emitPilotStatus(true);
       }
+      this.cinematicClock = this.pilot.view === 'cinematic' ? this.cinematicClock + dt : 0;
       this.applyPilotCamera(dt);
       this.updateShipModel();
       this.pilotStatusClock += dt;

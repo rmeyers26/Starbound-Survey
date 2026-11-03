@@ -23,8 +23,8 @@ const minus = (a: { x: number; y: number; z: number }, b: { x: number; y: number
   vec(a.x - b.x, a.y - b.y, a.z - b.z);
 
 describe('choosing a view', () => {
-  it('there are four views, each with a label', () => {
-    expect([...SHIP_VIEWS]).toEqual(['chase', 'cockpit', 'orbit', 'map']);
+  it('there are five views, each with a label', () => {
+    expect([...SHIP_VIEWS]).toEqual(['chase', 'cockpit', 'orbit', 'map', 'cinematic']);
     for (const view of SHIP_VIEWS) expect(SHIP_VIEW_LABELS[view].length).toBeGreaterThan(0);
   });
 

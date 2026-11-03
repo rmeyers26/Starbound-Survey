@@ -79,7 +79,12 @@ export function createPilotPanel(
   views.setAttribute('aria-label', 'Camera view');
   const viewButtons = new Map<ShipView, HTMLButtonElement>();
   for (const view of SHIP_VIEWS) {
-    const button = el('button', 'hud-button pilot-view', SHIP_VIEW_LABELS[view]);
+    // Four short names fit in a row; "Cinematic" is longer, so it gets a row of its own.
+    const button = el(
+      'button',
+      view === 'cinematic' ? 'hud-button pilot-view pilot-view--wide' : 'hud-button pilot-view',
+      SHIP_VIEW_LABELS[view],
+    );
     button.type = 'button';
     button.dataset.view = view;
     button.setAttribute('aria-pressed', String(view === 'chase'));
@@ -206,6 +211,7 @@ export function createPilotPanel(
     root.dataset.active = String(active);
     // Lets the stylesheet tidy the screen while flying (on phones it hides the top rows of buttons).
     container.classList.toggle('piloting', active);
+    if (!active) container.classList.remove('cinematic');
   };
 
   const refresh = (): void => {
@@ -214,6 +220,8 @@ export function createPilotPanel(
     for (const [view, button] of viewButtons) {
       button.setAttribute('aria-pressed', String(view === status.view));
     }
+    // The cinematic view adds film-style black bars at the top and bottom (see the stylesheet).
+    container.classList.toggle('cinematic', active && status.view === 'cinematic');
     numbers.textContent = describeSpeed(status);
     fill.style.height = `${Math.round(speedFraction(status.speed) * 100)}%`;
     const selectedName = nameOf(selectedId);
@@ -281,7 +289,7 @@ export function createPilotPanel(
     offRenderer();
     offAutopilot();
     timers.forEach((id) => window.clearTimeout(id));
-    container.classList.remove('piloting');
+    container.classList.remove('piloting', 'cinematic');
     root.remove();
   };
 }

@@ -117,7 +117,9 @@ Tick each one and note anything odd.
 - [ ] Holding **+** speeds the ship up; letting go keeps the speed; **Stop** brings it to zero.
 - [ ] Holding **◀** and **▶** turns the ship, and it stops turning the moment you let go (try with two fingers: one turning, one on **+**).
 - [ ] **▲** and **▼** tilt the nose; dragging on the picture also steers in Chase and Cockpit.
-- [ ] All four views work (Chase, Cockpit, Orbit, Map). In Orbit, dragging swings round the ship.
+- [ ] All five views work (Chase, Cockpit, Orbit, Map, Cinematic). In Orbit, dragging swings round the ship.
+- [ ] Cinematic: the camera cuts between four shots about every 6 seconds, the black bars are thin, the object buttons at the top are still visible and work, and the ship is easy to see in every shot. Does it feel smooth, or does the cutting feel jarring?
+- [ ] Cinematic with Settings > Reduce motion on: one still angle, no cutting.
 - [ ] Tap an object button: the autopilot flies there, goes round the Sun if needed, and stops. "Arrived at ..." appears.
 - [ ] Hold **SCAN** after arriving: the scan works. Fly away from the planet and the scan says "Move closer".
 - [ ] With the info sheet open the steering pad hides but **Cancel flight** stays; closing the sheet brings the pad back.

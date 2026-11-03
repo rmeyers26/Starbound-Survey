@@ -241,7 +241,8 @@ describe('views', () => {
     expect(pilot.view).toBe('map');
     expect(pilot.setView('periscope')).toBe(false);
     expect(pilot.view).toBe('map');
-    expect(pilot.cycleView()).toBe('chase');
+    expect(pilot.cycleView()).toBe('cinematic'); // the view after Map
+    expect(pilot.cycleView()).toBe('chase'); // and then it wraps round to the start
   });
 });
 

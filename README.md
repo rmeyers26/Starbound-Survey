@@ -37,18 +37,21 @@ Deeper scans (Detailed at Navigator, Spectral at Surveyor) need a higher rank. M
 By default the camera orbits whatever you pick. To steer the ship yourself, press **Pilot ship** (or the **P** key).
 The ship appears where the camera was. Scanning then measures the distance **from the ship**, so you have to fly there.
 
-| Control                      | Keyboard                          | Touch / mouse                             |
-| ---------------------------- | --------------------------------- | ----------------------------------------- |
-| Faster / slower (or reverse) | **W** / **S**, or the mouse wheel | **+** / **-** buttons (hold)              |
-| Turn left / right            | **A** / **D**, or **←** / **→**   | **◀** / **▶** buttons (hold), or drag     |
-| Nose up / down               | **↑** / **↓**                     | **▲** / **▼** buttons (hold), or drag     |
-| Stop                         | **X** (one tap)                   | **Stop** button                           |
-| Change camera view           | **V**                             | **Chase / Cockpit / Orbit / Map** buttons |
-| Fly to the selected object   | an object button, or **Enter**    | an object button, or **Fly to ...**       |
-| Leave the ship               | **P** or **Esc**                  | **Leave ship**                            |
+| Control                      | Keyboard                          | Touch / mouse                                         |
+| ---------------------------- | --------------------------------- | ----------------------------------------------------- |
+| Faster / slower (or reverse) | **W** / **S**, or the mouse wheel | **+** / **-** buttons (hold)                          |
+| Turn left / right            | **A** / **D**, or **←** / **→**   | **◀** / **▶** buttons (hold), or drag                 |
+| Nose up / down               | **↑** / **↓**                     | **▲** / **▼** buttons (hold), or drag                 |
+| Stop                         | **X** (one tap)                   | **Stop** button                                       |
+| Change camera view           | **V**                             | **Chase / Cockpit / Orbit / Map / Cinematic** buttons |
+| Fly to the selected object   | an object button, or **Enter**    | an object button, or **Fly to ...**                   |
+| Leave the ship               | **P** or **Esc**                  | **Leave ship**                                        |
 
-- **Chase** (behind the ship), **Cockpit** (from the nose), **Orbit** (drag to swing round the ship) and **Map**
-  (looking straight down, your heading pointing up the screen).
+- **Chase** (behind the ship), **Cockpit** (from the nose), **Orbit** (drag to swing round the ship), **Map**
+  (looking straight down, your heading pointing up the screen) and **Cinematic**.
+- **Cinematic** is a self-directing film camera. It cuts between four shots of your ship (a sweeping flyby, a low side
+  track, a head-on shot and an overhead dolly), through a narrower film-style lens, with black bars top and bottom. You
+  can keep steering while it films. With _Reduce motion_ on it holds one still angle instead of sweeping and cutting.
 - **The throttle is a lever.** It stays where you leave it, so the ship keeps cruising when you let go of **W**.
 - **You cannot crash.** The top speed shrinks as you get near a world, and the ship stops at its surface.
 - **Autopilot** flies to the selected object, goes round the Sun if it is in the way, and stops in scanning range.
