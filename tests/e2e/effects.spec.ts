@@ -1,7 +1,7 @@
 // Visual effects (spec: bloom, atmosphere, warp, each tied to the graphics profile and to Reduce motion).
 // These tests measure real pixels, so the thresholds come from measured numbers, with generous margins:
 //   brightness of a ring around the Sun (0 to 255):   High about 95, Balanced about 74, Performance about 10
-//   bluish pixels in the middle of the view during a warp: about 6100 with streaks, about 2300 without
+// Warp streaks are checked through the strength the view reports (data-warp), not through pixel colours.
 import { expect, test, type Page } from '@playwright/test';
 import { openGame, openSettings, trackErrors } from './helpers';
 
@@ -54,22 +54,20 @@ async function chooseQuality(page: Page, profile: 'high' | 'balanced' | 'perform
   await page.waitForTimeout(1500); // let the effect switch on or off
 }
 
-/** How many pixels in the middle of the view look like a warp streak (bluish-white). */
-async function bluishPixels(page: Page): Promise<number> {
-  const size = page.viewportSize()!;
-  // The middle of the view, away from the buttons on the left, right and top.
-  const data = await pixelsOf(page, {
-    x: Math.round(size.width * 0.33),
-    y: Math.round(size.height * 0.14),
-    width: Math.round(size.width * 0.58),
-    height: Math.round(size.height * 0.72),
-  });
-  let count = 0;
-  for (let i = 0; i < data.length; i += 4) {
-    const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
-    if (b > 150 && g > 110 && b > r + 40 && g > r + 15) count++;
+/**
+ * Watches the warp strength the 3D view reports (the `data-warp` attribute on the canvas, 0 to 1) for a few
+ * seconds and returns the highest value seen. Reading the strength itself is exact and the same in every
+ * browser; counting streak-coloured pixels was not (it differed between Chromium and WebKit).
+ */
+async function highestWarp(page: Page, seconds = 8): Promise<number> {
+  let highest = 0;
+  const end = Date.now() + seconds * 1000;
+  while (Date.now() < end) {
+    const value = await page.locator('canvas.game-canvas').getAttribute('data-warp');
+    highest = Math.max(highest, Number(value ?? 0));
+    await page.waitForTimeout(100);
   }
-  return count;
+  return highest;
 }
 
 // A small window keeps the software-rendered 3D light enough for slow test machines (a real GPU would not care).
@@ -105,23 +103,27 @@ test.describe('bloom (glow around the Sun)', () => {
 });
 
 test.describe('warp streaks (long flights)', () => {
+  test.use({ viewport: SMALL_WINDOW });
   test.beforeEach(() => {
     test.slow(); // software-rendered 3D with effects on is slow on test machines; a real GPU is not
   });
-  test.use({ viewport: SMALL_WINDOW });
-  test.beforeEach(({ isMobile }) => {
-    test.skip(isMobile, 'pixel measurements use the desktop layout');
-  });
 
-  test('rush past mid-flight on a long trip, and are gone once you arrive', async ({ page }) => {
+  test('are strong mid-flight on a long trip, and gone once you arrive', async ({ page }) => {
     await openGame(page, '?effects=on');
     await chooseQuality(page, 'high');
     await page.locator('button[data-object-id="ceres"]').click(); // the Sun to Ceres: a long trip
-    await page.waitForTimeout(1100); // about half way through the 2.5 second flight
-    const mid = await bluishPixels(page);
-    await page.waitForTimeout(2600);
-    const arrived = await bluishPixels(page);
-    expect(mid).toBeGreaterThan(arrived + 1500);
+    expect(await highestWarp(page)).toBeGreaterThan(0.5);
+    await expect(page.locator('canvas.game-canvas')).toHaveAttribute('data-warp', '0.00');
+  });
+
+  test('do not appear on a short hop (Earth to its Moon)', async ({ page }) => {
+    await openGame(page, '?effects=on');
+    await chooseQuality(page, 'high');
+    await page.locator('button[data-object-id="earth"]').click();
+    await highestWarp(page, 6); // let the (long) trip to Earth finish
+    await page.locator('button[data-object-id="moon"]').click(); // about 6 units: far too short for a warp
+    expect(await highestWarp(page, 5)).toBe(0);
+    await expect(page.locator('canvas.game-canvas')).toHaveAttribute('data-warp', '0.00'); // reported, and zero
   });
 
   test('do not appear with Reduce motion on (the flight is instant)', async ({ page }) => {
@@ -129,19 +131,16 @@ test.describe('warp streaks (long flights)', () => {
     await openGame(page, '?effects=on');
     await chooseQuality(page, 'high');
     await page.locator('button[data-object-id="ceres"]').click();
-    await page.waitForTimeout(1100);
-    const mid = await bluishPixels(page);
-    await page.waitForTimeout(2600);
-    const arrived = await bluishPixels(page);
-    expect(Math.abs(mid - arrived)).toBeLessThan(600);
+    expect(await highestWarp(page, 4)).toBe(0);
+    await expect(page.locator('canvas.game-canvas')).toHaveAttribute('data-warp', '0.00'); // reported, and zero
   });
 
   test('do not appear on the Performance profile', async ({ page }) => {
     await openGame(page, '?effects=on');
     await chooseQuality(page, 'performance');
     await page.locator('button[data-object-id="ceres"]').click();
-    await page.waitForTimeout(1100);
-    expect(await bluishPixels(page)).toBeLessThan(500);
+    expect(await highestWarp(page, 4)).toBe(0);
+    await expect(page.locator('canvas.game-canvas')).toHaveAttribute('data-warp', '0.00'); // reported, and zero
   });
 });
 

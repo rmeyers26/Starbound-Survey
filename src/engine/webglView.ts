@@ -62,6 +62,8 @@ export class WebGLView implements View {
   private readonly warp = new WarpStreaks(warpStreakCount(true));
   /** How far the camera's target moves in the current flight, used to decide how strong the warp is. */
   private warpTravel = 0;
+  /** The last strength written to the canvas's data-warp attribute (so it is only written when it changes). */
+  private warpLabel = '';
   private readonly selectionRing: THREE.Mesh;
   private readonly raycaster = new THREE.Raycaster();
   private readonly resizeObserver: ResizeObserver;
@@ -625,6 +627,13 @@ export class WebGLView implements View {
         ? warpStrength(progress, this.warpTravel, this.rig.reducedMotion)
         : 0;
     this.warp.update(warpAmount, now / 1000);
+    // A read-only status for automated tests ("data-warp" on the canvas, 0.00 to 1.00). Counting coloured pixels
+    // to check the streaks is unreliable between browsers, so tests read the strength itself.
+    const warpLabel = warpAmount.toFixed(2);
+    if (warpLabel !== this.warpLabel) {
+      this.warpLabel = warpLabel;
+      this.renderer.domElement.dataset.warp = warpLabel;
+    }
     // With bloom on, draw through the glow pipeline; otherwise straight to the screen.
     if (this.bloomPipeline) this.bloomPipeline.render();
     else this.renderer.render(this.scene, this.camera);
