@@ -230,10 +230,14 @@ export const replayLoopDays = (el: CometElements, windowAu: number): number =>
 
 // ---- the tail ---------------------------------------------------------------------------------------------------
 
-/** A comet only grows a tail once it is warm enough for its ice to turn to gas, roughly inside this distance. */
-export const TAIL_START_AU = 3.2;
+/**
+ * A comet's ice starts turning to gas and growing a tail well out in the Solar System (many comets are already
+ * active beyond 3 AU). This is set beyond the edge of the part of the flyby the game shows (3.5 AU), so the tail is
+ * there for the whole replay and the comet never looks like a bare ball.
+ */
+export const TAIL_START_AU = 4.5;
 /** The longest the tail is drawn, in scene units (at perihelion). Decorative: real tails can be millions of km. */
-export const TAIL_MAX_LENGTH = 14;
+export const TAIL_MAX_LENGTH = 22;
 
 /**
  * How long to draw the tail (scene units) when the comet is `rAu` from the Sun: none beyond TAIL_START_AU, and

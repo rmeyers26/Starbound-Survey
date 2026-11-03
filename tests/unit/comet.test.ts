@@ -293,6 +293,14 @@ describe('the tail', () => {
     }
   });
 
+  it('is there for the WHOLE replay: even at the edge of the window (3.5 AU) the comet has a clear tail', () => {
+    // The first version only grew a tail inside 3.2 AU, so for the start of every loop it was a bare ball.
+    expect(tailLength(3.5, 1.94)).toBeGreaterThan(2);
+    expect(tailLength(3.5, 1.94)).toBeLessThan(TAIL_MAX_LENGTH / 2); // but much longer near the Sun
+    for (let r = 1.94; r <= 3.5; r += 0.05)
+      expect(tailLength(r, 1.94), `${r} AU`).toBeGreaterThan(2);
+  });
+
   it('is never negative or bigger than the maximum, and survives nonsense', () => {
     for (const r of [0, 0.5, 1.94, 2.5, 3.1, 3.2, 50, Number.NaN, Number.POSITIVE_INFINITY]) {
       const length = tailLength(r, 1.94);

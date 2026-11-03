@@ -160,6 +160,20 @@ Date of this report: 2026-11-02.
     textured asset made by an artist. I could not download one here, so if you can supply a licensed `.glb` spacecraft
     I can load that instead. While building it, measuring the model showed my own `SHIP_HEIGHT` constant was wrong (0.26;
     really 0.36) and a unit test caught that the first tail-fin outline was a stub barely above the hull.
+25. **The comet looked like a moon** (owner's feedback: needs a tail and more broken-up rocks and ice). The nucleus was a
+    smooth grey ball and the tail only appeared inside 3.2 AU, so the first third of every loop was a bare ball. Now: a
+    lumpy, faceted, stretched nucleus with a dark crust and bright ice patches (`engine/cometNucleus.ts` has the pure
+    rules, tested: it is not round, it is stretched, ice covers only part of it), 140 pieces of broken rock and ice
+    circling it and streaming down the tail, a glow that is drawn only BEHIND the nucleus (drawn over it, it washed the
+    nucleus out to white in a screenshot), and a tail that is there for the whole replay, brighter and softer-edged.
+    A screenshot also showed the first chunks were bigger than the nucleus; they are now small.
+    **Settings now has a Close button at the top**, pinned there while the list scrolls (the one at the bottom stays).
+    **CI's Lighthouse check then failed (performance 48, minimum 50), and it was real, not noise.** Measured locally the same
+    way: `main` scored 49, 51 and 53; the new comet scored 46 three times (largest paint 4.0 s against about 3.3 s). Cause:
+    drawing the tails, glow and rocks from the first second made the page compile extra shader programs while it was still
+    loading, and a software renderer is slow at that. Fix: the comet's visuals are now built only after the page has had 6
+    seconds to settle, their shaders are compiled while still hidden, and then it fades in (a test checks nothing is built
+    in the first seconds). Measured afterwards: 54, 53 and 54. Lesson: optional eye candy must not run during startup.
 
 ## Open problems and trade-offs
 

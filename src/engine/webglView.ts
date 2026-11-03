@@ -14,6 +14,8 @@ import { createShipModel, type ShipModel } from './shipModel';
 import { shotAt } from './cinematic';
 import { TAIL_MAX_LENGTH, cometPath, tailLength } from './comet';
 import { createComa, createTail, setGlowStrength } from './cometGlow';
+import { generateDebris } from './cometNucleus';
+import { createDebris, shapeNucleus, updateDebris, type Debris } from './cometParts';
 import { DEFAULT_FOV, cameraPoseFor, shipModelScale } from './shipViews';
 import type { BloomPipeline } from './bloomPipeline';
 import {
@@ -51,8 +53,24 @@ import { WarpStreaks } from './warpEffect';
 const STAR_SPHERE_RADIUS = 1500;
 const MAX_STARS = 4000;
 
+// The comet is eye candy, so it must not slow down the first screen. Its glow, tails and rocks (and the shader
+// programs that draw them, which are slow to compile, especially without a good graphics card) are built only after
+// the page has had a few seconds to settle, compiled while still hidden, and then faded in.
+/** How long after the view starts before the comet's visuals are built. */
+const COMET_SETTLE_MS = 6000;
+/** How long they stay hidden after being built, while the graphics card finishes compiling their shaders. */
+const COMET_WARMUP_MS = 1000;
+/** How long the comet then takes to fade in. */
+const COMET_FADE_IN_MS = 2000;
+
 /** What the 3D view keeps for a comet besides its nucleus. */
 interface CometVisual {
+  /** A small, bright glow right round the nucleus (the coma's dense core). */
+  core: THREE.Mesh;
+  /** The broken-up rocks and ice round the nucleus and trailing into the tail. */
+  debris: Debris;
+  /** The nucleus's nominal radius in scene units. */
+  nucleusRadius: number;
   coma: THREE.Mesh;
   /** The coma's size at its normal scale, in scene units. */
   comaRadius: number;
@@ -117,6 +135,10 @@ export class WebGLView implements View {
   private pilotStatusClock = 0;
   /** The comet's glow, tails and path (the comet itself is an ordinary body in `meshes`). */
   private readonly comets = new Map<string, CometVisual>();
+  /** When the view started, so the comet can wait until the page has settled (see COMET_SETTLE_MS). */
+  private startedAt = performance.now();
+  /** When the comet's fade-in begins (set when its visuals are built, after a short shader warm-up). */
+  private cometRevealAt = 0;
   /** Seconds spent in the cinematic view, which decides which shot is on (restarts each time you choose it). */
   private cinematicClock = 0;
   /** The last shot number written to the canvas's data-shot attribute. */
@@ -184,6 +206,7 @@ export class WebGLView implements View {
   };
 
   start(): void {
+    this.startedAt = performance.now();
     this.running = true;
     this.resume();
     log('WebGL view started');
@@ -343,7 +366,6 @@ export class WebGLView implements View {
       }
       this.meshes.set(id, mesh);
       this.scene.add(mesh);
-      if (spec.comet) this.comets.set(id, this.buildComet(id, mesh));
     }
     this.scene.add(this.buildGlow(VISUALS.sun.radius * 1.5));
     // One ring for every body that circles the Sun. (Moons are skipped: a ring around a moving
@@ -400,6 +422,30 @@ export class WebGLView implements View {
     }
   }
 
+  /** Builds every comet's glow, tails, rocks and path, then asks the graphics card to compile their shaders now. */
+  private buildComets(): void {
+    for (const [id, spec] of Object.entries(VISUALS)) {
+      const nucleus = this.meshes.get(id);
+      if (spec.comet && nucleus) this.comets.set(id, this.buildComet(id, nucleus));
+    }
+    // Shader programs are compiled the first time something that uses them is drawn, which would stall the frame in
+    // which the comet first appears. Compile them now instead, while everything is still hidden: show every part for
+    // the length of the compile request, then put the visibility back.
+    const parts: Array<[THREE.Object3D, boolean]> = [];
+    const show = (part: THREE.Object3D): void => {
+      parts.push([part, part.visible]);
+      part.visible = true;
+    };
+    for (const [id, comet] of this.comets) {
+      const nucleus = this.meshes.get(id);
+      if (nucleus) show(nucleus);
+      for (const part of [comet.coma, comet.core, comet.ion, comet.dust, comet.debris.mesh])
+        show(part);
+    }
+    this.renderer.compile(this.scene, this.camera);
+    for (const [part, wasVisible] of parts) part.visible = wasVisible;
+  }
+
   /**
    * The comet's look: a faint glow round the nucleus (the coma), two tails that point AWAY from the Sun (a blue,
    * straight one of gas and a paler, wider one of dust), and its path drawn as a thin line. All decorative: the real
@@ -407,9 +453,13 @@ export class WebGLView implements View {
    */
   private buildComet(id: string, nucleus: THREE.Mesh): CometVisual {
     (nucleus.material as THREE.MeshStandardMaterial).transparent = true; // it fades in and out as the replay loops
-    const comaRadius = VISUALS[id].radius * 6;
+    const nucleusRadius = VISUALS[id].radius;
+    shapeNucleus(nucleus, nucleusRadius); // a lumpy, faceted dirty snowball, not a smooth moon
+    const comaRadius = nucleusRadius * 8;
     const coma = createComa(comaRadius);
-    nucleus.add(coma);
+    const core = createComa(nucleusRadius * 2.6, 0xffffff);
+    const debris = createDebris(generateDebris(140));
+    nucleus.add(coma, core, debris.mesh);
     const ion = createTail(0x6fb4ff);
     const dust = createTail(0xffe2b0);
     nucleus.add(ion, dust);
@@ -424,6 +474,9 @@ export class WebGLView implements View {
     );
     this.scene.add(path);
     return {
+      core,
+      debris,
+      nucleusRadius,
       coma,
       comaRadius,
       ion,
@@ -442,13 +495,32 @@ export class WebGLView implements View {
 
   /** Fades the comet with its replay, and points and sizes its tails: away from the Sun, longer when closer to it. */
   private updateComets(): void {
+    const now = performance.now();
+    if (this.comets.size === 0) {
+      if (now - this.startedAt < COMET_SETTLE_MS) {
+        // Not yet: keep the plain placeholder sphere hidden and do no comet work while the page settles.
+        for (const [id, spec] of Object.entries(VISUALS)) {
+          if (spec.comet) {
+            const placeholder = this.meshes.get(id);
+            if (placeholder) placeholder.visible = false;
+          }
+        }
+        return;
+      }
+      this.buildComets();
+      this.cometRevealAt = now + COMET_WARMUP_MS;
+    }
+    // 0 while the shaders warm up, then rising to 1 over COMET_FADE_IN_MS.
+    const reveal = THREE.MathUtils.clamp((now - this.cometRevealAt) / COMET_FADE_IN_MS, 0, 1);
     for (const [id, comet] of this.comets) {
       const nucleus = this.meshes.get(id);
       if (!nucleus) continue;
-      const moment = cometMoment(this.options.objects, id, this.simDays);
+      const replay = cometMoment(this.options.objects, id, this.simDays);
+      // The replay's own fade (at the ends of each loop), times the one-off fade-in after the page settled.
+      const moment = { ...replay, fade: replay.fade * reveal };
       const inRegion = this.visibleIds.has(id);
       nucleus.visible = inRegion && moment.fade > 0.01;
-      comet.path.visible = inRegion;
+      comet.path.visible = inRegion && reveal > 0;
       (nucleus.material as THREE.MeshStandardMaterial).opacity = moment.fade;
 
       // Which way the comet is moving, to bend the dust tail back along its path. (A jump means the replay looped.)
@@ -472,18 +544,29 @@ export class WebGLView implements View {
 
       comet.ion.visible = length > 0.05;
       comet.ion.quaternion.setFromUnitVectors(this.cometForward, away);
-      comet.ion.scale.set(length * 0.08, length * 0.08, length);
-      setGlowStrength(comet.ion, 1.2 * moment.fade);
+      comet.ion.scale.set(length * 0.11, length * 0.11, length);
+      setGlowStrength(comet.ion, 1.7 * moment.fade);
 
       // The dust tail trails behind the comet's motion as well as away from the Sun, so it curves.
       const dustDirection =
         velocity.lengthSq() > 1e-12 ? velocity.normalize().multiplyScalar(-0.45).add(away) : away;
       comet.dust.visible = length > 0.05;
       comet.dust.quaternion.setFromUnitVectors(this.cometForward, dustDirection.normalize());
-      comet.dust.scale.set(length * 0.16, length * 0.16, length * 0.75);
-      setGlowStrength(comet.dust, 0.9 * moment.fade);
+      comet.dust.scale.set(length * 0.22, length * 0.22, length * 0.8);
+      setGlowStrength(comet.dust, 1.3 * moment.fade);
 
-      setGlowStrength(comet.coma, 0.55 * moment.fade * (0.25 + 0.75 * warmth));
+      setGlowStrength(comet.coma, 0.6 * moment.fade * (0.3 + 0.7 * warmth));
+      setGlowStrength(comet.core, 0.9 * moment.fade);
+
+      // The broken-up rocks and ice: a halo round the nucleus and a stream trailing down the tail.
+      updateDebris(
+        comet.debris,
+        performance.now() / 1000,
+        comet.nucleusRadius,
+        length * 0.6,
+        away,
+        moment.fade,
+      );
 
       // A read-only status for automated tests: "fade height tailLength" (the comet moves every frame, so this is
       // refreshed only a few times a second). Looking at coloured pixels to find a faint tail is unreliable.
