@@ -70,6 +70,17 @@ async function highestWarp(page: Page, seconds = 8): Promise<number> {
   return highest;
 }
 
+/**
+ * Waits until the warp has fully ended (the canvas reports 0.00).
+ * A flight's length is measured in animation frames, and a slow test machine draws fewer of them per
+ * second, so a fixed number of seconds is a guess. Waiting for the finish line itself is not.
+ */
+async function expectWarpEnded(page: Page): Promise<void> {
+  await expect(page.locator('canvas.game-canvas')).toHaveAttribute('data-warp', '0.00', {
+    timeout: 45_000,
+  });
+}
+
 // A small window keeps the software-rendered 3D light enough for slow test machines (a real GPU would not care).
 const SMALL_WINDOW = { width: 800, height: 480 };
 
@@ -113,14 +124,15 @@ test.describe('warp streaks (long flights)', () => {
     await chooseQuality(page, 'high');
     await page.locator('button[data-object-id="ceres"]').click(); // the Sun to Ceres: a long trip
     expect(await highestWarp(page)).toBeGreaterThan(0.5);
-    await expect(page.locator('canvas.game-canvas')).toHaveAttribute('data-warp', '0.00');
+    await expectWarpEnded(page);
   });
 
   test('do not appear on a short hop (Earth to its Moon)', async ({ page }) => {
     await openGame(page, '?effects=on');
     await chooseQuality(page, 'high');
     await page.locator('button[data-object-id="earth"]').click();
-    await highestWarp(page, 6); // let the (long) trip to Earth finish
+    await highestWarp(page, 3); // the long trip to Earth is under way...
+    await expectWarpEnded(page); // ...and wait for it to truly finish, however slow the machine
     await page.locator('button[data-object-id="moon"]').click(); // about 6 units: far too short for a warp
     expect(await highestWarp(page, 5)).toBe(0);
     await expect(page.locator('canvas.game-canvas')).toHaveAttribute('data-warp', '0.00'); // reported, and zero
