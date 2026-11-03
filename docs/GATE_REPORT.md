@@ -32,7 +32,7 @@ Date of this report: 2026-11-02.
 
 ## What was verified, and how
 
-- 294 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
+- 312 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
 - 99 browser tests (Playwright; 5 skipped by design) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
   bottom-sheet handle only exists on phone-width screens).
 - Lint, type-check and production build pass. Production dependencies: 0 known vulnerabilities.
@@ -98,6 +98,15 @@ Date of this report: 2026-11-02.
     written to: turning practice off returns exactly to the real progress. Practice scans are kept in memory only.
     Tested as pure rules, in the scan controller, and end to end (including that real XP and "objects inspected"
     never change, and that the setting survives a reload).
+
+20. **Warp-streak tests failed only in Safari's engine (WebKit) on CI.** They counted "bluish pixels", which differs between
+    browsers even with no warp at all (3,000 to 4,000 on the Performance profile in WebKit, about 0 in Chromium), so the
+    check did not carry over. The 3D view now publishes its warp strength as a read-only `data-warp` value and the tests
+    read that. Whether the streaks are _drawn_ correctly in Safari could not be reproduced here (WebKit cannot be
+    downloaded in this container): the iPhone test covers it.
+21. **The Sun's layers** (core, radiative zone, convection zone, photosphere, chromosphere, transition region, corona) are a
+    new Layers tab with a cutaway picture, revealed by scan level. The wording is NASA's as pasted by the owner (page address
+    unconfirmed); the extra detail and the picture's proportions are from general knowledge and are listed for checking.
 
 ## Open problems and trade-offs
 

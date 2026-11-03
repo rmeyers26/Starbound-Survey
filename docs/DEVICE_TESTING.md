@@ -56,6 +56,13 @@ Tick each one and note anything odd.
 - [ ] Tap a planet: the Sun stays on the same side of it (it does not swing round), and only the stars drift.
 - [ ] Tap the Moon: its surface stays still on screen while its lit part changes through the phases.
 
+**The Sun's layers**
+
+- [ ] Select the Sun: a third tab, **Layers**, appears (no other object has it). Before any scan it asks you to scan the Sun.
+- [ ] After a basic scan the picture shows four coloured outer rings and dark unlit inner ones, and the list names the Photosphere, Chromosphere, Transition Region and Corona, with "A hidden layer" for the rest.
+- [ ] With Practice mode on, three scans reveal all seven layers, the core in the middle of the picture.
+- [ ] On a phone, the three tab names fit on one line and the sheet scrolls to the end of the list.
+
 **Practice mode** (Settings)
 
 - [ ] Switch **Practice mode** on: a gold "Practice" badge replaces the XP bar and Jupiter, Saturn, Uranus and Neptune appear straight away.

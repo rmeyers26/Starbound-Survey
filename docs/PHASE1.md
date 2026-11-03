@@ -74,6 +74,8 @@ Design choices (all tunable numbers are in one place each):
 - Warp strength depends on how far the flight goes: short hops (Earth to the Moon) get none.
 - The 2D fallback chart has none of these effects, by design (it is a simplified chart).
 
+**The Sun's layers** (added after slice D): a Layers tab with a cutaway picture and seven layers revealed by scan level (see `DATA_CHECK.md` for what is NASA's wording and what was added).
+
 **Practice mode** (added after slice D): a Settings option that unlocks every region and every scan level with no XP,
 without touching saved progress (see `game/practice.ts`). It is a learning and exploring tool, and a handy way to see
 the whole game while the quizzes and missions (slice B) are still unbuilt.

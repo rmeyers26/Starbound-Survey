@@ -1,15 +1,6 @@
 // Practice mode: everything unlocked, every scan level available, no XP, and your real progress untouched.
-import { expect, test, type Page } from '@playwright/test';
-import { chip, openForScanning, openSettings, scanObject, xpText } from './helpers';
-
-/** Turns practice mode on or off in Settings, then closes Settings. */
-async function setPractice(page: Page, on: boolean) {
-  await openSettings(page);
-  const box = page.getByLabel('Practice mode');
-  if (on) await box.check();
-  else await box.uncheck();
-  await page.getByRole('button', { name: 'Close' }).last().click();
-}
+import { expect, test } from '@playwright/test';
+import { chip, openForScanning, openSettings, scanObject, setPractice, xpText } from './helpers';
 
 test.describe('practice mode', () => {
   test('unlocks everything, gives no XP, and leaves real progress alone', async ({ page }) => {

@@ -208,7 +208,8 @@ body {
 }
 .tab {
   min-height: 44px;
-  padding: 0 14px;
+  padding: 0 10px; /* three tabs (Quick facts, Advanced data, Layers) must fit on one line */
+  white-space: nowrap;
   border: 0;
   border-bottom: 3px solid transparent;
   background: transparent;
@@ -625,4 +626,64 @@ body {
 }
 .logbook-meta {
   color: #a9b6dc;
+}
+
+/* ---- Layers tab (the Sun's core, corona and so on) ---- */
+.layers-figure {
+  margin: 4px 0 12px;
+  text-align: center;
+}
+.layers-diagram {
+  width: min(230px, 70%);
+  height: auto;
+}
+.layers-caption {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #a9b6dc;
+}
+.layers-heading {
+  margin: 12px 0 4px;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #a9b6dc;
+}
+.layer-list {
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+.layer-item {
+  display: flex;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #1c2a4d;
+}
+.layer-item.locked {
+  opacity: 0.7;
+}
+.layer-swatch {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  margin-top: 4px;
+  border-radius: 50%;
+  border: 1px solid #33477e;
+}
+.layer-text {
+  min-width: 0;
+}
+.layer-name {
+  margin: 0 0 2px;
+  font-size: 0.95rem;
+}
+.layer-summary,
+.layer-detail {
+  margin: 0 0 4px;
+  line-height: 1.45;
+  font-size: 0.85rem;
+}
+.layer-detail {
+  color: #b8c4e8;
 }

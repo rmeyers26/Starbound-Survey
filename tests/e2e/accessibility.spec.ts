@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { chip, openForScanning, openGame, openSettings, scanObject } from './helpers';
+import { chip, openForScanning, openGame, openSettings, scanObject, setPractice } from './helpers';
 
 // Spec: "text and controls meet WCAG AA contrast", labelled controls, keyboard reachable.
 // axe-core is an automated checker. It finds many (not all) problems, so it complements manual checks.
@@ -47,5 +47,20 @@ test('settings dialog has no accessibility violations', async ({ page }) => {
 test('the 2D fallback view has no accessibility violations', async ({ page }) => {
   await openGame(page, '?renderer=canvas2d');
   await chip(page, 'moon').click();
+  expect((await scan(page)).violations).toEqual([]);
+});
+
+test("the Sun's Layers tab (hidden and revealed layers) has no accessibility violations", async ({
+  page,
+}) => {
+  await openForScanning(page);
+  await scanObject(page, 'sun'); // a basic scan: some layers revealed, some still hidden
+  await page.getByRole('tab', { name: 'Layers' }).click();
+  await expect(page.locator('svg.layers-diagram')).toBeVisible();
+  expect((await scan(page)).violations).toEqual([]);
+  await setPractice(page, true); // every scan level: all seven layers revealed
+  await scanObject(page, 'sun');
+  await scanObject(page, 'sun');
+  await page.getByRole('tab', { name: 'Layers' }).click();
   expect((await scan(page)).violations).toEqual([]);
 });

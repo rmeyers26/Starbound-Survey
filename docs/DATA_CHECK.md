@@ -212,3 +212,32 @@ each very fast moon with a **slower** one, always keeping the true order of spee
 The planets from Mercury to Mars, the Moon and Iapetus keep their true speed. Whenever an orbit is drawn at a
 different speed, the info panel says so ("Its orbit is drawn about 46 times faster than real, so you can watch it
 move"), and a test checks that every changed orbit has that explanation.
+
+## The Sun's layers (Layers tab)
+
+The seven layers come from NASA's description of the Sun's structure, whose text the project owner pasted into the
+chat. The **summary** line of each layer is that NASA wording (lightly punctuated). I recognise the wording as NASA's,
+but the original page address is **not confirmed**, so the game says so under the tab ("not yet confirmed"). Please find
+the page, confirm the wording, and add its address to `layersSource` in `data/objects.json`.
+
+Everything I added is in the **detail** line and in the picture. It comes from general solar-physics knowledge, not
+from the pasted text, so please check each one:
+
+| Layer             | Added detail (from memory)                                                                                                                                           | Checked? |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| The Core          | about 15 million °C; the inner quarter of the Sun's radius; about 600 million tonnes of hydrogen turned into helium every second                                     | [ ]      |
+| Radiative Zone    | light is absorbed and re-emitted again and again; energy takes tens of thousands of years or more to cross                                                           | [ ]      |
+| Convection Zone   | hot gas rises, cools and sinks like boiling water; granules about 1,000 km, supergranules about 30,000 km                                                            | [ ]      |
+| Photosphere       | a few hundred km thick; about 5,500 °C; nearly all visible light; sunspots are cooler, darker patches                                                                | [ ]      |
+| Chromosphere      | "sphere of colour"; red-pink flash at a total eclipse; a few thousand km thick                                                                                       | [ ]      |
+| Transition Region | temperature leaps from tens of thousands of degrees to about a million; seen in ultraviolet                                                                          | [ ]      |
+| Corona            | over a million °C; millions of km into space; visible to the naked eye only at a total eclipse; source of the solar wind; why it is so hot is still being worked out | [ ]      |
+
+**The picture's proportions** (also from memory): the core reaches about 25% of the Sun's radius, the radiative zone about
+70%, and the convection zone the rest (so inside the Sun the bands are drawn to scale). The atmosphere layers are far thinner
+than the picture shows, so they are drawn thicker on purpose (the caption says so).
+
+**Game design choices (not facts):** the four atmosphere layers are revealed by a basic scan (they can be seen from
+outside), the convection and radiative zones by a detailed scan (Navigator), and the core by a spectral scan (Surveyor).
+Practice mode reveals them all. Only the Sun has layers so far; Earth (crust, mantle, core) and the gas giants could use the
+same Layers tab later.

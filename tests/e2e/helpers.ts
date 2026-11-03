@@ -65,3 +65,12 @@ export async function scanObject(page: Page, id: string): Promise<void> {
 }
 
 export const xpText = (page: Page) => page.locator('.xp-text');
+
+/** Turns practice mode on or off in Settings, then closes Settings. */
+export async function setPractice(page: Page, on: boolean): Promise<void> {
+  await openSettings(page);
+  const box = page.getByLabel('Practice mode');
+  if (on) await box.check();
+  else await box.uncheck();
+  await page.getByRole('button', { name: 'Close' }).last().click();
+}

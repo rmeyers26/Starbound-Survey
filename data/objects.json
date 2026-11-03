@@ -48,7 +48,80 @@
         "tier": "detailed"
       }
     },
-    "source": "NASA Sun Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/sunfact.html); IAU 2015 Resolution B3 nominal solar values (radius 695,700 km, so diameter 1,391,400 km; effective temperature 5,772 K)"
+    "source": "NASA Sun Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/sunfact.html); IAU 2015 Resolution B3 nominal solar values (radius 695,700 km, so diameter 1,391,400 km; effective temperature 5,772 K)",
+    "layers": [
+      {
+        "id": "core",
+        "name": "The Core",
+        "zone": "interior",
+        "summary": "The central region where nuclear reactions consume hydrogen to form helium. These reactions release the energy that ultimately leaves the surface as visible light.",
+        "detail": "It is the hottest part of the Sun, at about 15 million °C, and holds roughly the inner quarter of the Sun's radius. Every second the Sun turns about 600 million tonnes of hydrogen into helium here.",
+        "tier": "spectral",
+        "ring": [0, 0.195],
+        "color": "#fff2b8"
+      },
+      {
+        "id": "radiative-zone",
+        "name": "The Radiative Zone",
+        "zone": "interior",
+        "summary": "Extends outward from the outer edge of the core to the base of the convection zone. It is characterized by the method of energy transport: radiation.",
+        "detail": "Light is absorbed and given out again again and again as it zigzags outward, so a packet of energy can take tens of thousands of years or more to cross this zone.",
+        "tier": "detailed",
+        "ring": [0.195, 0.546],
+        "color": "#ffd45a"
+      },
+      {
+        "id": "convection-zone",
+        "name": "The Convection Zone",
+        "zone": "interior",
+        "summary": "The outermost layer of the solar interior, extending from a depth of about 200,000 km to the visible surface, where its motion is seen as granules and supergranules.",
+        "detail": "Hot gas rises, cools near the top and sinks again, like water boiling in a pan. Granules at the surface are about 1,000 km across; supergranules are about 30,000 km across.",
+        "tier": "detailed",
+        "ring": [0.546, 0.78],
+        "color": "#ff9a2e"
+      },
+      {
+        "id": "photosphere",
+        "name": "The Photosphere",
+        "zone": "atmosphere",
+        "summary": "The visible surface of the Sun.",
+        "detail": "It is only a few hundred kilometres thick and about 5,500 °C, and almost all of the Sun's visible light comes from it. Sunspots, cooler and darker patches, appear here.",
+        "tier": "basic",
+        "ring": [0.78, 0.81],
+        "color": "#fff6a8"
+      },
+      {
+        "id": "chromosphere",
+        "name": "The Chromosphere",
+        "zone": "atmosphere",
+        "summary": "An irregular layer above the photosphere where the temperature rises from 6,000 °C to about 20,000 °C.",
+        "detail": "Its name means \"sphere of colour\": it flashes red-pink around the edge of the Sun at the start and end of a total solar eclipse. It is a few thousand kilometres thick.",
+        "tier": "basic",
+        "ring": [0.81, 0.86],
+        "color": "#ff5a78"
+      },
+      {
+        "id": "transition-region",
+        "name": "The Transition Region",
+        "zone": "atmosphere",
+        "summary": "A thin and very irregular layer of the Sun's atmosphere that separates the hot corona from the much cooler chromosphere.",
+        "detail": "Across this thin layer the temperature leaps from tens of thousands of degrees to about a million. It is mostly seen in ultraviolet light, which our eyes cannot see.",
+        "tier": "basic",
+        "ring": [0.86, 0.885],
+        "color": "#b678ff"
+      },
+      {
+        "id": "corona",
+        "name": "The Corona",
+        "zone": "atmosphere",
+        "summary": "The Sun's outer atmosphere.",
+        "detail": "It is far hotter than the surface, over a million °C, and stretches millions of kilometres into space. It can be seen with the naked eye only during a total solar eclipse, it is where the solar wind comes from, and scientists are still working out why it is so hot.",
+        "tier": "basic",
+        "ring": [0.885, 1],
+        "color": "#c4d8ff"
+      }
+    ],
+    "layersSource": "NASA's description of the Sun's layers. The summary of each layer is NASA's wording, supplied by the project owner (the original page address is not yet confirmed). The extra detail sentences and the proportions of the diagram come from general solar-physics knowledge and are listed in docs/DATA_CHECK.md for checking."
   },
   {
     "id": "mercury",
