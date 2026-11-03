@@ -4,6 +4,7 @@
 import type { EventBus, GameEvents } from '../game/events';
 import { firstRankForTier } from '../game/ranks';
 import { TIER_LABEL, splitByTier } from '../game/tiers';
+import { VISUALS } from '../engine/scale';
 import type { CelestialObject } from '../game/types';
 import type { SaveRecord } from '../save/schema';
 import {
@@ -14,6 +15,7 @@ import {
   typeLabel,
 } from './format';
 import { el } from './dom';
+import { speedNote } from './format';
 import { sheetAction } from './sheetGesture';
 
 type TabName = 'quick' | 'advanced';
@@ -69,11 +71,9 @@ export function createInfoPanel(
     tablist.append(tab);
   }
 
-  const scaleNote = el(
-    'p',
-    'scale-note',
-    'Sizes and distances in the 3D view are compressed so everything fits. The values here are real.',
-  );
+  const SCALE_NOTE =
+    'Sizes and distances in the 3D view are compressed so everything fits. The values here are real.';
+  const scaleNote = el('p', 'scale-note', SCALE_NOTE);
   panel.append(handle, header, tablist, panes.quick, panes.advanced, scaleNote);
 
   // A hidden live region: screen readers announce changes politely without moving focus.
@@ -101,6 +101,11 @@ export function createInfoPanel(
     title.textContent = object.name;
     badge.textContent = IMAGE_TYPE_LABEL[object.imageType];
     badge.title = IMAGE_TYPE_DESCRIPTION[object.imageType];
+    // If this orbit is drawn at a different speed from the real one, say so (honest science).
+    const real = object.data.orbitalPeriod?.value;
+    const shown = VISUALS[object.id]?.visualPeriodDays;
+    const speed = typeof real === 'number' && shown !== undefined ? speedNote(real, shown) : null;
+    scaleNote.textContent = speed ? `${SCALE_NOTE} ${speed}` : SCALE_NOTE;
 
     panes.quick.replaceChildren(
       el('p', 'quick-text', object.quick),

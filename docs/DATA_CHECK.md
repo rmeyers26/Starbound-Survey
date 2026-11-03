@@ -159,3 +159,56 @@ of speed around each planet is true and tested. They unlock with their planet at
 A decorative band of up to 3,000 small dots between Mars and Jupiter (fewer on weaker graphics levels). It is **not
 data**: the real belt holds millions of rocks, spread much more thinly than any picture can show. Ceres and Vesta are
 the real, scannable members.
+
+## More moons: Saturn's mid-sized moons and Uranus's five big moons
+
+**Status: UNVERIFIED**, entered from memory. Sources to compare with: NASA's Saturnian and Uranian Satellite Fact
+Sheets (NSSDC) and JPL's "Planetary Satellite Physical Parameters" (ssd.jpl.nasa.gov/sats/phys_par/). The two
+sources **disagree** in places for the Uranian moons, especially mass and distance; the game uses the JPL-style
+values below. Pick one source and make all of them match it.
+
+| Value (as entered)                | Mimas     | Tethys    | Dione     | Rhea      | Iapetus   | Checked? |
+| --------------------------------- | --------- | --------- | --------- | --------- | --------- | -------- |
+| Mean diameter (km)                | 396.4     | 1,062.2   | 1,122.8   | 1,527.6   | 1,468.2   | [ ]      |
+| Mass (kg)                         | 3.7493e19 | 6.1745e20 | 1.0955e21 | 2.3065e21 | 1.8056e21 | [ ]      |
+| Average distance from Saturn (km) | 185,540   | 294,620   | 377,400   | 527,100   | 3,561,300 | [ ]      |
+| Orbital period (days)             | 0.942422  | 1.887802  | 2.736915  | 4.5175    | 79.3215   | [ ]      |
+| Surface gravity (m/s²)            | 0.064     | 0.146     | 0.232     | 0.264     | 0.223     | [ ]      |
+| Mean density (kg/m³)              | 1,150     | 984       | 1,478     | 1,236     | 1,088     | [ ]      |
+
+| Value (as entered)                | Miranda  | Ariel    | Umbriel  | Titania  | Oberon    | Checked? |
+| --------------------------------- | -------- | -------- | -------- | -------- | --------- | -------- |
+| Mean diameter (km)                | 471.6    | 1,157.8  | 1,169.4  | 1,576.8  | 1,522.8   | [ ]      |
+| Mass (kg)                         | 6.59e19  | 1.251e21 | 1.275e21 | 3.42e21  | 3.08e21   | [ ]      |
+| Average distance from Uranus (km) | 129,390  | 191,020  | 266,300  | 435,910  | 583,520   | [ ]      |
+| Orbital period (days)             | 1.413479 | 2.520379 | 4.144176 | 8.705867 | 13.463234 | [ ]      |
+| Surface gravity (m/s²)            | 0.079    | 0.269    | 0.2      | 0.379    | 0.347     | [ ]      |
+| Mean density (kg/m³)              | 1,200    | 1,592    | 1,459    | 1,662    | 1,559     | [ ]      |
+
+Quick-facts text to check: Mimas's crater Herschel being "about a third as wide as Mimas"; Tethys's canyon Ithaca Chasma
+running "most of the way round"; Dione's "possible ocean" (a hint, not a confirmation); Iapetus's two faces and its
+"20 kilometre" equatorial ridge; Miranda looking "smashed apart and put back together"; Ariel "the brightest" of the
+big Uranian moons; Umbriel "the darkest" and the bright ring in the crater Wunda; Titania and Oberon being named
+after the fairy queen and king in Shakespeare's _A Midsummer Night's Dream_.
+
+**Mercury and Venus have no moons** (that is real, not a gap in the game). Earth has the Moon, Mars two, and each
+giant now has several. Many dozens of smaller moons are not in the game.
+
+## How fast the orbits are drawn (and why you are told)
+
+At the game's speed (3 simulated days per second) Jupiter would take 24 minutes to go round the Sun and Neptune
+5 and a half hours, so the outer planets looked frozen. Each far-out world is now drawn with a **faster** lap, and
+each very fast moon with a **slower** one, always keeping the true order of speeds:
+
+| World   | Real orbit | Drawn lap | Drawn as                   |
+| ------- | ---------- | --------- | -------------------------- |
+| Vesta   | 3.6 years  | 4.5 min   | 1.6 times faster than real |
+| Ceres   | 4.6 years  | 5 min     | 1.9 times faster           |
+| Jupiter | 11.9 years | 5.3 min   | 4.5 times faster           |
+| Saturn  | 29.5 years | 6 min     | 10 times faster            |
+| Uranus  | 84 years   | 6.7 min   | 26 times faster            |
+| Neptune | 165 years  | 7.3 min   | 46 times faster            |
+
+The planets from Mercury to Mars, the Moon and Iapetus keep their true speed. Whenever an orbit is drawn at a
+different speed, the info panel says so ("Its orbit is drawn about 46 times faster than real, so you can watch it
+move"), and a test checks that every changed orbit has that explanation.

@@ -32,7 +32,7 @@ Date of this report: 2026-11-02.
 
 ## What was verified, and how
 
-- 277 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
+- 282 unit tests (Vitest), including validation of every entry in the real `data/objects.json`.
 - 91 browser tests (Playwright) on desktop Chromium and a Pixel 7 emulation; 1 skipped by design (the
   bottom-sheet handle only exists on phone-width screens).
 - Lint, type-check and production build pass. Production dependencies: 0 known vulnerabilities.
@@ -85,6 +85,13 @@ Date of this report: 2026-11-02.
     this problem, but it is a reminder that bloom is the first thing to trim if a phone is slow.)
 16. **A "should never happen" bad number (NaN) could have broken the warp streaks.** A test of silly inputs found it
     before any player could.
+
+17. **The outer planets looked frozen.** At the game's speed Jupiter takes 24 minutes to go round and Neptune 5 and a
+    half hours. Far worlds are now drawn with faster laps (4 to 7 minutes), keeping the true order, and the info panel
+    says how much faster than real. The old rule "nothing is ever drawn faster than real" was replaced with: every lap
+    is between 3 seconds and 10 minutes, no orbit is changed more than 60 times, and every change is explained.
+18. **Uranus had no moons in the game** although it has five big ones. Added (with Saturn's five mid-sized moons).
+    The object button row is now 31 long: grouping buttons by planet is the next interface job.
 
 ## Open problems and trade-offs
 

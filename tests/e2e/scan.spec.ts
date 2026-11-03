@@ -167,7 +167,7 @@ test.describe('ranks', () => {
     await expect(xpText(page)).toContainText('220');
     await page.getByRole('button', { name: /Open the Logbook/ }).click();
     await expect(
-      page.locator('dialog.logbook-dialog').getByText('Discovered 11 of 21 objects.'),
+      page.locator('dialog.logbook-dialog').getByText('Discovered 11 of 31 objects.'),
     ).toBeVisible();
   });
 });

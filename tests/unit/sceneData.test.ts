@@ -10,6 +10,7 @@ import {
   reachFromSun,
 } from '../../src/engine/scale';
 import { visibleBodyIds } from '../../src/game/regions';
+import { speedNote } from '../../src/ui/format';
 import { computePositions } from '../../src/engine/solarSystem';
 import { textureUrlFor } from '../../src/engine/textures';
 import { RANKS } from '../../src/game/ranks';
@@ -76,7 +77,7 @@ describe('objects.json and the 3D scene agree', () => {
     }
   });
 
-  describe('slowed display speed for very fast moons', () => {
+  describe('display speed of orbits (sped up if too slow to see, slowed if a blur)', () => {
     const realPeriod = (id: string): number =>
       objects.find((o) => o.id === id)!.data.orbitalPeriod.value as number;
     const shownPeriod = (id: string): number => VISUALS[id].visualPeriodDays ?? realPeriod(id);
@@ -93,25 +94,41 @@ describe('objects.json and the 3D scene agree', () => {
       }
     });
 
-    it('never makes a body orbit faster than it really does', () => {
-      for (const id of orbiting) expect(shownPeriod(id)).toBeGreaterThanOrEqual(realPeriod(id));
-    });
+    const MAX_LAP_DAYS = 10 * 60 * SIM_DAYS_PER_SECOND; // a lap over 10 minutes looks frozen
 
-    it('every lap takes at least 3 seconds, so nothing becomes a blur', () => {
-      for (const id of orbiting) expect(shownPeriod(id)).toBeGreaterThanOrEqual(MIN_LAP_DAYS);
-    });
-
-    it('every body whose real lap would be a blur is slowed (and the slowing is declared)', () => {
+    it('every lap takes between 3 seconds and 10 minutes: never a blur, never frozen', () => {
       for (const id of orbiting) {
-        if (realPeriod(id) < MIN_LAP_DAYS) {
+        expect(shownPeriod(id), `${id} is too fast`).toBeGreaterThanOrEqual(MIN_LAP_DAYS);
+        expect(shownPeriod(id), `${id} is too slow to see`).toBeLessThanOrEqual(MAX_LAP_DAYS);
+      }
+    });
+
+    it('no orbit is drawn more than 60 times faster or slower than real', () => {
+      for (const id of orbiting) {
+        const change = Math.max(realPeriod(id) / shownPeriod(id), shownPeriod(id) / realPeriod(id));
+        expect(change, id).toBeLessThanOrEqual(60);
+      }
+    });
+
+    it('every body whose real lap would be a blur or frozen declares a display period', () => {
+      for (const id of orbiting) {
+        const real = realPeriod(id);
+        if (real < MIN_LAP_DAYS || real > MAX_LAP_DAYS) {
           expect(VISUALS[id].visualPeriodDays, `${id} needs a display period`).toBeDefined();
         }
       }
     });
 
-    it('planets and asteroids circling the Sun are never slowed (they are drawn at their true speed)', () => {
-      for (const id of orbiting.filter((i) => VISUALS[i].orbit!.parentId === 'sun')) {
+    it('the inner planets, the Moon and Iapetus are drawn at their true speed', () => {
+      for (const id of ['mercury', 'venus', 'earth', 'mars', 'moon', 'iapetus']) {
         expect(VISUALS[id].visualPeriodDays, id).toBeUndefined();
+      }
+    });
+
+    it('every orbit drawn at a different speed is explained to the player in the info panel', () => {
+      for (const id of orbiting) {
+        if (VISUALS[id].visualPeriodDays === undefined) continue;
+        expect(speedNote(realPeriod(id), shownPeriod(id)), id).not.toBeNull();
       }
     });
   });

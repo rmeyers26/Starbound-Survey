@@ -90,14 +90,25 @@ export const VISUALS: Record<string, VisualSpec> = {
     visualPeriodDays: 21,
   },
   // The asteroid belt sits between Mars and Jupiter. Orbit distances are compressed, order kept true.
-  vesta: { radius: 0.3, color: 0x9a948c, orbit: { parentId: 'sun', radius: 100 } },
-  ceres: { radius: 0.35, color: 0x7d7a78, orbit: { parentId: 'sun', radius: 112 } },
+  vesta: {
+    radius: 0.3,
+    color: 0x9a948c,
+    orbit: { parentId: 'sun', radius: 100 },
+    visualPeriodDays: 810, // drawn about 1.6 times faster than real, so it visibly moves
+  },
+  ceres: {
+    radius: 0.35,
+    color: 0x7d7a78,
+    orbit: { parentId: 'sun', radius: 112 },
+    visualPeriodDays: 900, // about 1.9 times faster than real
+  },
   // The outer planets (unlock at Navigator). Real distances are 5 to 30 times Earth's; here they are squeezed
   // so the whole system still fits, with the true ORDER kept. Sizes keep the true order too.
   jupiter: {
     radius: 5.5,
     color: 0xc8a27a,
     orbit: { parentId: 'sun', radius: 140 },
+    visualPeriodDays: 960, // drawn about 4.5 times faster than real
     atmosphere: { color: 0xe8cfa8, thickness: 1.06, strength: 0.55 },
   },
   saturn: {
@@ -105,6 +116,7 @@ export const VISUALS: Record<string, VisualSpec> = {
     radius: 4.8,
     color: 0xe0cf9b,
     orbit: { parentId: 'sun', radius: 165 },
+    visualPeriodDays: 1080, // about 10 times faster than real
     // Saturn's rings really reach from about 1.3 to 2.3 planet radii and are tilted about 27 degrees.
     rings: { inner: 1.3, outer: 2.3, color: 0xcdb98a, opacity: 0.75, tiltDeg: 26.7 },
   },
@@ -112,12 +124,14 @@ export const VISUALS: Record<string, VisualSpec> = {
     radius: 3.2,
     color: 0x9fd6e0,
     orbit: { parentId: 'sun', radius: 190 },
+    visualPeriodDays: 1200, // about 26 times faster than real
     atmosphere: { color: 0xb4f4f8, thickness: 1.1, strength: 0.9 },
   },
   neptune: {
     radius: 3.1,
     color: 0x4a6fe0,
     orbit: { parentId: 'sun', radius: 212 },
+    visualPeriodDays: 1320, // about 46 times faster than real
     atmosphere: { color: 0x7fa0ff, thickness: 1.1, strength: 0.9 },
   },
   // Moons of the outer planets. They unlock with their planet. Real laps range from 1.4 to 17 days, a blur at
@@ -157,13 +171,13 @@ export const VISUALS: Record<string, VisualSpec> = {
     color: 0xf2f6f8,
     orbit: { parentId: 'saturn', radius: 14 },
     tidallyLocked: true,
-    visualPeriodDays: 9,
+    visualPeriodDays: 10,
   },
   titan: {
     atmosphere: { color: 0xe9a850, thickness: 1.22, strength: 1.0 }, // thick orange haze
     radius: 0.85,
     color: 0xd9a05b,
-    orbit: { parentId: 'saturn', radius: 21 },
+    orbit: { parentId: 'saturn', radius: 23 },
     tidallyLocked: true,
     visualPeriodDays: 27,
   },
@@ -174,6 +188,76 @@ export const VISUALS: Record<string, VisualSpec> = {
     tidallyLocked: true,
     retrograde: true, // Triton circles Neptune backwards
     visualPeriodDays: 15,
+  },
+  // More moons (outer region). Saturn's mid-sized moons orbit beyond its rings (about 11 units); Uranus gets its five big ones.
+  mimas: {
+    radius: 0.19,
+    color: 0xc9c9c9,
+    orbit: { parentId: 'saturn', radius: 12.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 9,
+  },
+  tethys: {
+    radius: 0.36,
+    color: 0xe6e6e6,
+    orbit: { parentId: 'saturn', radius: 16.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 11.5,
+  },
+  dione: {
+    radius: 0.37,
+    color: 0xd9d9d9,
+    orbit: { parentId: 'saturn', radius: 18.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 13.5,
+  },
+  rhea: {
+    radius: 0.415,
+    color: 0xcfcfcf,
+    orbit: { parentId: 'saturn', radius: 20.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 16.5,
+  },
+  iapetus: {
+    radius: 0.4,
+    color: 0xa89f8a,
+    orbit: { parentId: 'saturn', radius: 28 },
+    tidallyLocked: true,
+  },
+  miranda: {
+    radius: 0.195,
+    color: 0xb0b0b8,
+    orbit: { parentId: 'uranus', radius: 6.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 9,
+  },
+  ariel: {
+    radius: 0.375,
+    color: 0xc7c7cf,
+    orbit: { parentId: 'uranus', radius: 8 },
+    tidallyLocked: true,
+    visualPeriodDays: 12,
+  },
+  umbriel: {
+    radius: 0.38,
+    color: 0x6e6e74,
+    orbit: { parentId: 'uranus', radius: 9.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 16,
+  },
+  titania: {
+    radius: 0.42,
+    color: 0xa09c9a,
+    orbit: { parentId: 'uranus', radius: 11.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 24,
+  },
+  oberon: {
+    radius: 0.41,
+    color: 0x8d8480,
+    orbit: { parentId: 'uranus', radius: 13.5 },
+    tidallyLocked: true,
+    visualPeriodDays: 33,
   },
 };
 

@@ -64,6 +64,8 @@ Tick each one and note anything odd.
 - [ ] Earth, Venus and the giants have a thin glowing edge on the side facing the Sun.
 - [ ] Tap Ceres from the overview: streaks rush past during the flight, then stop. Tap the Moon from Earth: no streaks (a short hop).
 - [ ] With **Reduce motion** on (Settings), no streaks appear and flights are instant.
+- [ ] After the rank-up the outer planets visibly creep round the Sun (Jupiter about 5 minutes a lap) and their info panel says the orbit is drawn faster than real.
+- [ ] Uranus and Saturn each have a family of moons orbiting them; Uranus's five go round it quickly.
 - [ ] The asteroid belt is a band of dots between Mars and Jupiter and turns slowly.
 - [ ] After the rank-up, the moons of Jupiter, Saturn and Neptune orbit their planets; Triton goes the opposite way to the others.
 

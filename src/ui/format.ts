@@ -68,3 +68,19 @@ export function typeLabel(type: string): string {
   const spaced = type.replace(/([A-Z])/g, ' $1').toLowerCase();
   return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
+
+/**
+ * A sentence explaining that an orbit is drawn faster or slower than real, or null when it is drawn at its true
+ * speed. Honest-science rule: the game may change HOW FAST things move so you can watch them, but it says so.
+ * `realDays` is the true orbital period, `shownDays` the period the 3D view uses.
+ */
+export function speedNote(realDays: number, shownDays: number): string | null {
+  if (!(realDays > 0) || !(shownDays > 0)) return null;
+  const ratio = realDays / shownDays; // above 1: drawn faster than real
+  if (Math.abs(ratio - 1) < 0.02) return null;
+  const times = ratio > 1 ? ratio : 1 / ratio;
+  const rounded = times >= 10 ? Math.round(times) : Math.round(times * 10) / 10;
+  return ratio > 1
+    ? `Its orbit is drawn about ${rounded} times faster than real, so you can watch it move.`
+    : `Its orbit is drawn about ${rounded} times slower than real, so you can follow it.`;
+}

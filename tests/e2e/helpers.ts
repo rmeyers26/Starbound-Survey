@@ -18,7 +18,7 @@ export async function openGame(page: Page, query = ''): Promise<void> {
   const full = withEffects ? query : `${query}${query.includes('?') ? '&' : '?'}effects=off`;
   await page.goto(`/${full}`);
   await expect(page.locator('canvas.game-canvas')).toBeVisible();
-  await expect(page.locator('.hud-objects button')).toHaveCount(21);
+  await expect(page.locator('.hud-objects button')).toHaveCount(31);
 }
 
 export const chip = (page: Page, id: string) => page.locator(`button[data-object-id="${id}"]`);

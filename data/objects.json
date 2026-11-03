@@ -815,46 +815,46 @@
     "source": "NASA Saturn Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/saturnfact.html)"
   },
   {
-    "id": "titan",
-    "name": "Titan",
+    "id": "mimas",
+    "name": "Mimas",
     "type": "moon",
     "imageType": "simulation",
     "region": "outer",
-    "quick": "Titan is Saturn's largest moon, wrapped in a thick orange haze. It is the only moon with a dense atmosphere, and the only other world where we have seen liquid lakes on the surface, made of methane and ethane.",
+    "quick": "Mimas is a small icy moon with one enormous crater, Herschel, which makes it look a little like the Death Star from the movies. The crater is about a third as wide as Mimas itself.",
     "data": {
       "diameter": {
         "label": "Mean diameter",
-        "value": 5149.4,
+        "value": 396.4,
         "unit": "km",
         "tier": "basic"
       },
       "mass": {
         "label": "Mass",
-        "value": 1.3452e23,
+        "value": 3.7493e19,
         "unit": "kg",
         "tier": "detailed"
       },
       "distanceFromParent": {
         "label": "Average distance from Saturn",
-        "value": 1221870,
+        "value": 185540,
         "unit": "km",
         "tier": "basic"
       },
       "orbitalPeriod": {
         "label": "Orbital period",
-        "value": 15.945421,
+        "value": 0.942422,
         "unit": "days",
         "tier": "detailed"
       },
       "surfaceGravity": {
         "label": "Surface gravity",
-        "value": 1.352,
+        "value": 0.064,
         "unit": "m/s²",
         "tier": "detailed"
       },
       "density": {
         "label": "Mean density",
-        "value": 1881,
+        "value": 1150,
         "unit": "kg/m³",
         "tier": "spectral"
       }
@@ -902,6 +902,241 @@
       "density": {
         "label": "Mean density",
         "value": 1609,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Saturnian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "tethys",
+    "name": "Tethys",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Tethys is a bright moon of Saturn made almost entirely of water ice. A huge canyon, Ithaca Chasma, runs most of the way round it.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 1062.2,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 6.1745e20,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Saturn",
+        "value": 294620,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 1.887802,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.146,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 984,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Saturnian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "dione",
+    "name": "Dione",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Dione is an icy moon of Saturn with a rocky core and bright, wispy cliffs on one side. Spacecraft measurements hint at a possible ocean deep underneath.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 1122.8,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.0955e21,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Saturn",
+        "value": 377400,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 2.736915,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.232,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1478,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Saturnian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "rhea",
+    "name": "Rhea",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Rhea is Saturn's second-largest moon, a heavily cratered ball of ice mixed with a little rock.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 1527.6,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 2.3065e21,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Saturn",
+        "value": 527100,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 4.5175,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.264,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1236,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Saturnian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "titan",
+    "name": "Titan",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Titan is Saturn's largest moon, wrapped in a thick orange haze. It is the only moon with a dense atmosphere, and the only other world where we have seen liquid lakes on the surface, made of methane and ethane.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 5149.4,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.3452e23,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Saturn",
+        "value": 1221870,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 15.945421,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 1.352,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1881,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Saturnian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "iapetus",
+    "name": "Iapetus",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Iapetus has two faces: one side is as dark as coal and the other as bright as snow. A mountain ridge about 20 kilometres high runs around its middle like the seam on a walnut.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 1468.2,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.8056e21,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Saturn",
+        "value": 3561300,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 79.3215,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.223,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1088,
         "unit": "kg/m³",
         "tier": "spectral"
       }
@@ -960,6 +1195,241 @@
       }
     },
     "source": "NASA Uranus Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/uranusfact.html)"
+  },
+  {
+    "id": "miranda",
+    "name": "Miranda",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Miranda is the smallest of Uranus's five big moons. It looks as if it was smashed apart and put back together, with giant cliffs and patchwork land. Only one spacecraft, Voyager 2, has ever visited.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 471.6,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 6.59e19,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Uranus",
+        "value": 129390,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 1.413479,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.079,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1200,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Uranian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "ariel",
+    "name": "Ariel",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Ariel is the brightest of Uranus's big moons, an icy world crisscrossed by deep valleys and smooth plains that show it was once geologically active.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 1157.8,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.251e21,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Uranus",
+        "value": 191020,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 2.520379,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.269,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1592,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Uranian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "umbriel",
+    "name": "Umbriel",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Umbriel is the darkest of Uranus's big moons. A mysterious bright ring inside a crater called Wunda stands out against its dark ground.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 1169.4,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 1.275e21,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Uranus",
+        "value": 266300,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 4.144176,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.2,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1459,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Uranian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "titania",
+    "name": "Titania",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Titania is the largest moon of Uranus, an icy world with huge canyons and cracks. It is named after the queen of the fairies in Shakespeare's play A Midsummer Night's Dream.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 1576.8,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 3.42e21,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Uranus",
+        "value": 435910,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 8.705867,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.379,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1662,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Uranian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
+  },
+  {
+    "id": "oberon",
+    "name": "Oberon",
+    "type": "moon",
+    "imageType": "simulation",
+    "region": "outer",
+    "quick": "Oberon is the second-largest moon of Uranus and is heavily cratered. It is named after the king of the fairies in Shakespeare's play A Midsummer Night's Dream.",
+    "data": {
+      "diameter": {
+        "label": "Mean diameter",
+        "value": 1522.8,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "mass": {
+        "label": "Mass",
+        "value": 3.08e21,
+        "unit": "kg",
+        "tier": "detailed"
+      },
+      "distanceFromParent": {
+        "label": "Average distance from Uranus",
+        "value": 583520,
+        "unit": "km",
+        "tier": "basic"
+      },
+      "orbitalPeriod": {
+        "label": "Orbital period",
+        "value": 13.463234,
+        "unit": "days",
+        "tier": "detailed"
+      },
+      "surfaceGravity": {
+        "label": "Surface gravity",
+        "value": 0.347,
+        "unit": "m/s²",
+        "tier": "detailed"
+      },
+      "density": {
+        "label": "Mean density",
+        "value": 1559,
+        "unit": "kg/m³",
+        "tier": "spectral"
+      }
+    },
+    "source": "NASA Uranian Satellite Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/); JPL Planetary Satellite Physical Parameters (ssd.jpl.nasa.gov/sats/phys_par/)"
   },
   {
     "id": "neptune",
