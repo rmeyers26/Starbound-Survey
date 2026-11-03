@@ -44,8 +44,8 @@ const tailFragment = /* glsl */ `
   varying float vAlong;
   void main() {
     float facing = abs(dot(normalize(vNormalWorld), normalize(cameraPosition - vPositionWorld)));
-    float soft = pow(facing, 1.3);                       // sides fade out
-    float along = pow(clamp(1.0 - vAlong, 0.0, 1.0), 1.8); // the far end fades out
+    float soft = pow(facing, 2.0);                       // sides fade out (softly, so the edges are not hard)
+    float along = pow(clamp(1.0 - vAlong, 0.0, 1.0), 1.2); // the far end fades out (slowly, so the tail looks long)
     float amount = soft * along * strength;
     gl_FragColor = vec4(tint * amount, amount);
   }
@@ -63,12 +63,15 @@ function glowMaterial(color: number, fragmentShader: string): THREE.ShaderMateri
   });
 }
 
-/** The glow round a nucleus, `radius` scene units across (its strength starts at 0: set it with `setGlowStrength`). */
+/**
+ * The glow round a nucleus, `radius` scene units across (its strength starts at 0: set it with `setGlowStrength`).
+ * Only the FAR half of the glow sphere is drawn (BackSide), so the nucleus itself, which is in front of it, hides the
+ * middle and the glow shows as a halo round and behind it. (Drawn over the nucleus it washed it out to white.)
+ */
 export function createComa(radius: number, color = 0xbfe0ff): THREE.Mesh {
-  const coma = new THREE.Mesh(
-    new THREE.SphereGeometry(radius, 32, 24),
-    glowMaterial(color, comaFragment),
-  );
+  const material = glowMaterial(color, comaFragment);
+  material.side = THREE.BackSide;
+  const coma = new THREE.Mesh(new THREE.SphereGeometry(radius, 32, 24), material);
   coma.renderOrder = 2; // after the opaque bodies
   return coma;
 }

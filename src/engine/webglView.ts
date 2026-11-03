@@ -14,6 +14,8 @@ import { createShipModel, type ShipModel } from './shipModel';
 import { shotAt } from './cinematic';
 import { TAIL_MAX_LENGTH, cometPath, tailLength } from './comet';
 import { createComa, createTail, setGlowStrength } from './cometGlow';
+import { generateDebris } from './cometNucleus';
+import { createDebris, shapeNucleus, updateDebris, type Debris } from './cometParts';
 import { DEFAULT_FOV, cameraPoseFor, shipModelScale } from './shipViews';
 import type { BloomPipeline } from './bloomPipeline';
 import {
@@ -53,6 +55,12 @@ const MAX_STARS = 4000;
 
 /** What the 3D view keeps for a comet besides its nucleus. */
 interface CometVisual {
+  /** A small, bright glow right round the nucleus (the coma's dense core). */
+  core: THREE.Mesh;
+  /** The broken-up rocks and ice round the nucleus and trailing into the tail. */
+  debris: Debris;
+  /** The nucleus's nominal radius in scene units. */
+  nucleusRadius: number;
   coma: THREE.Mesh;
   /** The coma's size at its normal scale, in scene units. */
   comaRadius: number;
@@ -407,9 +415,13 @@ export class WebGLView implements View {
    */
   private buildComet(id: string, nucleus: THREE.Mesh): CometVisual {
     (nucleus.material as THREE.MeshStandardMaterial).transparent = true; // it fades in and out as the replay loops
-    const comaRadius = VISUALS[id].radius * 6;
+    const nucleusRadius = VISUALS[id].radius;
+    shapeNucleus(nucleus, nucleusRadius); // a lumpy, faceted dirty snowball, not a smooth moon
+    const comaRadius = nucleusRadius * 8;
     const coma = createComa(comaRadius);
-    nucleus.add(coma);
+    const core = createComa(nucleusRadius * 2.6, 0xffffff);
+    const debris = createDebris(generateDebris(140));
+    nucleus.add(coma, core, debris.mesh);
     const ion = createTail(0x6fb4ff);
     const dust = createTail(0xffe2b0);
     nucleus.add(ion, dust);
@@ -424,6 +436,9 @@ export class WebGLView implements View {
     );
     this.scene.add(path);
     return {
+      core,
+      debris,
+      nucleusRadius,
       coma,
       comaRadius,
       ion,
@@ -472,18 +487,29 @@ export class WebGLView implements View {
 
       comet.ion.visible = length > 0.05;
       comet.ion.quaternion.setFromUnitVectors(this.cometForward, away);
-      comet.ion.scale.set(length * 0.08, length * 0.08, length);
-      setGlowStrength(comet.ion, 1.2 * moment.fade);
+      comet.ion.scale.set(length * 0.11, length * 0.11, length);
+      setGlowStrength(comet.ion, 1.7 * moment.fade);
 
       // The dust tail trails behind the comet's motion as well as away from the Sun, so it curves.
       const dustDirection =
         velocity.lengthSq() > 1e-12 ? velocity.normalize().multiplyScalar(-0.45).add(away) : away;
       comet.dust.visible = length > 0.05;
       comet.dust.quaternion.setFromUnitVectors(this.cometForward, dustDirection.normalize());
-      comet.dust.scale.set(length * 0.16, length * 0.16, length * 0.75);
-      setGlowStrength(comet.dust, 0.9 * moment.fade);
+      comet.dust.scale.set(length * 0.22, length * 0.22, length * 0.8);
+      setGlowStrength(comet.dust, 1.3 * moment.fade);
 
-      setGlowStrength(comet.coma, 0.55 * moment.fade * (0.25 + 0.75 * warmth));
+      setGlowStrength(comet.coma, 0.6 * moment.fade * (0.3 + 0.7 * warmth));
+      setGlowStrength(comet.core, 0.9 * moment.fade);
+
+      // The broken-up rocks and ice: a halo round the nucleus and a stream trailing down the tail.
+      updateDebris(
+        comet.debris,
+        performance.now() / 1000,
+        comet.nucleusRadius,
+        length * 0.6,
+        away,
+        moment.fade,
+      );
 
       // A read-only status for automated tests: "fade height tailLength" (the comet moves every frame, so this is
       // refreshed only a few times a second). Looking at coloured pixels to find a faint tail is unreliable.

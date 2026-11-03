@@ -109,7 +109,7 @@ export const VISUALS: Record<string, VisualSpec> = {
   // Comet C/2026 A2 (Bok): not on a circle, so no `orbit`; its path comes from the `comet` spec and the data file.
   // The nucleus size is NOT known (the data says "Not yet checked"), so this radius is only a small dot to select.
   c2026a2: {
-    radius: 0.25,
+    radius: 0.35,
     color: 0x6a645c, // real nuclei are very dark (they reflect only a few percent of the light)
     comet: { nodeDeg: 0, argPerihelionDeg: 0, windowAu: 3.5 },
   },

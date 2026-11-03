@@ -147,6 +147,15 @@ Date of this report: 2026-11-02.
     ignored by the "carry the ship along" rule (tested, and the test confirmed to fail without the rule); and the first
     version of the glow (a flat polygon) and tails (hard-edged cones) looked wrong in a screenshot and were reworked.
 
+25. **The comet looked like a moon** (owner's feedback: needs a tail and more broken-up rocks and ice). The nucleus was a
+    smooth grey ball and the tail only appeared inside 3.2 AU, so the first third of every loop was a bare ball. Now: a
+    lumpy, faceted, stretched nucleus with a dark crust and bright ice patches (`engine/cometNucleus.ts` has the pure
+    rules, tested: it is not round, it is stretched, ice covers only part of it), 140 pieces of broken rock and ice
+    circling it and streaming down the tail, a glow that is drawn only BEHIND the nucleus (drawn over it, it washed the
+    nucleus out to white in a screenshot), and a tail that is there for the whole replay, brighter and softer-edged.
+    A screenshot also showed the first chunks were bigger than the nucleus; they are now small.
+    **Settings now has a Close button at the top**, pinned there while the list scrolls (the one at the bottom stays).
+
 ## Open problems and trade-offs
 
 1. **WebGPU is not implemented.** The spec asks for WebGPU first. Three.js's WebGPU API is still moving

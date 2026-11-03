@@ -63,16 +63,29 @@ test.describe('comet C/2026 A2 (Bok)', () => {
     expect(errors).toEqual([]);
   });
 
-  test("grows a tail as it nears the Sun, on a path far out of the planets' plane", async ({
+  test('has a tail from the first moment it appears (never a bare ball)', async ({ page }) => {
+    const errors = trackErrors(page);
+    await openGame(page);
+    // The replay starts when the page loads. As soon as the comet is clearly visible (still fading in), it already has
+    // a real tail. (An earlier version only grew one near the Sun, so the start of every loop looked like a moon.)
+    await expect
+      .poll(async () => (await cometState(page)).fade, { timeout: 30_000 })
+      .toBeGreaterThan(0.3);
+    expect((await cometState(page)).tail).toBeGreaterThan(2);
+    expect(errors).toEqual([]);
+  });
+
+  test("grows a longer tail as it nears the Sun, on a path far out of the planets' plane", async ({
     page,
   }) => {
     test.slow();
     const errors = trackErrors(page);
     await openGame(page);
-    // The replay starts far from the Sun with no tail; wait until the comet is fully visible with a real tail.
+    // Wait until the comet is well inside the Solar System, where the tail is much longer than at the start.
+    // (The number is the tail as DRAWN, which is up to 2.5 times the real length when the camera is far away.)
     await expect
       .poll(async () => (await cometState(page)).tail, { timeout: 100_000 })
-      .toBeGreaterThan(5);
+      .toBeGreaterThan(30);
     const state = await cometState(page);
     expect(state.fade).toBeGreaterThan(0.9);
     // Its orbit is tilted 82 degrees, so it is far above or below the flat plane the planets move in.
