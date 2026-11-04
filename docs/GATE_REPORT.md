@@ -160,7 +160,7 @@ Date of this report: 2026-11-02.
     textured asset made by an artist. I could not download one here, so if you can supply a licensed `.glb` spacecraft
     I can load that instead. While building it, measuring the model showed my own `SHIP_HEIGHT` constant was wrong (0.26;
     really 0.36) and a unit test caught that the first tail-fin outline was a stub barely above the hull.
-25. **The comet looked like a moon** (owner's feedback: needs a tail and more broken-up rocks and ice). The nucleus was a
+26. **The comet looked like a moon** (owner's feedback: needs a tail and more broken-up rocks and ice). The nucleus was a
     smooth grey ball and the tail only appeared inside 3.2 AU, so the first third of every loop was a bare ball. Now: a
     lumpy, faceted, stretched nucleus with a dark crust and bright ice patches (`engine/cometNucleus.ts` has the pure
     rules, tested: it is not round, it is stretched, ice covers only part of it), 140 pieces of broken rock and ice
