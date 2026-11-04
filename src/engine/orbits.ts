@@ -8,11 +8,15 @@
 
 const TWO_PI = Math.PI * 2;
 
-/** Angle (radians, 0..2π) around the orbit after `simDays` simulated days. */
-export function orbitAngle(periodDays: number, simDays: number): number {
+/**
+ * Angle (radians, 0..2π) around the orbit after `simDays` simulated days.
+ * `startAngle` is where on the circle the body is at day 0. Without it every body would start on the same
+ * side of its parent, in one straight line, and look as if they move together.
+ */
+export function orbitAngle(periodDays: number, simDays: number, startAngle = 0): number {
   if (!(periodDays > 0)) throw new RangeError('periodDays must be greater than 0');
   // `% TWO_PI` keeps the number small so precision does not degrade in long sessions.
-  const angle = ((simDays / periodDays) * TWO_PI) % TWO_PI;
+  const angle = (startAngle + (simDays / periodDays) * TWO_PI) % TWO_PI;
   return angle < 0 ? angle + TWO_PI : angle;
 }
 
@@ -22,8 +26,9 @@ export function orbitPosition(
   periodDays: number,
   simDays: number,
   retrograde = false,
+  startAngle = 0,
 ): { x: number; z: number } {
-  const angle = orbitAngle(periodDays, simDays);
+  const angle = orbitAngle(periodDays, simDays, startAngle);
   // Retrograde means "backwards": the same circle, travelled the other way (Neptune's moon Triton does this).
   const direction = retrograde ? 1 : -1;
   return { x: Math.cos(angle) * radius, z: direction * Math.sin(angle) * radius };

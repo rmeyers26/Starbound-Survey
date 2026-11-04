@@ -14,6 +14,28 @@ export interface BodyPosition {
   fade?: number;
 }
 
+/** The "golden angle" in degrees. Stepping round a circle by this much never lands near an earlier step. */
+const GOLDEN_ANGLE_DEG = 137.50776;
+
+/**
+ * Where on its orbit a body starts, in radians (0 = the side facing away from what it orbits).
+ * A body with its own `startAngleDeg` in the scene table uses that. Any other (the moons) starts a golden angle
+ * further round than the previous moon of the same planet, so the moons of one planet are spread out and not lined up.
+ * This is a display choice, not the real position on any date.
+ */
+export function startAngleOf(id: string): number {
+  const own = VISUALS[id]?.startAngleDeg;
+  if (own !== undefined) return (own * Math.PI) / 180;
+  const parentId = VISUALS[id]?.orbit?.parentId;
+  if (!parentId) return 0;
+  const siblings = Object.keys(VISUALS).filter(
+    (other) => VISUALS[other].orbit?.parentId === parentId,
+  );
+  const place = siblings.indexOf(id) + 1; // 1, 2, 3...: the first moon is not at 0, which is every planet's reference side
+  const parentStart = VISUALS[parentId]?.startAngleDeg ?? 0; // so two planets' moon families do not start parallel
+  return (((parentStart + place * GOLDEN_ANGLE_DEG) % 360) * Math.PI) / 180;
+}
+
 /** The orbital period (days) stored in the JSON data. Throws if it is missing. */
 export function periodDaysOf(objects: CelestialObject[], id: string): number {
   const object = objects.find((o) => o.id === id);
@@ -77,7 +99,13 @@ export function computePositions(
       const parent = resolve(orbit.parentId); // a body's position is its parent's + its orbit offset
       // Fast moons use a slowed display period so they can be seen (see VisualSpec.visualPeriodDays).
       const period = VISUALS[id].visualPeriodDays ?? periodDaysOf(objects, id);
-      const offset = orbitPosition(orbit.radius, period, simDays, VISUALS[id].retrograde);
+      const offset = orbitPosition(
+        orbit.radius,
+        period,
+        simDays,
+        VISUALS[id].retrograde,
+        startAngleOf(id),
+      );
       position = { x: parent.x + offset.x, z: parent.z + offset.z };
     }
     positions.set(id, position);

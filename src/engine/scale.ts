@@ -34,6 +34,14 @@ export interface VisualSpec {
    * Moon), which a unit test checks. This is disclosed in the docs.
    */
   visualPeriodDays?: number;
+  /**
+   * Where on its orbit the body starts (degrees counter-clockwise from the direction away from its parent, seen from
+   * above north). Without a start angle every body would begin in one straight line and seem to move together.
+   * Planets and asteroids have their own, spread around the Sun. A moon that has none gets one worked out by
+   * `startAngleOf` (engine/solarSystem.ts) so that the moons of one planet are spread around it.
+   * These are display choices, NOT the real positions on any date.
+   */
+  startAngleDeg?: number;
   /** True if it orbits the OPPOSITE way to everything else (clockwise seen from above north). Triton does. */
   retrograde?: boolean;
   /** A glowing haze around the edge, for worlds with a real atmosphere. Decorative. */
@@ -55,23 +63,31 @@ export const VISUALS: Record<string, VisualSpec> = {
   sun: { radius: 8, color: 0xffc860 },
   // Planets: sizes and orbit distances are squeezed so all fit (see the note at the top of the file).
   // Order of size and distance is kept true: Venus is nearly Earth's size, Mercury and Mars are smaller.
-  mercury: { radius: 0.8, color: 0x8c8680, orbit: { parentId: 'sun', radius: 28 } },
+  mercury: {
+    radius: 0.8,
+    color: 0x8c8680,
+    orbit: { parentId: 'sun', radius: 28 },
+    startAngleDeg: 250,
+  },
   venus: {
     radius: 1.9,
     color: 0xe3c07a,
     orbit: { parentId: 'sun', radius: 43 },
+    startAngleDeg: 175,
     atmosphere: { color: 0xf4dca0, thickness: 1.16, strength: 1.1 }, // thick, bright cloud deck
   },
   earth: {
     radius: 2,
     color: 0x2f6fd6,
     orbit: { parentId: 'sun', radius: 60 },
+    startAngleDeg: 0, // Earth is the reference: the Earth and Moon framing and tests start from here
     atmosphere: { color: 0x5fa0ff, thickness: 1.14, strength: 1.2 },
   },
   moon: {
     radius: 0.55,
     color: 0xb9b9b9,
     orbit: { parentId: 'earth', radius: 6 },
+    startAngleDeg: 0,
     texture: 'moon',
     tidallyLocked: true,
     nightGlow: 0.08,
@@ -81,6 +97,7 @@ export const VISUALS: Record<string, VisualSpec> = {
     radius: 1.1,
     color: 0xc1572f,
     orbit: { parentId: 'sun', radius: 80 },
+    startAngleDeg: 320,
     texture: 'mars',
     startLongitudeDeg: 70, // Syrtis Major and the Hellas basin
   },
@@ -104,7 +121,8 @@ export const VISUALS: Record<string, VisualSpec> = {
     radius: 0.3,
     color: 0x9a948c,
     orbit: { parentId: 'sun', radius: 100 },
-    visualPeriodDays: 810, // drawn about 1.6 times faster than real, so it visibly moves
+    startAngleDeg: 100,
+    visualPeriodDays: 890, // drawn about 1.5 times faster than real, so it visibly moves
   },
   // Comet C/2026 A2 (Bok): not on a circle, so no `orbit`; its path comes from the `comet` spec and the data file.
   // The nucleus size is NOT known (the data says "Not yet checked"), so this radius is only a small dot to select.
@@ -117,7 +135,8 @@ export const VISUALS: Record<string, VisualSpec> = {
     radius: 0.35,
     color: 0x7d7a78,
     orbit: { parentId: 'sun', radius: 112 },
-    visualPeriodDays: 900, // about 1.9 times faster than real
+    startAngleDeg: 210,
+    visualPeriodDays: 990, // about 1.7 times faster than real
   },
   // The outer planets (unlock at Navigator). Real distances are 5 to 30 times Earth's; here they are squeezed
   // so the whole system still fits, with the true ORDER kept. Sizes keep the true order too.
@@ -125,7 +144,8 @@ export const VISUALS: Record<string, VisualSpec> = {
     radius: 5.5,
     color: 0xc8a27a,
     orbit: { parentId: 'sun', radius: 140 },
-    visualPeriodDays: 960, // drawn about 4.5 times faster than real
+    startAngleDeg: 35,
+    visualPeriodDays: 1440, // drawn 3 times faster than real
     atmosphere: { color: 0xe8cfa8, thickness: 1.06, strength: 0.55 },
   },
   saturn: {
@@ -133,7 +153,8 @@ export const VISUALS: Record<string, VisualSpec> = {
     radius: 4.8,
     color: 0xe0cf9b,
     orbit: { parentId: 'sun', radius: 165 },
-    visualPeriodDays: 1080, // about 10 times faster than real
+    startAngleDeg: 135,
+    visualPeriodDays: 2060, // about 5 times faster than real
     // Saturn's rings really reach from about 1.3 to 2.3 planet radii and are tilted about 27 degrees.
     rings: { inner: 1.3, outer: 2.3, color: 0xcdb98a, opacity: 0.75, tiltDeg: 26.7 },
   },
@@ -141,14 +162,16 @@ export const VISUALS: Record<string, VisualSpec> = {
     radius: 3.2,
     color: 0x9fd6e0,
     orbit: { parentId: 'sun', radius: 190 },
-    visualPeriodDays: 1200, // about 26 times faster than real
+    startAngleDeg: 285,
+    visualPeriodDays: 3140, // about 10 times faster than real
     atmosphere: { color: 0xb4f4f8, thickness: 1.1, strength: 0.9 },
   },
   neptune: {
     radius: 3.1,
     color: 0x4a6fe0,
     orbit: { parentId: 'sun', radius: 212 },
-    visualPeriodDays: 1320, // about 46 times faster than real
+    startAngleDeg: 70,
+    visualPeriodDays: 4120, // about 15 times faster than real
     atmosphere: { color: 0x7fa0ff, thickness: 1.1, strength: 0.9 },
   },
   // Moons of the outer planets. They unlock with their planet. Real laps range from 1.4 to 17 days, a blur at
