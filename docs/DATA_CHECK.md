@@ -198,19 +198,25 @@ giant now has several. Many dozens of smaller moons are not in the game.
 
 At the game's speed (3 simulated days per second) Jupiter would take 24 minutes to go round the Sun and Neptune
 5 and a half hours, so the outer planets looked frozen. Each far-out world is now drawn with a **faster** lap, and
-each very fast moon with a **slower** one, always keeping the true order of speeds:
+each very fast moon with a **slower** one, always keeping the true order of speeds.
+
+The outer laps must not be squeezed into the same few minutes, or the planets drift round as one pack (an earlier
+version did: Jupiter 5.3 minutes, Neptune 7.3, although Neptune really takes 14 times longer). Beyond Mars the drawn
+lap grows roughly as the real lap raised to the power 0.4 (about 14 times slower for real becomes about 3 times
+slower on screen). The speeds are still compressed, but each planet keeps its own and the gaps between neighbours stay
+clearly visible:
 
 | World   | Real orbit | Drawn lap | Drawn as                   |
 | ------- | ---------- | --------- | -------------------------- |
-| Vesta   | 3.6 years  | 4.5 min   | 1.6 times faster than real |
-| Ceres   | 4.6 years  | 5 min     | 1.9 times faster           |
-| Jupiter | 11.9 years | 5.3 min   | 4.5 times faster           |
-| Saturn  | 29.5 years | 6 min     | 10 times faster            |
-| Uranus  | 84 years   | 6.7 min   | 26 times faster            |
-| Neptune | 165 years  | 7.3 min   | 46 times faster            |
+| Vesta   | 3.6 years  | 5 min     | 1.5 times faster than real |
+| Ceres   | 4.6 years  | 5.5 min   | 1.7 times faster           |
+| Jupiter | 11.9 years | 8 min     | 3 times faster             |
+| Saturn  | 29.5 years | 11.5 min  | 5 times faster             |
+| Uranus  | 84 years   | 17.5 min  | 10 times faster            |
+| Neptune | 165 years  | 23 min    | 15 times faster            |
 
 The planets from Mercury to Mars, the Moon and Iapetus keep their true speed. Whenever an orbit is drawn at a
-different speed, the info panel says so ("Its orbit is drawn about 46 times faster than real, so you can watch it
+different speed, the info panel says so ("Its orbit is drawn about 15 times faster than real, so you can watch it
 move"), and a test checks that every changed orbit has that explanation.
 
 ## The Sun's layers (Layers tab)

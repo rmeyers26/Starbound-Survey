@@ -174,6 +174,20 @@ Date of this report: 2026-11-02.
     loading, and a software renderer is slow at that. Fix: the comet's visuals are now built only after the page has had 6
     seconds to settle, their shaders are compiled while still hidden, and then it fades in (a test checks nothing is built
     in the first seconds). Measured afterwards: 54, 53 and 54. Lesson: optional eye candy must not run during startup.
+27. **Planets moved almost in step** (owner: "make sure the planets move at their own speed and not in sync"). Two real
+    causes, found by reading the code and the numbers. (1) Nothing gave a body a starting angle, so at day 0 every
+    planet, and every moon of each planet, sat on the same side in one straight line. (2) The earlier rule "no lap over
+    10 minutes" had squeezed Vesta, Ceres, Jupiter, Saturn, Uranus and Neptune into laps of 4.5 to 7.3 minutes, so on
+    screen Neptune took only 1.4 times as long as Jupiter (really 14 times). Fixes: every orbiting body now has a start
+    angle (`startAngleDeg` in the scene table for planets and asteroids; moons get one spread by the golden angle,
+    `startAngleOf` in `engine/solarSystem.ts`); Earth and the Moon stay at 0 because the Earth/Moon tests and framing
+    start there. The outer laps now follow a power law (real lap to the power 0.4, anchored at Mars), so Neptune is
+    about 3 times slower than Jupiter on screen, and the longest allowed lap rose from 10 to 25 minutes (Neptune 23).
+    Trade-off: the outer planets now creep more slowly than before (Jupiter 8 minutes, not 5). Start angles are a
+    display choice, not the real positions on any date. New tests fail on the old values: neighbours at least 10%
+    apart in drawn speed, keeping a third of the real gaps, Neptune 2.5 times slower than Jupiter, no two planets
+    start within 25 degrees, no two moons of one planet within 20, every planet turns a different amount in the same
+    time, and the closer to the Sun the faster.
 
 ## Open problems and trade-offs
 

@@ -81,3 +81,21 @@ describe('retrograde orbits', () => {
     expect(orbitPosition(10, 100, 0, true).x).toBeCloseTo(10);
   });
 });
+
+describe('start angle', () => {
+  it('moves where a body is at day 0 without changing how fast it goes', () => {
+    expect(orbitAngle(100, 0, Math.PI / 2)).toBeCloseTo(Math.PI / 2);
+    // 25 days later it has gone a further quarter turn, same as a body that started at 0
+    expect(orbitAngle(100, 25, Math.PI / 2)).toBeCloseTo(Math.PI);
+  });
+  it('stays between 0 and 2π even when the start angle plus the travel is more than a full turn', () => {
+    const a = orbitAngle(100, 90, Math.PI);
+    expect(a).toBeGreaterThanOrEqual(0);
+    expect(a).toBeLessThan(Math.PI * 2);
+  });
+  it('puts a body a quarter turn round at day 0', () => {
+    const p = orbitPosition(10, 100, 0, false, Math.PI / 2);
+    expect(p.x).toBeCloseTo(0);
+    expect(p.z).toBeCloseTo(-10); // counter-clockwise from above: +X turns toward -Z
+  });
+});

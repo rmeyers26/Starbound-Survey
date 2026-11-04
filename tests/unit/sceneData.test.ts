@@ -96,9 +96,11 @@ describe('objects.json and the 3D scene agree', () => {
       }
     });
 
-    const MAX_LAP_DAYS = 10 * 60 * SIM_DAYS_PER_SECOND; // a lap over 10 minutes looks frozen
+    // A lap over 25 minutes looks frozen. (It was 10 minutes, but that squeezed Vesta to Neptune into laps of 4.5 to
+    // 7.3 minutes, so the outer planets moved almost together. 25 minutes leaves room to keep their speeds apart.)
+    const MAX_LAP_DAYS = 25 * 60 * SIM_DAYS_PER_SECOND;
 
-    it('every lap takes between 3 seconds and 10 minutes: never a blur, never frozen', () => {
+    it('every lap takes between 3 seconds and 25 minutes: never a blur, never frozen', () => {
       for (const id of orbiting) {
         expect(shownPeriod(id), `${id} is too fast`).toBeGreaterThanOrEqual(MIN_LAP_DAYS);
         expect(shownPeriod(id), `${id} is too slow to see`).toBeLessThanOrEqual(MAX_LAP_DAYS);
@@ -119,6 +121,28 @@ describe('objects.json and the 3D scene agree', () => {
           expect(VISUALS[id].visualPeriodDays, `${id} needs a display period`).toBeDefined();
         }
       }
+    });
+
+    it('planets keep their own speed: neighbours differ, and the gaps between them stay at least a third of the real gaps', () => {
+      const aroundSun = orbiting
+        .filter((id) => VISUALS[id].orbit!.parentId === 'sun')
+        .sort((a, b) => realPeriod(a) - realPeriod(b));
+      for (let i = 1; i < aroundSun.length; i++) {
+        const [inner, outer] = [aroundSun[i - 1], aroundSun[i]];
+        const shownGap = shownPeriod(outer) / shownPeriod(inner);
+        const realGap = realPeriod(outer) / realPeriod(inner);
+        // Neighbouring worlds are at least 10% apart in drawn speed (so they never drift as a pair)...
+        expect(shownGap, `${inner} -> ${outer}`).toBeGreaterThanOrEqual(1.1);
+        // ...and keep at least a third of the real gap, measured in "times slower" (on a log scale).
+        expect(
+          Math.log(shownGap) / Math.log(realGap),
+          `${inner} -> ${outer}`,
+        ).toBeGreaterThanOrEqual(1 / 3);
+      }
+    });
+
+    it('Neptune is drawn at least 2.5 times slower than Jupiter (really about 14 times slower)', () => {
+      expect(shownPeriod('neptune') / shownPeriod('jupiter')).toBeGreaterThanOrEqual(2.5);
     });
 
     it('the inner planets, the Moon and Iapetus are drawn at their true speed', () => {
