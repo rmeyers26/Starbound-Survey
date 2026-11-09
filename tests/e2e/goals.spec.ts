@@ -144,3 +144,49 @@ test.describe('toasts that arrive together', () => {
     ).toBeVisible();
   });
 });
+
+test.describe('on a short window', () => {
+  // 800 x 480 is a small browser window, or close to a phone held sideways. The HUD has a corner for the status
+  // (rank, XP, Goal line), a centred column of buttons, and the SCAN button in the bottom corner, so on a short
+  // screen they can run into each other. Nothing here may overlap anything else.
+  test.use({ viewport: { width: 800, height: 480 } });
+
+  test('no part of the HUD overlaps another, even with an object selected', async ({ page }) => {
+    await openForScanning(page);
+    await chip(page, 'moon').click(); // selecting an object shows the SCAN button's status line too
+    await expect(page.locator('.scan-ring')).toBeVisible();
+
+    const parts = await page.evaluate(() => {
+      const wanted: Array<[string, string]> = [
+        ['object row', '.hud-objects'],
+        ['scale note', '.hud-note'],
+        ['XP bar', '.xp-bar'],
+        ['Goal line', '.goal-chip'],
+        ['controls', '.hud-controls button'],
+        ['SCAN ring', '.scan-ring'],
+        ['SCAN status', '.scan-status'],
+      ];
+      const found: Array<{ name: string; l: number; t: number; r: number; b: number }> = [];
+      for (const [label, selector] of wanted) {
+        document.querySelectorAll(selector).forEach((node, index) => {
+          const box = node.getBoundingClientRect();
+          if (box.width === 0 || box.height === 0) return;
+          const name = `${label} ${node.getAttribute('aria-label') ?? node.textContent?.trim().slice(0, 20) ?? index}`;
+          found.push({ name, l: box.left, t: box.top, r: box.right, b: box.bottom });
+        });
+      }
+      return found;
+    });
+    expect(parts.length).toBeGreaterThan(8);
+
+    const clashes: string[] = [];
+    for (let i = 0; i < parts.length; i++) {
+      for (let j = i + 1; j < parts.length; j++) {
+        const a = parts[i];
+        const b = parts[j];
+        if (a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b) clashes.push(`${a.name} / ${b.name}`);
+      }
+    }
+    expect(clashes).toEqual([]);
+  });
+});
