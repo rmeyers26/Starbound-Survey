@@ -198,6 +198,13 @@ Date of this report: 2026-11-02.
     the fix for the XP ceiling) are the next recommended step and need written content. Tests: the goal rules, every
     achievement being earnable and mentioning only objects that exist, the rank-up message, and browser tests for the
     Goal line (including that it never covers a button), the toast, the Logbook list, and practice mode.
+    **CI then found two mistakes of mine that my screenshots had not.** (1) The Goal button was 40 px tall on narrow phones
+    (every button must be 44 px), and an achievement hint named Jupiter, so the Logbook mentioned a planet a new
+    player cannot reach yet. (2) The worse one, WebKit phone only: on an iPhone the "Add to Home Screen" tip never closes,
+    the screen shows at most two toasts, and a scan that earned the first rank-up AND an achievement made three, so
+    the **"Rank up!" message was removed from the screen**. Fix: one toast per scan for all its achievements, shown
+    BEFORE the rank-up so the rank-up is always the newest. Reproduced first on desktop Chromium with an iPhone browser
+    identity, and kept as a permanent test. Lesson: every new toast competes with the others for two places.
 
 ## Open problems and trade-offs
 

@@ -185,6 +185,17 @@ export function newlyEarned(
   return ACHIEVEMENTS.filter((a) => after.has(a.id) && !before.has(a.id));
 }
 
+/**
+ * ONE message for everything just earned, so a scan never makes more than one achievement toast.
+ * (The screen shows at most two toasts and drops the oldest, so several achievement toasts in a row would push a
+ * rank-up message off the screen. See app.ts for the order they are shown in.)
+ */
+export function achievementMessage(earned: readonly Achievement[]): string | null {
+  if (earned.length === 0) return null;
+  if (earned.length === 1) return `Achievement earned: ${earned[0].title}. ${earned[0].hint}`;
+  return `Achievements earned: ${earned.map((a) => a.title).join(', ')}.`;
+}
+
 /** Names the regions of `newRegions` that contain at least one object, so a rank-up never announces an empty place. */
 export function regionsWithObjects(newRegions: string[], objects: CelestialObject[]): string[] {
   return newRegions.filter((region) => regionHasObjects(region, objects));

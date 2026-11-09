@@ -4,6 +4,7 @@ import {
   ACHIEVEMENTS,
   earnedAchievementIds,
   newlyEarned,
+  achievementMessage,
   nextGoal,
   rankUpMessage,
   regionsWithObjects,
@@ -224,5 +225,24 @@ describe('rankUpMessage', () => {
     expect(rankUpMessage('Surveyor', ['outer', 'kuiper'], objects, nameOf)).toBe(
       'Rank up! You are now a Surveyor. New region unlocked: Outer Solar System.',
     );
+  });
+});
+
+describe('achievementMessage', () => {
+  const find = (id: string) => ACHIEVEMENTS.find((a) => a.id === id)!;
+
+  it('says nothing when nothing was earned', () => {
+    expect(achievementMessage([])).toBeNull();
+  });
+
+  it('names one achievement and says how it was earned', () => {
+    expect(achievementMessage([find('first-light')])).toBe(
+      'Achievement earned: First Light. Complete your first scan.',
+    );
+  });
+
+  it('puts several achievements in ONE message (the screen shows only two toasts, so more would push a rank-up off)', () => {
+    const message = achievementMessage([find('rising-star'), find('inner-surveyor')]);
+    expect(message).toBe('Achievements earned: Rising Star, Inner System Surveyor.');
   });
 });

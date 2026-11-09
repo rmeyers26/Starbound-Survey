@@ -14,7 +14,7 @@ import { SaveService } from './save/saveService';
 import { openBestStore } from './save/stores';
 import { SettingsStore, defaultSettings, normalizeSettings, type Settings } from './game/settings';
 import type { CelestialObject } from './game/types';
-import { earnedAchievementIds, newlyEarned, rankUpMessage } from './game/goals';
+import { achievementMessage, earnedAchievementIds, newlyEarned, rankUpMessage } from './game/goals';
 import type { SaveRecord } from './save/schema';
 import { loadPrefs, savePrefs } from './save/prefs';
 import { createFpsReadout } from './ui/fpsReadout';
@@ -195,20 +195,23 @@ export async function startApp(
 
   // Achievements are worked out from the REAL save (practice scans never count). We remember what was already
   // earned, and congratulate only for what a scan has just added.
+  //
+  // ORDER MATTERS. The screen shows at most two toasts and removes the oldest first, and on an iPhone the
+  // "Add to Home Screen" tip stays up as one of them. So the achievement message must come BEFORE the rank-up
+  // message (a scan emits "scan:completed" first, then "rank:up"): the rank-up is the bigger moment and must be the
+  // newest toast, the one that survives. All achievements of one scan share a single toast for the same reason.
   let knownAchievements = earnedAchievementIds(save.current, objects);
-  let scanJustFinished = false;
   const offScanDone = bus.on('scan:completed', () => {
-    scanJustFinished = true;
-  });
-  const offAchievements = bus.on('progress:changed', () => {
     const earnedNow = earnedAchievementIds(save.current, objects);
-    if (scanJustFinished && !isPractice()) {
-      for (const a of newlyEarned(knownAchievements, earnedNow)) {
-        toaster.show(`Achievement earned: ${a.title}. ${a.hint}`, { durationMs: 9000 });
-      }
+    if (!isPractice()) {
+      const message = achievementMessage(newlyEarned(knownAchievements, earnedNow));
+      if (message) toaster.show(message, { durationMs: 9000 });
     }
-    scanJustFinished = false;
-    knownAchievements = earnedNow; // also catches changes that were not a scan (such as importing a backup) silently
+    knownAchievements = earnedNow;
+  });
+  // Anything that is not a scan (importing a backup, for example) updates what is known, silently.
+  const offAchievements = bus.on('progress:changed', () => {
+    knownAchievements = earnedAchievementIds(save.current, objects);
   });
 
   const cleanups = [

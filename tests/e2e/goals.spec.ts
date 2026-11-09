@@ -109,3 +109,38 @@ test.describe('achievements', () => {
     await expect(page.getByText('0 of 10 earned.')).toBeVisible();
   });
 });
+
+test.describe('toasts that arrive together', () => {
+  // On an iPhone the "Add to Home Screen" tip appears after 6 seconds and never closes by itself, and the screen shows
+  // at most two toasts (dropping the oldest plain one). A scan that earns a rank-up AND an achievement used to push
+  // the "Rank up!" message off the screen. The rank-up must always survive.
+  test.use({
+    userAgent:
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+  });
+
+  test('the rank-up message is not pushed off by the install tip and an achievement', async ({
+    page,
+  }) => {
+    test.setTimeout(240_000); // ten scans, each with a flight and a short hold
+    await openForScanning(page);
+    const innerObjects = [
+      'sun',
+      'mercury',
+      'venus',
+      'earth',
+      'moon',
+      'mars',
+      'phobos',
+      'deimos',
+      'vesta',
+      'ceres',
+    ];
+    for (const id of innerObjects) await scanObject(page, id);
+    // The tenth scan earns 200 XP (the Navigator rank-up) and the Rising Star achievement at the same moment.
+    await expect(page.getByText('Add to Home Screen', { exact: false })).toBeVisible();
+    await expect(
+      page.getByText('Rank up! You are now a Navigator.', { exact: false }),
+    ).toBeVisible();
+  });
+});
