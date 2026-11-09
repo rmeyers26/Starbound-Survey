@@ -580,6 +580,11 @@ body {
   color: #d6def5;
 }
 .goal-chip-button {
+  /* Every tappable button is at least 44 px tall (a rule the mobile test checks), also on narrow screens. */
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   border: 1px solid #3a5a8c;
   font: inherit;
   text-align: right;

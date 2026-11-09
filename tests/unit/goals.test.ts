@@ -117,6 +117,16 @@ describe('achievements', () => {
     }
   });
 
+  it('no hint names an object from a region a new player cannot reach (the Logbook never mentions locked things)', () => {
+    const lockedAtStart = objects.filter((o) => !fresh().unlockedRegions.includes(o.region));
+    expect(lockedAtStart.length).toBeGreaterThan(0);
+    for (const a of ACHIEVEMENTS) {
+      for (const o of lockedAtStart) {
+        expect(a.hint, `${a.id} names ${o.name}`).not.toContain(o.name);
+      }
+    }
+  });
+
   it('a new player has earned none', () => {
     expect([...earnedAchievementIds(fresh(), objects)]).toEqual([]);
   });

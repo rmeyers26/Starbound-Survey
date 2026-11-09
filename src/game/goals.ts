@@ -137,7 +137,7 @@ export const ACHIEVEMENTS: readonly Achievement[] = [
   {
     id: 'giant-hunter',
     title: 'Giant Hunter',
-    hint: 'Scan Jupiter, Saturn, Uranus and Neptune.',
+    hint: 'Scan all four giant planets.',
     ids: GIANTS,
     earned: (c) => GIANTS.every((id) => scannedAtAll(c, id)),
   },
