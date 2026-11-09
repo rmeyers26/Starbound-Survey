@@ -83,6 +83,8 @@ Tick each one and note anything odd.
 - [ ] Tap Ceres from the overview: streaks rush past during the flight, then stop. Tap the Moon from Earth: no streaks (a short hop).
 - [ ] With **Reduce motion** on (Settings), no streaks appear and flights are instant.
 - [ ] After the rank-up the outer planets visibly creep round the Sun (Jupiter about 8 minutes a lap, Neptune about 23) and their info panel says the orbit is drawn faster than real.
+- [ ] **Goal line.** A new game shows "Goal: Welcome, Cadet! Tap Earth..." under the XP bar. Tapping it flies to Earth. After a scan it names the next object. It does not cover any button, also on your smallest phone, and it disappears in practice mode.
+- [ ] **Achievements.** The first scan shows "Achievement earned: First Light." The Logbook lists 10 achievements with the earned ones marked.
 - [ ] **Planets do not move in step.** At the start no two planets are in a straight line with the Sun. Watch Mercury, Venus
       and Earth for a minute: Mercury clearly gains on Venus, and Venus on Earth. After the rank-up, Jupiter, Saturn, Uranus
       and Neptune each creep at their own pace (Neptune the slowest). The four big moons of Jupiter are spread round it.

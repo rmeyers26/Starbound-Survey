@@ -29,6 +29,11 @@ export function visibleBodyIds(objects: CelestialObject[], unlockedRegions: stri
   return new Set(objects.filter((o) => unlockedRegions.includes(o.region)).map((o) => o.id));
 }
 
+/** True if at least one object lives in `region` (some regions unlock before any content exists for them). */
+export function regionHasObjects(region: string, objects: CelestialObject[]): boolean {
+  return objects.some((o) => o.region === region);
+}
+
 /** The first rank that unlocks `region`, for messages like "Reach Navigator to unlock it". */
 export function rankThatUnlocks(region: string): RankDef | undefined {
   return RANKS.find((rank) => rank.regions.includes(region));

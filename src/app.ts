@@ -14,9 +14,11 @@ import { SaveService } from './save/saveService';
 import { openBestStore } from './save/stores';
 import { SettingsStore, defaultSettings, normalizeSettings, type Settings } from './game/settings';
 import type { CelestialObject } from './game/types';
+import { achievementMessage, earnedAchievementIds, newlyEarned, rankUpMessage } from './game/goals';
 import type { SaveRecord } from './save/schema';
 import { loadPrefs, savePrefs } from './save/prefs';
 import { createFpsReadout } from './ui/fpsReadout';
+import { createGoalChip } from './ui/goalChip';
 import { createHud } from './ui/hud';
 import { createInfoPanel } from './ui/infoPanel';
 import { createLogbook } from './ui/logbook';
@@ -188,24 +190,42 @@ export async function startApp(
     );
   });
   const offRankUp = bus.on('rank:up', ({ rank, newRegions }) => {
-    const regions = newRegions.map(regionName).join(', ');
-    toaster.show(
-      `Rank up! You are now a ${rank}.${regions ? ` New region unlocked: ${regions}.` : ''}`,
-      {
-        durationMs: 12_000,
-      },
-    );
+    toaster.show(rankUpMessage(rank, newRegions, objects, regionName), { durationMs: 12_000 });
+  });
+
+  // Achievements are worked out from the REAL save (practice scans never count). We remember what was already
+  // earned, and congratulate only for what a scan has just added.
+  //
+  // ORDER MATTERS. The screen shows at most two toasts and removes the oldest first, and on an iPhone the
+  // "Add to Home Screen" tip stays up as one of them. So the achievement message must come BEFORE the rank-up
+  // message (a scan emits "scan:completed" first, then "rank:up"): the rank-up is the bigger moment and must be the
+  // newest toast, the one that survives. All achievements of one scan share a single toast for the same reason.
+  let knownAchievements = earnedAchievementIds(save.current, objects);
+  const offScanDone = bus.on('scan:completed', () => {
+    const earnedNow = earnedAchievementIds(save.current, objects);
+    if (!isPractice()) {
+      const message = achievementMessage(newlyEarned(knownAchievements, earnedNow));
+      if (message) toaster.show(message, { durationMs: 9000 });
+    }
+    knownAchievements = earnedNow;
+  });
+  // Anything that is not a scan (importing a backup, for example) updates what is known, silently.
+  const offAchievements = bus.on('progress:changed', () => {
+    knownAchievements = earnedAchievementIds(save.current, objects);
   });
 
   const cleanups = [
     createHud(container, objects, bus, machine, effectiveRecord),
     createXpBar(container, bus, effectiveRecord, isPractice),
+    createGoalChip(container, objects, bus, effectiveRecord, isPractice),
     createScanHud(container, bus, objects, () => settings.get()),
-    createLogbook(container, objects, bus, machine, effectiveRecord),
+    createLogbook(container, objects, bus, machine, effectiveRecord, () => save.current),
     createInfoPanel(container, objects, bus, effectiveRecord),
     // The spacecraft needs the 3D view; the simplified 2D star chart cannot show it.
     createPilotPanel(container, bus, objects, () => view?.kind === 'webgl2'),
     scan.dispose,
+    offScanDone,
+    offAchievements,
     offRankUp,
     offRegionsA,
     offRegionsB,

@@ -188,6 +188,28 @@ Date of this report: 2026-11-02.
     apart in drawn speed, keeping a third of the real gaps, Neptune 2.5 times slower than Jupiter, no two planets
     start within 25 degrees, no two moons of one planet within 20, every planet turns a different amount in the same
     time, and the closer to the Sun the faster.
+28. **"Is the game fun?" review** (owner: "review the game and make recommended changes to make the game fun"); full
+    findings in `docs/FUN_REVIEW.md`. The biggest finding, from the data: all 32 objects together give at most 1,280 XP,
+    but the two top ranks need 1,400 and 2,800, so **they cannot be reached**, and rank-ups announced regions with no
+    objects in them. There was also no guidance for a new player and no recognition for milestones. This slice adds a
+    **Goal line** (always names the next step, ends honestly when everything is scanned), **10 achievements** worked
+    out from the player's scans (no save change; practice scans never count; toast plus a Logbook section) and a
+    rank-up message that names only regions that contain objects. Missions and quizzes (the spec's big XP source, and
+    the fix for the XP ceiling) are the next recommended step and need written content. Tests: the goal rules, every
+    achievement being earnable and mentioning only objects that exist, the rank-up message, and browser tests for the
+    Goal line (including that it never covers a button), the toast, the Logbook list, and practice mode.
+    **CI then found two mistakes of mine that my screenshots had not.** (1) The Goal button was 40 px tall on narrow phones
+    (every button must be 44 px), and an achievement hint named Jupiter, so the Logbook mentioned a planet a new
+    player cannot reach yet. (2) The worse one, WebKit phone only: on an iPhone the "Add to Home Screen" tip never closes,
+    the screen shows at most two toasts, and a scan that earned the first rank-up AND an achievement made three, so
+    the **"Rank up!" message was removed from the screen**. Fix: one toast per scan for all its achievements, shown
+    BEFORE the rank-up so the rank-up is always the newest. Reproduced first on desktop Chromium with an iPhone browser
+    identity, and kept as a permanent test. Lesson: every new toast competes with the others for two places.
+    **A third problem, found later while adding the next feature:** on a short window (800 x 480, a small browser window
+    or close to a phone held sideways) the Goal line overlapped the top zoom button by 10 px. No test had looked at that
+    size. Fix: on windows over 700 px wide but under 560 px high the button column becomes two columns (about half as
+    tall), plus a test that no part of the HUD overlaps another at 800 x 480 with an object selected. It failed before
+    the fix and passes after. Lesson: test the HUD at the smallest size you support, not just the usual one.
 
 ## Open problems and trade-offs
 
