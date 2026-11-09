@@ -205,6 +205,11 @@ Date of this report: 2026-11-02.
     the **"Rank up!" message was removed from the screen**. Fix: one toast per scan for all its achievements, shown
     BEFORE the rank-up so the rank-up is always the newest. Reproduced first on desktop Chromium with an iPhone browser
     identity, and kept as a permanent test. Lesson: every new toast competes with the others for two places.
+    **A third problem, found later while adding the next feature:** on a short window (800 x 480, a small browser window
+    or close to a phone held sideways) the Goal line overlapped the top zoom button by 10 px. No test had looked at that
+    size. Fix: on windows over 700 px wide but under 560 px high the button column becomes two columns (about half as
+    tall), plus a test that no part of the HUD overlaps another at 800 x 480 with an object selected. It failed before
+    the fix and passes after. Lesson: test the HUD at the smallest size you support, not just the usual one.
 
 29. **Missions, starting with the Moon** (owner: "Missions moon"). The spec's guided missions: objectives, then a final
     question that uses what you found. `data/missions.json` holds the missions, and `validateMissions` refuses one that
