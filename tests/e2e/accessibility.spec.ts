@@ -64,3 +64,23 @@ test("the Sun's Layers tab (hidden and revealed layers) has no accessibility vio
   await page.getByRole('tab', { name: 'Layers' }).click();
   expect((await scan(page)).violations).toEqual([]);
 });
+
+test('the Missions screen (objectives, then the question and a wrong answer) has no accessibility violations', async ({
+  page,
+}) => {
+  await openForScanning(page);
+  await page.getByRole('button', { name: 'Open the Missions list' }).click();
+  expect((await scan(page)).violations).toEqual([]); // objectives still to do
+  await page.getByRole('button', { name: 'Close', exact: true }).last().click();
+
+  await scanObject(page, 'sun');
+  await scanObject(page, 'moon');
+  await page.getByRole('button', { name: 'Open the Missions list' }).click();
+  expect((await scan(page)).violations).toEqual([]); // the question is open
+  await page.locator('.mission-choice[data-choice="0"]').click(); // a wrong answer shows its explanation
+  await expect(page.getByText('Not quite, and that costs nothing.')).toBeVisible();
+  expect((await scan(page)).violations).toEqual([]);
+  await page.locator('.mission-choice[data-choice="1"]').click(); // the right answer completes it
+  await expect(page.getByText('Mission complete!')).toBeVisible();
+  expect((await scan(page)).violations).toEqual([]);
+});

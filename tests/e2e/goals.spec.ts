@@ -24,7 +24,9 @@ test.describe('goal line', () => {
   }) => {
     await openForScanning(page);
     await scanObject(page, 'earth');
-    await expect(goalChip(page)).toContainText('Scan The Sun (+20 XP)');
+    // The welcome step is done, so the Goal line moves on to the open mission (the next object in the list is only
+    // the goal when no mission is waiting: the unit tests cover that case).
+    await expect(goalChip(page)).toContainText('Mission: scan The Sun and The Moon.');
     await expect(goalChip(page)).not.toContainText('Welcome');
     // The goal is a real button naming where it goes, so a screen reader user can act on it too.
     await expect(goalChip(page).getByRole('button')).toHaveAccessibleName(

@@ -18,13 +18,16 @@ informed opinion, not measurement.
    _Fixed in this slice: 10 achievements, toasts and a Logbook section._
 3. **The XP ladder dead-ends.** All 32 objects together are worth at most **1,280 XP** (440 inner, 840 outer), but
    Astronomer needs 1,400 and Director 2,800. **The top two ranks cannot be reached with the current content.**
+   _Update: the Moon mission adds up to 65 XP, so the ceiling is now **1,345**. That is still 55 short of Astronomer and
+   1,455 short of Director: one more mission would make Astronomer reachable, and Director needs roughly 13 to 22 more
+   (or new objects)._
    _Not fixed: it needs more XP sources or more objects (see below). The Goal line now ends honestly ("you have scanned
    everything in the game so far") instead of leaving a dead end._
 4. **Rank-ups announced empty places.** Surveyor says "New region unlocked: Kuiper Belt, stars", but no object lives
    in those regions yet. _Fixed: the message only names regions that contain objects._
 5. **Missions, quizzes and achievements were in the spec but never built.** The save file has an empty `missions`
-   slot waiting for them. _Achievements are done (derived from your scans, so no save change). Missions and quizzes are
-   the biggest remaining gap._
+   slot waiting for them. _Achievements are done (derived from your scans, so no save change). The first mission, the
+   Moon's light, is now built with its quiz; more missions only need entries in `data/missions.json`._
 6. **32 buttons in one scrolling row** is a lot to browse, especially on a phone.
 7. **The outer planets are slow to watch** (Jupiter about 8 minutes a lap, Neptune about 23).
 
@@ -40,15 +43,15 @@ informed opinion, not measurement.
 
 ## Recommended next, in order
 
-| #   | Idea                                                                               | Why it is fun                                       | Needs                                                           |
-| --- | ---------------------------------------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------------------- |
-| 1   | **Missions and quizzes** (spec: 15 XP per first-try answer, 50 to 150 per mission) | A reason to look at the data; teaches the science   | Written content, sources. Fixes the XP ceiling at the same time |
-| 2   | **Rebalance ranks after #1** so every rank is reachable                            | Removes the dead end                                | #1 done first, then tune numbers                                |
-| 3   | **Flying achievements** ("Grand Tour": arrive at every planet by ship)             | Rewards the spacecraft, which has no goal right now | Small: the ship already reports arrivals                        |
-| 4   | **Fast-forward time control**                                                      | Watch the outer planets and moons really move       | Small to medium                                                 |
-| 5   | **Group the object buttons** (by planet, with its moons)                           | Less scrolling, easier to find things on a phone    | Medium (layout work)                                            |
-| 6   | **Content for the empty regions** (Pluto and the Kuiper Belt, nearby stars)        | Gives the higher ranks something to unlock          | Verified data from NASA or JPL; network access to check it      |
-| 7   | **Sound and a photo mode**                                                         | Atmosphere, and something to share                  | Assets and licences                                             |
+| #   | Idea                                                                                                                        | Why it is fun                                       | Needs                                                      |
+| --- | --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------- |
+| 1   | **More missions and quizzes** (the first, the Moon's light, is built; spec: 50 to 150 XP each plus 15 per first-try answer) | A reason to look at the data; teaches the science   | Written content and sources                                |
+| 2   | **Rebalance ranks after #1** so every rank is reachable                                                                     | Removes the dead end                                | #1 done first, then tune numbers                           |
+| 3   | **Flying achievements** ("Grand Tour": arrive at every planet by ship)                                                      | Rewards the spacecraft, which has no goal right now | Small: the ship already reports arrivals                   |
+| 4   | **Fast-forward time control**                                                                                               | Watch the outer planets and moons really move       | Small to medium                                            |
+| 5   | **Group the object buttons** (by planet, with its moons)                                                                    | Less scrolling, easier to find things on a phone    | Medium (layout work)                                       |
+| 6   | **Content for the empty regions** (Pluto and the Kuiper Belt, nearby stars)                                                 | Gives the higher ranks something to unlock          | Verified data from NASA or JPL; network access to check it |
+| 7   | **Sound and a photo mode**                                                                                                  | Atmosphere, and something to share                  | Assets and licences                                        |
 
 ## Questions for the owner
 

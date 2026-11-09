@@ -211,6 +211,29 @@ Date of this report: 2026-11-02.
     tall), plus a test that no part of the HUD overlaps another at 800 x 480 with an object selected. It failed before
     the fix and passes after. Lesson: test the HUD at the smallest size you support, not just the usual one.
 
+29. **Missions, starting with the Moon** (owner: "Missions moon"). The spec's guided missions: objectives, then a final
+    question that uses what you found. `data/missions.json` holds the missions, and `validateMissions` refuses one that
+    could never be finished (an unknown object, or an object in a region the player cannot reach at that mission's
+    rank). The first is "Where does the Moon's light come from?": scan the Sun and the Moon, then answer; 50 XP for
+    finishing plus 15 for a first-try answer (5 for a retry). A wrong answer costs nothing and shows the explanation.
+    **No save-file change:** objectives are worked out from the scans (like achievements), and the save's existing
+    `missions` slot stores only `wrong:N` or `complete`. Mission XP goes through one shared `awardXp` (pulled out of
+    the scan code, so both rank the player up identically). The Goal line now leads a new player through the mission
+    and opens the question. Feedback is shown inside the Missions screen and not as a toast, because toasts share two
+    places (the lesson from item 28). The mission's wording is not yet checked against a NASA page: see
+    `docs/DATA_CHECK.md`. Tests: the validator (one test per way a mission can be broken), the rules (retry XP, no
+    double reward, practice mode, a mission causing a rank-up), the controller (announcement order), the mission-aware
+    goal, and browser tests for the whole flow, a reload, practice mode, button sizes and accessibility.
+    **A mistake the Logbook's own test caught:** the Missions screen borrowed the Logbook's CSS class names, so a test
+    that looks up the Logbook summary found two elements (both dialogs are always in the page). The Missions screen now
+    has its own class names; the styling is shared in the stylesheet. Lesson: never reuse another screen's class names
+    for a new screen, even to save a few lines of CSS.
+    **The Missions button also broke 18 `effects` tests** (all four browsers): those tests use an 800 x 480 window, where
+    the vertically centred button column, one button taller, covered Settings with the SCAN ring (it had cleared by only
+    2 px before). Fix: the + and - zoom buttons now share one row, which gives the height back, and the short-window
+    two-column layout (see item 28) treats that pair as one row. Lesson: a new button changes the height of everything
+    around it, so test the smallest window after adding one.
+
 ## Open problems and trade-offs
 
 1. **WebGPU is not implemented.** The spec asks for WebGPU first. Three.js's WebGPU API is still moving

@@ -15,10 +15,13 @@ import { openBestStore } from './save/stores';
 import { SettingsStore, defaultSettings, normalizeSettings, type Settings } from './game/settings';
 import type { CelestialObject } from './game/types';
 import { achievementMessage, earnedAchievementIds, newlyEarned, rankUpMessage } from './game/goals';
+import { createMissionController } from './game/missionController';
+import type { Mission } from './game/missions';
 import type { SaveRecord } from './save/schema';
 import { loadPrefs, savePrefs } from './save/prefs';
 import { createFpsReadout } from './ui/fpsReadout';
 import { createGoalChip } from './ui/goalChip';
+import { createMissionsPanel } from './ui/missionsPanel';
 import { createHud } from './ui/hud';
 import { createInfoPanel } from './ui/infoPanel';
 import { createLogbook } from './ui/logbook';
@@ -34,6 +37,8 @@ import { registerServiceWorker } from './pwa';
 export async function startApp(
   container: HTMLElement,
   objects: CelestialObject[],
+  /** The guided missions (may be empty: the game works without them). */
+  missions: Mission[] = [],
 ): Promise<() => void> {
   const bus = new EventBus<GameEvents>();
 
@@ -129,6 +134,22 @@ export async function startApp(
   machine.transition('TITLE'); // no title screen yet: go straight through to exploring
   machine.transition('EXPLORE');
 
+  // Missions always use the REAL save (practice never changes saved progress, so missions are paused there).
+  const missionController = createMissionController({
+    bus,
+    missions,
+    getRecord: () => save.current,
+    isPractice,
+    commit: (change) =>
+      save.update(change).catch(() => {
+        if (warnedAboutSaving) return;
+        warnedAboutSaving = true;
+        toaster.show(
+          'Could not save your progress on this device. Try exporting a backup from Settings.',
+        );
+      }),
+  });
+
   const scan = createScanController({
     bus,
     machine,
@@ -201,14 +222,18 @@ export async function startApp(
   // message (a scan emits "scan:completed" first, then "rank:up"): the rank-up is the bigger moment and must be the
   // newest toast, the one that survives. All achievements of one scan share a single toast for the same reason.
   let knownAchievements = earnedAchievementIds(save.current, objects);
-  const offScanDone = bus.on('scan:completed', () => {
+  const announceAchievements = (): void => {
     const earnedNow = earnedAchievementIds(save.current, objects);
     if (!isPractice()) {
       const message = achievementMessage(newlyEarned(knownAchievements, earnedNow));
       if (message) toaster.show(message, { durationMs: 9000 });
     }
     knownAchievements = earnedNow;
-  });
+  };
+  // Both a finished scan and a mission answer can earn achievements (a mission's XP can cause a rank-up). Both
+  // announce BEFORE their 'rank:up', so the rank-up message stays the newest.
+  const offScanDone = bus.on('scan:completed', announceAchievements);
+  const offMissionAnswered = bus.on('mission:answered', announceAchievements);
   // Anything that is not a scan (importing a backup, for example) updates what is known, silently.
   const offAchievements = bus.on('progress:changed', () => {
     knownAchievements = earnedAchievementIds(save.current, objects);
@@ -217,7 +242,17 @@ export async function startApp(
   const cleanups = [
     createHud(container, objects, bus, machine, effectiveRecord),
     createXpBar(container, bus, effectiveRecord, isPractice),
-    createGoalChip(container, objects, bus, effectiveRecord, isPractice),
+    createGoalChip(container, objects, bus, effectiveRecord, missions, isPractice),
+    createMissionsPanel(
+      container,
+      missions,
+      objects,
+      bus,
+      machine,
+      () => save.current,
+      missionController,
+      isPractice,
+    ),
     createScanHud(container, bus, objects, () => settings.get()),
     createLogbook(container, objects, bus, machine, effectiveRecord, () => save.current),
     createInfoPanel(container, objects, bus, effectiveRecord),
@@ -225,6 +260,7 @@ export async function startApp(
     createPilotPanel(container, bus, objects, () => view?.kind === 'webgl2'),
     scan.dispose,
     offScanDone,
+    offMissionAnswered,
     offAchievements,
     offRankUp,
     offRegionsA,

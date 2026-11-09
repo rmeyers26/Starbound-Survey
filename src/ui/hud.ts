@@ -69,7 +69,16 @@ export function createHud(
     'Open the Logbook of discovered objects',
   );
   logbookButton.addEventListener('click', () => machine.transition('LOGBOOK'));
-  controls.append(zoomIn, zoomOut, overview, logbookButton, settingsButton);
+  const missionsButton = makeButton('Missions', 'hud-button', 'Open the Missions list');
+  missionsButton.addEventListener('click', () => bus.emit('missions:open', undefined));
+  // + and − share one row. The column of buttons is vertically centred, and on a short window (a small browser
+  // window, or a phone held sideways) one more row would push Settings down into the SCAN button.
+  const zoom = document.createElement('div');
+  zoom.className = 'hud-zoom';
+  zoom.setAttribute('role', 'group');
+  zoom.setAttribute('aria-label', 'Zoom');
+  zoom.append(zoomIn, zoomOut);
+  controls.append(zoom, overview, logbookButton, missionsButton, settingsButton);
 
   // Honesty rule (spec): the HUD says when the view is not to scale.
   const note = document.createElement('p');
