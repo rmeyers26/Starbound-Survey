@@ -3,6 +3,7 @@
 // (the same as tapping its button in the row at the top). The rules for WHAT the goal is live in game/goals.ts.
 import type { EventBus, GameEvents } from '../game/events';
 import { nextGoal } from '../game/goals';
+import type { Mission } from '../game/missions';
 import type { CelestialObject } from '../game/types';
 import type { SaveRecord } from '../save/schema';
 import { el } from './dom';
@@ -12,6 +13,7 @@ export function createGoalChip(
   objects: CelestialObject[],
   bus: EventBus<GameEvents>,
   getRecord: () => SaveRecord,
+  missions: Mission[] = [],
   /** True in practice mode: scans give no XP there, so there is no goal to chase and the line hides. */
   isPractice: () => boolean = () => false,
 ): () => void {
@@ -25,12 +27,18 @@ export function createGoalChip(
   const render = (): void => {
     root.hidden = isPractice();
     if (root.hidden) return;
-    const goal = nextGoal(getRecord(), objects);
+    const goal = nextGoal(getRecord(), objects, missions);
     const target = goal.targetId ? objects.find((o) => o.id === goal.targetId) : undefined;
     // The label "Goal:" is part of the visible text so the screen reader says the same words as the screen shows.
     const visible = `Goal: ${goal.text}`;
     root.dataset.goalTarget = goal.targetId ?? '';
-    if (target) {
+    if (goal.opensMissions) {
+      const button = el('button', 'goal-chip-button', visible);
+      button.type = 'button';
+      button.setAttribute('aria-label', `${visible} Open the Missions screen.`);
+      button.addEventListener('click', () => bus.emit('missions:open', undefined));
+      root.replaceChildren(button);
+    } else if (target) {
       const button = el('button', 'goal-chip-button', visible);
       button.type = 'button';
       button.setAttribute('aria-label', `${visible} Select ${target.name} and fly there.`);
@@ -49,6 +57,7 @@ export function createGoalChip(
   const offs = [
     bus.on('progress:changed', render),
     bus.on('rank:up', render),
+    bus.on('mission:answered', render),
     bus.on('settings:changed', render), // practice mode can be switched on or off
   ];
   return () => {

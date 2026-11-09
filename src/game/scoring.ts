@@ -25,6 +25,39 @@ export function xpForScan(previousTier: number, newTier: number): number {
   return previousTier === 0 ? XP_FIRST_SCAN : XP_HIGHER_TIER;
 }
 
+/** What awarding XP changed: the new save, and whether it caused a rank-up (and which regions it opened). */
+export interface XpAward {
+  record: SaveRecord;
+  /** Name of the new rank when this XP caused a rank-up, otherwise null. */
+  rankedUpTo: string | null;
+  /** Regions that this rank-up newly unlocked (empty when none). */
+  newRegions: string[];
+}
+
+/**
+ * Adds XP to a save and works out the rank and regions that follow from it. Shared by scans and missions, so both
+ * rank the player up in exactly the same way. Does not mutate the input.
+ */
+export function awardXp(record: SaveRecord, delta: number): XpAward {
+  const xp = record.xp + delta;
+  const oldIndex = rankIndexForXp(record.xp);
+  const newIndex = rankIndexForXp(xp);
+
+  const known = new Set(record.unlockedRegions);
+  const newRegions = regionsUnlockedAt(newIndex).filter((r) => !known.has(r));
+
+  return {
+    record: {
+      ...record,
+      xp,
+      rank: RANKS[newIndex].name,
+      unlockedRegions: [...record.unlockedRegions, ...newRegions],
+    },
+    rankedUpTo: newIndex > oldIndex ? RANKS[newIndex].name : null,
+    newRegions,
+  };
+}
+
 export interface ScanOutcome {
   record: SaveRecord;
   xpAwarded: number;
@@ -47,27 +80,16 @@ export function applyScan(
 ): ScanOutcome {
   const previous = record.scannedObjects[objectId] ?? 0;
   const xpAwarded = awardProgress ? xpForScan(previous, tier) : 0;
-  const xp = record.xp + xpAwarded;
-
-  const oldIndex = rankIndexForXp(record.xp);
-  const newIndex = rankIndexForXp(xp);
-  const rankedUp = newIndex > oldIndex;
-
-  const known = new Set(record.unlockedRegions);
-  const wanted = regionsUnlockedAt(newIndex);
-  const newRegions = wanted.filter((r) => !known.has(r));
-
+  const scanned = {
+    ...record,
+    scannedObjects: { ...record.scannedObjects, [objectId]: Math.max(previous, tier) },
+  };
+  const award = awardXp(scanned, xpAwarded);
   return {
-    record: {
-      ...record,
-      xp,
-      rank: RANKS[newIndex].name,
-      scannedObjects: { ...record.scannedObjects, [objectId]: Math.max(previous, tier) },
-      unlockedRegions: [...record.unlockedRegions, ...newRegions],
-    },
+    record: award.record,
     xpAwarded,
-    rankedUpTo: rankedUp ? RANKS[newIndex].name : null,
-    newRegions,
+    rankedUpTo: award.rankedUpTo,
+    newRegions: award.newRegions,
   };
 }
 

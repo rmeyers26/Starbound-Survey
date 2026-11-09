@@ -4,6 +4,7 @@
 // storage, no timers. That makes it easy to test, and it means achievements need NO new data in the save file:
 // whether you have earned "Comet Chaser" is worked out from which objects you have scanned.
 import type { SaveRecord } from '../save/schema';
+import { activeMissions, missionStatus, objectiveProgress, type Mission } from './missions';
 import { progressToNextRank, rankIndexForXp } from './ranks';
 import { regionHasObjects, unlockedObjects } from './regions';
 import { nextScanTier, scannerTierFor, XP_FIRST_SCAN, XP_HIGHER_TIER } from './scoring';
@@ -19,17 +20,24 @@ export interface Goal {
   text: string;
   /** The object to fly to when the player taps the goal, or null when there is nothing to fly to. */
   targetId: string | null;
+  /** True when tapping the goal should open the Missions screen instead (a mission question is waiting). */
+  opensMissions?: boolean;
 }
 
 /**
  * The single best next step for this player.
  *  1. Brand new (nothing scanned): a welcome that says how scanning works, aimed at Earth.
- *  2. Something never scanned in an unlocked region: scan it (+20 XP).
- *  3. Everything scanned once, but this scanner can look deeper: scan one again (+10 XP).
- *  4. A higher rank would allow deeper scans: say how much XP is missing.
- *  5. Nothing left: say so honestly (new objects arrive in future updates), instead of a dead end.
+ *  2. A mission in progress: scan what it asks for, or (once all is scanned) go and answer its question.
+ *  3. Something never scanned in an unlocked region: scan it (+20 XP).
+ *  4. Everything scanned once, but this scanner can look deeper: scan one again (+10 XP).
+ *  5. A higher rank would allow deeper scans: say how much XP is missing.
+ *  6. Nothing left: say so honestly (new objects arrive in future updates), instead of a dead end.
  */
-export function nextGoal(record: SaveRecord, objects: CelestialObject[]): Goal {
+export function nextGoal(
+  record: SaveRecord,
+  objects: CelestialObject[],
+  missions: Mission[] = [],
+): Goal {
   const available = unlockedObjects(objects, record);
   const reached = (o: CelestialObject): number => record.scannedObjects[o.id] ?? 0;
   const scannerTier = scannerTierFor(record);
@@ -40,6 +48,18 @@ export function nextGoal(record: SaveRecord, objects: CelestialObject[]): Goal {
     return {
       text: `Welcome, ${record.rank}! Tap ${start.name}, fly close, then hold SCAN.`,
       targetId: start.id,
+    };
+  }
+
+  const mission = activeMissions(missions, record)[0];
+  if (mission) {
+    if (missionStatus(mission, record) === 'question') {
+      return { text: 'Mission ready: answer its question.', targetId: null, opensMissions: true };
+    }
+    const todo = objectiveProgress(mission, record, objects).filter((p) => !p.done);
+    return {
+      text: `Mission: scan ${todo.map((p) => p.name).join(' and ')}.`,
+      targetId: todo[0].id,
     };
   }
 

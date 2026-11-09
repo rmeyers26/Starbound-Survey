@@ -69,7 +69,9 @@ export function createHud(
     'Open the Logbook of discovered objects',
   );
   logbookButton.addEventListener('click', () => machine.transition('LOGBOOK'));
-  controls.append(zoomIn, zoomOut, overview, logbookButton, settingsButton);
+  const missionsButton = makeButton('Missions', 'hud-button', 'Open the Missions list');
+  missionsButton.addEventListener('click', () => bus.emit('missions:open', undefined));
+  controls.append(zoomIn, zoomOut, overview, logbookButton, missionsButton, settingsButton);
 
   // Honesty rule (spec): the HUD says when the view is not to scale.
   const note = document.createElement('p');

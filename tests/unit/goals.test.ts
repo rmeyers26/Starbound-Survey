@@ -9,13 +9,17 @@ import {
   rankUpMessage,
   regionsWithObjects,
 } from '../../src/game/goals';
+import missionData from '../../data/missions.json';
+import { answerMission } from '../../src/game/missions';
 import { RANKS, regionsUnlockedAt } from '../../src/game/ranks';
 import { applyScan } from '../../src/game/scoring';
 import { objectMaxTier } from '../../src/game/tiers';
+import { validateMissions } from '../../src/game/validateMissions';
 import { validateObjects } from '../../src/game/validateObjects';
 import { createEmptySave, type SaveRecord } from '../../src/save/schema';
 
 const objects = validateObjects(realData);
+const missions = validateMissions(missionData, objects);
 const byId = new Map(objects.map((o) => [o.id, o]));
 
 /** A save that starts the way a new player does: Cadet, only the inner region. */
@@ -244,5 +248,51 @@ describe('achievementMessage', () => {
   it('puts several achievements in ONE message (the screen shows only two toasts, so more would push a rank-up off)', () => {
     const message = achievementMessage([find('rising-star'), find('inner-surveyor')]);
     expect(message).toBe('Achievements earned: Rising Star, Inner System Surveyor.');
+  });
+});
+
+describe('nextGoal with a mission in progress', () => {
+  it('still welcomes a brand-new player first (the mission comes after the first scan)', () => {
+    const goal = nextGoal(fresh(), objects, missions);
+    expect(goal.text).toContain('Welcome');
+    expect(goal.targetId).toBe('earth');
+  });
+
+  it('after the first scan, points at the mission objectives instead of the next object in the list', () => {
+    const record = scanFully(fresh(), 'earth');
+    const goal = nextGoal(record, objects, missions);
+    expect(goal.text).toBe('Mission: scan The Sun and The Moon.');
+    expect(goal.targetId).toBe('sun');
+  });
+
+  it('names only what is left to scan', () => {
+    const record = applyScan(applyScan(fresh(), 'earth', 1).record, 'sun', 1).record;
+    const goal = nextGoal(record, objects, missions);
+    expect(goal.text).toBe('Mission: scan The Moon.');
+    expect(goal.targetId).toBe('moon');
+  });
+
+  it('once everything is scanned, tapping the goal opens the Missions screen', () => {
+    let record = fresh();
+    for (const id of ['sun', 'moon']) record = applyScan(record, id, 1).record;
+    const goal = nextGoal(record, objects, missions);
+    expect(goal.opensMissions).toBe(true);
+    expect(goal.targetId).toBeNull();
+    expect(goal.text).toContain('answer its question');
+  });
+
+  it('goes back to the ordinary goals once the mission is complete', () => {
+    let record = fresh();
+    for (const id of ['sun', 'moon']) record = applyScan(record, id, 1).record;
+    const done = answerMission(record, missions[0], missions[0].question.answer).record;
+    const goal = nextGoal(done, objects, missions);
+    expect(goal.opensMissions).toBeUndefined();
+    expect(goal.text).not.toContain('Mission');
+  });
+
+  it('without missions the goals are unchanged', () => {
+    const record = scanFully(fresh(), 'earth');
+    expect(nextGoal(record, objects)).toEqual(nextGoal(record, objects, []));
+    expect(nextGoal(record, objects).text).toBe('Scan The Sun (+20 XP)');
   });
 });

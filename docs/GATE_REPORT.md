@@ -206,6 +206,20 @@ Date of this report: 2026-11-02.
     BEFORE the rank-up so the rank-up is always the newest. Reproduced first on desktop Chromium with an iPhone browser
     identity, and kept as a permanent test. Lesson: every new toast competes with the others for two places.
 
+29. **Missions, starting with the Moon** (owner: "Missions moon"). The spec's guided missions: objectives, then a final
+    question that uses what you found. `data/missions.json` holds the missions, and `validateMissions` refuses one that
+    could never be finished (an unknown object, or an object in a region the player cannot reach at that mission's
+    rank). The first is "Where does the Moon's light come from?": scan the Sun and the Moon, then answer; 50 XP for
+    finishing plus 15 for a first-try answer (5 for a retry). A wrong answer costs nothing and shows the explanation.
+    **No save-file change:** objectives are worked out from the scans (like achievements), and the save's existing
+    `missions` slot stores only `wrong:N` or `complete`. Mission XP goes through one shared `awardXp` (pulled out of
+    the scan code, so both rank the player up identically). The Goal line now leads a new player through the mission
+    and opens the question. Feedback is shown inside the Missions screen and not as a toast, because toasts share two
+    places (the lesson from item 28). The mission's wording is not yet checked against a NASA page: see
+    `docs/DATA_CHECK.md`. Tests: the validator (one test per way a mission can be broken), the rules (retry XP, no
+    double reward, practice mode, a mission causing a rank-up), the controller (announcement order), the mission-aware
+    goal, and browser tests for the whole flow, a reload, practice mode, button sizes and accessibility.
+
 ## Open problems and trade-offs
 
 1. **WebGPU is not implemented.** The spec asks for WebGPU first. Three.js's WebGPU API is still moving

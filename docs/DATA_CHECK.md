@@ -292,3 +292,21 @@ which would make the orbit open and never return; the game draws the JPL value, 
 - **The broken rocks and ice** (about 140 pieces circling the nucleus and streaming into the tail) are decorative.
 - **The tail is drawn for the whole replay**, longer nearer the Sun, because many real comets are already active well
   beyond 3 AU.
+
+## Missions (data/missions.json)
+
+**First mission: "Where does the Moon's light come from?"** Scan the Sun and the Moon, then answer a multiple-choice
+question. The right answer is "The Moon reflects light from the Sun."
+
+- **What it rests on.** The game's own entries say the Sun's "light and heat make life on Earth possible" and that the
+  Moon's phases come from "how much of its sunlit half we can see". Both come from the NASA fact sheets already cited
+  on those objects.
+- **What is NOT checked.** The question, its four choices and the explanation (including the sentence about
+  **Earthshine**, sunlight bounced off Earth lighting the Moon's dark side) are standard textbook astronomy that I wrote.
+  I have **not** checked them against a specific NASA page, and the network here is restricted. The mission's source
+  line says so on screen. **To check:** compare the explanation with NASA's Moon pages (for example the Moon overview
+  and Earthshine pages) and tell me if any wording should change.
+- **The rewards are design choices, not facts:** 50 XP for finishing plus 15 XP for a correct first answer (5 XP for a
+  correct retry). The spec's range for a mission is 50 to 150 XP.
+- **The wrong answers are plausible mistakes**, not jokes: the Moon makes its own light, it reflects Earth's cities
+  and oceans, it glows because it is hot.

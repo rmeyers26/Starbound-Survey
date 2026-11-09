@@ -30,6 +30,14 @@ export function rankIndexForXp(xp: number): number {
 
 export const rankForXp = (xp: number): RankDef => RANKS[rankIndexForXp(xp)];
 
+/** Position in RANKS of the rank called `name` (0 = the first rank for an unknown name, like `rankByName`). */
+export function rankIndexByName(name: string): number {
+  return Math.max(
+    0,
+    RANKS.findIndex((r) => r.name === name),
+  );
+}
+
 /** Looks a rank up by name (as stored in the save). Unknown names fall back to the first rank. */
 export function rankByName(name: string): RankDef {
   return RANKS.find((r) => r.name === name) ?? RANKS[0];

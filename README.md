@@ -30,10 +30,13 @@ Phase 1 has started early: **slice A (scanning, XP, ranks, Logbook) is done**. S
    The bar at the top right shows your rank (Cadet, Navigator, Surveyor, Astronomer, Director) and progress.
 6. **Follow the Goal:** the line under the XP bar always names the next step (for example "Scan Mercury (+20 XP)"). Tap it
    to fly there. When you have scanned everything, it says so.
-7. **Achievements:** First Light, Comet Chaser, Giant Hunter and seven more. A message appears when you earn one.
-8. **Logbook:** open it to see what you have discovered and your achievements (locked ones say how to earn them).
-9. **Find the comet:** C/2026 A2 (Bok) is the button after Ceres. Its flyby is replayed on a loop with its tail pointing away
-   from the Sun. Only the numbers that could be found are in the game; the rest say "Not yet checked" (`docs/DATA_CHECK.md`).
+7. **Missions:** the **Missions** button lists guided missions. The first one, "Where does the Moon's light come from?",
+   asks you to scan the Sun and the Moon, then answer a question. A wrong answer costs nothing and shows the
+   explanation; a correct one earns XP (65 on the first try). Missions are paused in practice mode.
+8. **Achievements:** First Light, Comet Chaser, Giant Hunter and seven more. A message appears when you earn one.
+9. **Logbook:** open it to see what you have discovered and your achievements (locked ones say how to earn them).
+10. **Find the comet:** C/2026 A2 (Bok) is the button after Ceres. Its flyby is replayed on a loop with its tail pointing away
+    from the Sun. Only the numbers that could be found are in the game; the rest say "Not yet checked" (`docs/DATA_CHECK.md`).
 
 Deeper scans (Detailed at Navigator, Spectral at Surveyor) need a higher rank. More ways to earn XP
 (Flight School, quizzes, missions) arrive in the next Phase 1 slices.

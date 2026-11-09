@@ -1,0 +1,24 @@
+{
+  "missions": [
+    {
+      "id": "moon-light",
+      "title": "Where does the Moon's light come from?",
+      "summary": "Scan the Sun and the Moon, then explain why the Moon shines.",
+      "requiredRank": "Cadet",
+      "scan": ["sun", "moon"],
+      "question": {
+        "prompt": "Where does the Moon's light come from?",
+        "choices": [
+          "The Moon makes its own light, like a small star.",
+          "The Moon reflects light from the Sun.",
+          "The Moon reflects light from Earth's cities and oceans.",
+          "The Moon glows because its surface is hot."
+        ],
+        "answer": 1,
+        "explanation": "The Moon makes no light of its own. It shines by reflecting sunlight, and the half facing the Sun is the lit half. Its phases come from how much of that sunlit half we can see as it orbits Earth (it says so in its Quick facts). Even the dark part of the Moon can glow faintly: that is Earthshine, sunlight bounced off Earth."
+      },
+      "rewardXp": 50,
+      "source": "Built on the game's own Sun and Moon entries (NASA Sun and Moon fact sheets). The question and answer are standard textbook astronomy; they are not yet checked against a specific NASA page (see docs/DATA_CHECK.md)."
+    }
+  ]
+}

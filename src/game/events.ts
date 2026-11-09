@@ -51,6 +51,13 @@ export interface GameEvents {
   'scan:cancelled': { id: string };
   /** A scan could not start. */
   'scan:blocked': { reason: ScanBlock };
+  /** The player asked to open the Missions screen (from its button or from the Goal line). */
+  'missions:open': undefined;
+  /**
+   * A mission question was answered (the save is already updated). Announced BEFORE any 'rank:up', so the rank-up
+   * message is the newest toast and survives (see app.ts).
+   */
+  'mission:answered': { id: string; correct: boolean; xpAwarded: number };
   /** XP was awarded. */
   'xp:changed': { xp: number; delta: number; rank: string };
   /** A rank threshold was crossed. */
