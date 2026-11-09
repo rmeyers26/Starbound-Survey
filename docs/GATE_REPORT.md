@@ -219,6 +219,10 @@ Date of this report: 2026-11-02.
     `docs/DATA_CHECK.md`. Tests: the validator (one test per way a mission can be broken), the rules (retry XP, no
     double reward, practice mode, a mission causing a rank-up), the controller (announcement order), the mission-aware
     goal, and browser tests for the whole flow, a reload, practice mode, button sizes and accessibility.
+    **A mistake the Logbook's own test caught:** the Missions screen borrowed the Logbook's CSS class names, so a test
+    that looks up the Logbook summary found two elements (both dialogs are always in the page). The Missions screen now
+    has its own class names; the styling is shared in the stylesheet. Lesson: never reuse another screen's class names
+    for a new screen, even to save a few lines of CSS.
 
 ## Open problems and trade-offs
 

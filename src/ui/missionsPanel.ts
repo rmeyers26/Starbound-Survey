@@ -28,7 +28,7 @@ export function createMissionsPanel(
   const body = el('div', 'settings-body');
   const title = el('h2', 'settings-title', 'Missions');
   title.id = 'missions-title';
-  const summary = el('p', 'logbook-summary');
+  const summary = el('p', 'missions-summary');
   const list = el('ul', 'mission-list');
   const close = el('button', 'hud-button settings-close', 'Close');
   close.type = 'button';
@@ -101,7 +101,7 @@ export function createMissionsPanel(
     const item = el('li', `mission mission--${status}`);
     item.dataset.missionId = mission.id;
     item.dataset.status = status;
-    item.append(el('h3', undefined, mission.title), el('p', 'logbook-meta', mission.summary));
+    item.append(el('h3', undefined, mission.title), el('p', 'mission-meta', mission.summary));
 
     if (status === 'locked') {
       item.append(
@@ -112,7 +112,7 @@ export function createMissionsPanel(
         renderObjectives(mission, record),
         el(
           'p',
-          'logbook-meta',
+          'mission-meta',
           'Select each object, fly close, and hold SCAN. The question opens when all are scanned.',
         ),
       );
@@ -131,7 +131,7 @@ export function createMissionsPanel(
       item.append(
         done,
         el('p', undefined, mission.question.explanation),
-        el('p', 'logbook-meta', `Source: ${mission.source}`),
+        el('p', 'mission-meta', `Source: ${mission.source}`),
       );
     }
     return item;
