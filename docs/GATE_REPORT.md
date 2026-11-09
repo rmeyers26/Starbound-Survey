@@ -228,6 +228,11 @@ Date of this report: 2026-11-02.
     that looks up the Logbook summary found two elements (both dialogs are always in the page). The Missions screen now
     has its own class names; the styling is shared in the stylesheet. Lesson: never reuse another screen's class names
     for a new screen, even to save a few lines of CSS.
+    **The Missions button also broke 18 `effects` tests** (all four browsers): those tests use an 800 x 480 window, where
+    the vertically centred button column, one button taller, covered Settings with the SCAN ring (it had cleared by only
+    2 px before). Fix: the + and - zoom buttons now share one row, which gives the height back, and the short-window
+    two-column layout (see item 28) treats that pair as one row. Lesson: a new button changes the height of everything
+    around it, so test the smallest window after adding one.
 
 ## Open problems and trade-offs
 

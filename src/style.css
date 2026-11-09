@@ -83,6 +83,13 @@ body {
   flex-direction: column;
   gap: 8px;
 }
+.hud-zoom {
+  display: flex;
+  gap: 8px;
+}
+.hud-zoom .hud-button {
+  flex: 1; /* the two zoom buttons share the width of the buttons below them */
+}
 .hud-button {
   min-width: 44px; /* spec: every tappable control is at least 44 CSS pixels */
   min-height: 44px;
@@ -509,6 +516,9 @@ body {
   .hud-controls {
     display: grid;
     grid-template-columns: repeat(2, auto);
+  }
+  .hud-zoom {
+    grid-column: 1 / -1; /* the + and - pair takes a whole row, so the rest pair up beneath it */
   }
 }
 
