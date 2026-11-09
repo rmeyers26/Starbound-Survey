@@ -2,6 +2,7 @@
 // It is a native <dialog> and a game STATE: opening it moves the state machine to LOGBOOK, which is
 // what stops scanning while it is open.
 import type { EventBus, GameEvents } from '../game/events';
+import { ACHIEVEMENTS, earnedAchievementIds } from '../game/goals';
 import type { GameStateMachine } from '../game/stateMachine';
 import { TIER_LABEL } from '../game/tiers';
 import type { CelestialObject } from '../game/types';
@@ -16,6 +17,8 @@ export function createLogbook(
   bus: EventBus<GameEvents>,
   machine: GameStateMachine,
   getRecord: () => SaveRecord,
+  /** The real saved record: achievements count only real scans, never practice ones. */
+  getRealRecord: () => SaveRecord = getRecord,
 ): () => void {
   const dialog = el('dialog', 'app-dialog logbook-dialog');
   dialog.setAttribute('aria-labelledby', 'logbook-title');
@@ -23,10 +26,14 @@ export function createLogbook(
   const title = el('h2', 'settings-title', 'Logbook');
   title.id = 'logbook-title';
   const summary = el('p', 'logbook-summary');
+  const achievementsTitle = el('h3', 'logbook-subtitle', 'Achievements');
+  const achievementsSummary = el('p', 'logbook-meta');
+  const achievementList = el('ul', 'achievement-list');
+  achievementList.setAttribute('aria-label', 'Achievements');
   const list = el('ul', 'logbook-list');
   const close = el('button', 'hud-button settings-close', 'Close');
   close.type = 'button';
-  body.append(title, summary, list, close);
+  body.append(title, summary, achievementsTitle, achievementsSummary, achievementList, list, close);
   dialog.append(body);
   container.append(dialog);
 
@@ -39,6 +46,22 @@ export function createLogbook(
     summary.textContent =
       `Discovered ${found.length} of ${available.length} objects.` +
       (lockedCount > 0 ? ' More objects unlock as you rank up.' : '');
+
+    // Achievements: earned ones show their name, the others still show how to earn them.
+    const earned = earnedAchievementIds(getRealRecord(), objects);
+    achievementsSummary.textContent = `${earned.size} of ${ACHIEVEMENTS.length} earned.`;
+    achievementList.replaceChildren();
+    for (const achievement of ACHIEVEMENTS) {
+      const done = earned.has(achievement.id);
+      const item = el('li', done ? 'achievement achievement--earned' : 'achievement');
+      item.dataset.achievementId = achievement.id;
+      item.append(
+        el('strong', undefined, `${done ? '★ ' : '☆ '}${achievement.title}`),
+        el('span', 'visually-hidden', done ? ' (earned)' : ' (not yet earned)'),
+        el('span', 'logbook-meta', ` ${achievement.hint}`),
+      );
+      achievementList.append(item);
+    }
 
     list.replaceChildren();
     for (const object of available) {
